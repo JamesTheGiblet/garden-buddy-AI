@@ -944,6 +944,7 @@
                     <button class="submit-button settings-save-btn" onclick="saveSettings()">Save Settings</button>
                     <button class="submit-button replay-tutorial-btn" onclick="replayTutorial()">Replay Tutorial</button>
                     <button class="submit-button" onclick="clearAllData()" style="background-color: var(--sunset-tomato); margin-top: 0.5rem;">Clear All Data</button>
+                    <button class="submit-button" onclick="reportBug()" style="background-color: var(--text-secondary); margin-top: 0.5rem;">Report Bug</button>
                 </div>
             </div>
         </div>
@@ -1143,7 +1144,9 @@
 
     <script>
         // --- API Configuration ---
-        const API_BASE_URL = 'http://localhost:3000/api';
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+            ? 'http://localhost:3000/api' 
+            : 'https://api.gardenbuddy.app';
         let authToken = localStorage.getItem('gb_token');
 
         // Extended garden memory
@@ -1249,6 +1252,11 @@
                 localStorage.clear();
                 location.reload();
             }
+        }
+
+        // Report Bug
+        function reportBug() {
+            window.open('https://github.com/gibletscreations/gardenbuddy/issues/new', '_blank');
         }
 
         // Tutorial Functions
