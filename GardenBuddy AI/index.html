@@ -854,14 +854,15 @@
         <div id="auth-screen">
             <div class="auth-card">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
-                <h2>Welcome Back</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Sign in to sync your garden</p>
+                <h2 id="authTitle">Welcome Back</h2>
+                <p id="authSubtitle" style="color: var(--text-secondary); margin-bottom: 1.5rem;">Sign in to sync your garden</p>
                 
+                <input type="text" id="authName" class="auth-input" placeholder="Your Name" style="display:none">
                 <input type="email" id="authEmail" class="auth-input" placeholder="Email">
                 <input type="password" id="authPassword" class="auth-input" placeholder="Password">
                 
-                <button class="auth-btn" onclick="handleLogin()">Sign In</button>
-                <button class="auth-btn" onclick="handleRegister()" style="background: transparent; color: var(--garden-green); border: 1px solid var(--garden-green); margin-top: 0.5rem;">Create Account</button>
+                <button id="authMainBtn" class="auth-btn" onclick="handleLogin()">Sign In</button>
+                <button id="authToggleBtn" class="auth-btn" onclick="toggleAuthMode()" style="background: transparent; color: var(--garden-green); border: 1px solid var(--garden-green); margin-top: 0.5rem;">Create Account</button>
                 
                 <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;" onclick="skipAuth()">Continue as Guest</p>
             </div>
@@ -1499,6 +1500,11 @@
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
 
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address");
+                return;
+            }
+
             try {
                 const response = await fetch(`${API_BASE_URL}/auth/login`, {
                     method: 'POST',
@@ -1523,8 +1529,70 @@
             }
         }
 
-        function handleRegister() {
-            alert("Registration would open here.");
+        let isRegistering = false;
+
+        function toggleAuthMode() {
+            isRegistering = !isRegistering;
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const nameInput = document.getElementById('authName');
+            const mainBtn = document.getElementById('authMainBtn');
+            const toggleBtn = document.getElementById('authToggleBtn');
+
+            if (isRegistering) {
+                title.innerText = 'Create Account';
+                subtitle.innerText = 'Join GardenBuddy today';
+                nameInput.style.display = 'block';
+                mainBtn.innerText = 'Sign Up';
+                mainBtn.onclick = performRegister;
+                toggleBtn.innerText = 'Already have an account? Sign In';
+            } else {
+                title.innerText = 'Welcome Back';
+                subtitle.innerText = 'Sign in to sync your garden';
+                nameInput.style.display = 'none';
+                mainBtn.innerText = 'Sign In';
+                mainBtn.onclick = handleLogin;
+                toggleBtn.innerText = 'Create Account';
+            }
+        }
+
+        async function performRegister() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+
+            if (!email || !password || !name) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, name })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    handleAuthSuccess(data);
+                } else {
+                    alert('Registration failed: ' + (data.message || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error('API Error', e);
+                alert('Demo Mode: Registration simulated (Backend offline)');
+            }
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
 
         function handleLogout() {
@@ -1545,8 +1613,17 @@
             document.getElementById('pairing-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy://connect/${guestId}" alt="Pairing QR">`;
         }
 
+        function handleAuthSuccess(data) {
+            authToken = data.token;
+            localStorage.setItem('gb_token', authToken);
+            document.getElementById('auth-screen').style.display = 'none';
+            initUserData(data.user);
+        }
+
         function initUserData(user) {
             document.getElementById('clientIdDisplay').innerText = user.id;
+            if (user.name) document.getElementById('userName').innerText = user.name;
+            
             // Generate QR for logged in user
             document.getElementById('pairing-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy://connect/${user.id}" alt="Pairing QR">`;
 

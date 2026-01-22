@@ -113,6 +113,38 @@ app.post('/api/auth/login', (req, res) => {
     }
 });
 
+app.post('/api/auth/register', (req, res) => {
+    const { email, password, name } = req.body;
+    
+    if (USERS.find(u => u.email === email)) {
+        return res.status(400).json({ success: false, message: 'Email already exists' });
+    }
+
+    const newUser = {
+        id: 'user_' + Date.now(),
+        email,
+        password, // In a real app, hash this!
+        role: 'client',
+        name: name || 'New Gardener',
+        contractorId: null
+    };
+
+    USERS.push(newUser);
+
+    const token = `token_${newUser.id}_${Date.now()}`;
+    
+    res.json({
+        success: true,
+        token: token,
+        user: {
+            id: newUser.id,
+            contractorId: newUser.contractorId,
+            contractorName: null,
+            name: newUser.name
+        }
+    });
+});
+
 // --- Contractor Routes ---
 
 app.get('/api/jobs/today', verifyToken, (req, res) => {
