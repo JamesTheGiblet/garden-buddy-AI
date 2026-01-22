@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GardenManager Pro</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --primary-light: #4CAF50;
+            --accent: #00C853;
+            --background: #F8FDF8;
+            --surface: #FFFFFF;
+            --text: #1A1A1A;
+            --text-secondary: #666666;
+            --danger: #F44336;
+            --warning: #FF9800;
+            --success: #4CAF50;
+            --border: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --bottom-bar: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.4;
+            padding-bottom: var(--bottom-bar);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .business-info h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .business-info .subtitle {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Superuser Badge */
+        .superuser-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            z-index: 101;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-button {
+            background: var(--surface);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .action-button:active {
+            transform: scale(0.98);
+        }
+
+        .action-button .icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-button .label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .action-button.scan {
+            background: linear-gradient(135deg, var(--accent), var(--primary-light));
+            color: white;
+        }
+
+        .action-button.scan .label {
+            color: white;
+        }
+
+        .action-button.super {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+        }
+
+        .action-button.super .label {
+            color: white;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        /* Clients List */
+        .clients-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .client-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .client-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .client-garden {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .client-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-healthy { background: var(--success); }
+        .status-warning { background: var(--warning); }
+        .status-urgent { background: var(--danger); }
+
+        /* Jobs Today */
+        .jobs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .job-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.2s;
+        }
+
+        .job-item:hover {
+            transform: translateX(5px);
+        }
+
+        .job-item.urgent {
+            border-left-color: var(--danger);
+            background: #FFEBEE;
+        }
+
+        .job-time {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .job-details {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .job-client {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .job-service {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .job-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #FFF3E0; color: #E65100; }
+        .status-confirmed { background: #E8F5E9; color: var(--success); }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            height: var(--bottom-bar);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+        }
+
+        /* QR Scanner Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #qr-scanner {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            margin: 1rem 0;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        }
+
+        .login-card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Superuser Login Button */
+        .superuser-login {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .superuser-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Superuser Tools Panel */
+        .superuser-panel {
+            background: linear-gradient(135deg, #fff3e0, #ffecb3);
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .superuser-panel h3 {
+            color: #e65100;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .superuser-tools {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .super-tool {
+            background: white;
+            border: 1px solid #ffcc80;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .super-tool:hover {
+            background: #fff3e0;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .quick-actions {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-bar {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .superuser-tools {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen (Initially shown) -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">GardenManager Pro</h1>
+            <div id="loginError" class="error-message" style="color: var(--danger); display: none; margin-bottom: 1rem;"></div>
+            <div class="form-group">
+                <input type="email" id="loginEmail" class="form-input" placeholder="Email" value="demo@gardenmanager.com">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" class="form-input" placeholder="Password" value="demo123">
+            </div>
+            <button onclick="login()" class="login-button">Login</button>
+            
+            <div class="superuser-login">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Need full access?
+                </p>
+                <button onclick="superuserLogin()" class="superuser-button">
+                    🔑 Superuser Login (gardenbuddai)
+                </button>
+                <p style="font-size: 0.75rem; color: #ff9800; margin-top: 0.5rem;">
+                    Access all features with demo data
+                </p>
+            </div>
+            
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                Don't have an account? <a href="#" onclick="showRegister()" style="color: var(--primary);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App (Initially hidden) -->
+    <div id="appContent" style="display: none;">
+        <!-- Superuser Badge -->
+        <div id="superuserBadge" class="superuser-badge" style="display: none;">
+            🔓 SUPERUSER
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+                <div class="business-info">
+                    <h1 id="businessName">Loading...</h1>
+                    <div class="subtitle" id="businessSubtitle">Loading...</div>
+                </div>
+                <button onclick="logout()" style="background: none; border: none; color: white; font-size: 1.2rem; margin-left: auto;">🚪</button>
+            </div>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number" id="statJobs">0</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statRevenue">£0</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statClients">0</div>
+                    <div class="stat-label">Clients</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Superuser Tools Panel (Shows only for superuser) -->
+            <div id="superuserPanel" class="superuser-panel" style="display: none;">
+                <h3>⚡ Superuser Tools</h3>
+                <div class="superuser-tools">
+                    <div class="super-tool" onclick="addDemoClient()">➕ Add Demo Client</div>
+                    <div class="super-tool" onclick="addDemoJob()">🛠️ Add Demo Job</div>
+                    <div class="super-tool" onclick="simulatePayment()">💰 Simulate Payment</div>
+                    <div class="super-tool" onclick="clearAllData()">🗑️ Clear All Data</div>
+                    <div class="super-tool" onclick="exportAllData()">📤 Export Data</div>
+                    <div class="super-tool" onclick="simulateQRConnect()">📱 Simulate QR Connect</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="action-button scan" onclick="openQRScanner()">
+                    <div class="icon">📱</div>
+                    <div class="label">Scan Client</div>
+                </button>
+                <button class="action-button" onclick="createJob()">
+                    <div class="icon">🛠️</div>
+                    <div class="label">New Job</div>
+                </button>
+                <button class="action-button" onclick="messageAll()">
+                    <div class="icon">📢</div>
+                    <div class="label">Message All</div>
+                </button>
+                <button class="action-button" onclick="viewCalendar()">
+                    <div class="icon">📅</div>
+                    <div class="label">Calendar</div>
+                </button>
+            </div>
+
+            <!-- Today's Jobs -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">🛠️ Today's Jobs</h2>
+                    <a href="#" class="view-all" onclick="viewAllJobs()">View All</a>
+                </div>
+                <div class="jobs-list" id="todayJobs">
+                    <!-- Jobs loaded dynamically -->
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- Clients -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">👥 Recent Clients</h2>
+                    <a href="#" class="view-all" onclick="viewAllClients()">View All</a>
+                </div>
+                <div class="clients-list" id="clientsList">
+                    <!-- Clients loaded dynamically -->
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Quick Stats</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div style="text-align: center; padding: 0.75rem; background: var(--background); border-radius: 8px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);" id="statTotalRevenue">£0</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Total Revenue</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.75rem; background: var(--background); border-radius: 8px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" id="statCompletedJobs">0</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Completed Jobs</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" onclick="showDashboard()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </a>
+            <a href="#calendar" class="nav-item" onclick="showCalendar()">
+                <div class="nav-icon">📅</div>
+                <div class="nav-label">Calendar</div>
+            </a>
+            <a href="#clients" class="nav-item" onclick="showClients()">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">Clients</div>
+            </a>
+            <a href="#messages" class="nav-item" onclick="showMessages()">
+                <div class="nav-icon">💬</div>
+                <div class="nav-label">Messages</div>
+                <span id="messageBadge" style="display: none; position: absolute; top: 5px; right: 25%; background: var(--danger); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;">3</span>
+            </a>
+            <a href="#profile" class="nav-item" onclick="showProfile()">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Profile</div>
+            </a>
+        </nav>
+    </div>
+
+    <!-- QR Scanner Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Scan Client QR Code</h2>
+                <button class="close-modal" onclick="closeQRScanner()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="qr-scanner"></div>
+                <p>Align QR code within frame to connect</p>
+                <div id="scanResult" style="margin-top: 1rem; padding: 1rem; background: var(--background); border-radius: 10px; display: none;"></div>
+                
+                <!-- For superuser demo -->
+                <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 8px;">
+                    <p style="font-size: 0.9rem; color: #1976d2; margin-bottom: 0.5rem;">
+                        <strong>Demo:</strong> Click to simulate scanning
+                    </p>
+                    <button onclick="simulateQRScan()" style="width: 100%; padding: 0.75rem; background: #2196f3; color: white; border: none; border-radius: 8px;">
+                        📱 Simulate QR Scan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ SUPERUSER CONFIGURATION ============
+        const SUPERUSER_EMAIL = "admin@gardenbuddy.com";
+        const SUPERUSER_PASSWORD = "gardenbuddai"; // Your specified password
+        
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:3000/api'; // Change to your backend
+        
+        // App State
+        let currentUser = null;
+        let authToken = null;
+        let isSuperuser = false;
+        
+        // Demo Data
+        const DEMO_CLIENTS = [
+            { id: '1', name: 'Smith Family', garden: 'Rose Garden Estate', healthStatus: 'urgent', nextDue: 'Today' },
+            { id: '2', name: 'Jones Residence', garden: 'Lawn & Borders', healthStatus: 'healthy', nextDue: 'Mar 20' },
+            { id: '3', name: 'Patel Cottage', garden: 'Vegetable Patch', healthStatus: 'warning', nextDue: 'Overdue' },
+            { id: '4', name: 'Williams Mansion', garden: 'Formal Gardens', healthStatus: 'healthy', nextDue: 'Apr 1' },
+            { id: '5', name: 'Brown Apartment', garden: 'Balcony Garden', healthStatus: 'healthy', nextDue: 'Mar 25' },
+            { id: '6', name: 'Taylor Villa', garden: 'Orchard & Pond', healthStatus: 'warning', nextDue: 'Mar 22' }
+        ];
+
+        const DEMO_JOBS = [
+            { id: '1', clientName: 'Smith Family', service: 'Rose Pruning', time: '09:00', status: 'confirmed', urgent: true },
+            { id: '2', clientName: 'Jones Residence', service: 'Lawn Treatment', time: '11:30', status: 'confirmed', urgent: false },
+            { id: '3', clientName: 'Williams Mansion', service: 'Hedge Trimming', time: '14:00', status: 'pending', urgent: false },
+            { id: '4', clientName: 'Patel Cottage', service: 'Vegetable Bed Prep', time: '16:00', status: 'pending', urgent: false }
+        ];
+
+        // Initialize app
+        async function initApp() {
+            // Check for saved auth
+            const savedToken = localStorage.getItem('gm_auth_token');
+            const savedUser = localStorage.getItem('gm_user');
+            const savedSuperuser = localStorage.getItem('gm_superuser') === 'true';
+            
+            if (savedToken && savedUser) {
+                authToken = savedToken;
+                currentUser = JSON.parse(savedUser);
+                isSuperuser = savedSuperuser;
+                await loadDashboard();
+                showApp();
+            } else {
+                showLogin();
+            }
+        }
+        
+        // Login function
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Check for superuser login
+            if (email === SUPERUSER_EMAIL && password === SUPERUSER_PASSWORD) {
+                superuserLogin();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    isSuperuser = false;
+                    
+                    // Save auth
+                    localStorage.setItem('gm_auth_token', authToken);
+                    localStorage.setItem('gm_user', JSON.stringify(currentUser));
+                    localStorage.setItem('gm_superuser', 'false');
+                    
+                    await loadDashboard();
+                    showApp();
+                } else {
+                    showError(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.log('Using demo mode (no backend)');
+                // Fallback to demo mode
+                demoLogin(email, password);
+            }
+        }
+        
+        // Superuser login
+        function superuserLogin() {
+            isSuperuser = true;
+            currentUser = {
+                id: 'superuser_001',
+                email: SUPERUSER_EMAIL,
+                businessName: 'GardenBuddy Superuser',
+                location: 'Demo Mode',
+                clientCount: DEMO_CLIENTS.length
+            };
+            authToken = 'superuser_demo_token_' + Date.now();
+            
+            // Save auth
+            localStorage.setItem('gm_auth_token', authToken);
+            localStorage.setItem('gm_user', JSON.stringify(currentUser));
+            localStorage.setItem('gm_superuser', 'true');
+            
+            // Show superuser features
+            showApp();
+            loadDashboard();
+            
+            // Show welcome message
+            setTimeout(() => {
+                alert('🔓 Welcome Superuser! Full access granted. Try the superuser tools in the orange panel.');
+            }, 500);
+        }
+        
+        // Demo login (fallback when no backend)
+        function demoLogin(email, password) {
+            isSuperuser = false;
+            currentUser = {
+                id: 'demo_gardener_001',
+                email: email || 'demo@gardenmanager.com',
+                businessName: 'Demo Gardening Co.',
+                location: 'London, UK',
+                clientCount: 4
+            };
+            authToken = 'demo_token_' + Date.now();
+            
+            localStorage.setItem('gm_auth_token', authToken);
+            localStorage.setItem('gm_user', JSON.stringify(currentUser));
+            localStorage.setItem('gm_superuser', 'false');
+            
+            showApp();
+            loadDashboard();
+        }
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            updateBusinessInfo();
+            await loadTodayJobs();
+            await loadClients();
+            await loadStats();
+            
+            // Show/hide superuser features
+            if (isSuperuser) {
+                document.getElementById('superuserBadge').style.display = 'block';
+                document.getElementById('superuserPanel').style.display = 'block';
+            } else {
+                document.getElementById('superuserBadge').style.display = 'none';
+                document.getElementById('superuserPanel').style.display = 'none';
+            }
+        }
+        
+        // Update business info
+        function updateBusinessInfo() {
+            document.getElementById('businessName').textContent = currentUser?.businessName || 'GardenManager Pro';
+            document.getElementById('businessSubtitle').textContent = 
+                `${currentUser?.clientCount || 0} Clients • ${currentUser?.location || ''} ${isSuperuser ? '• 🔓 SUPERUSER' : ''}`;
+        }
+        
+        // Load today's jobs
+        async function loadTodayJobs() {
+            const jobsList = document.getElementById('todayJobs');
+            
+            // Show loading
+            jobsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            if (isSuperuser) {
+                // Superuser gets demo data instantly
+                setTimeout(() => {
+                    renderJobs(DEMO_JOBS);
+                }, 300);
+            } else {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/jobs/today`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    const jobs = await response.json();
+                    renderJobs(jobs);
+                } catch (error) {
+                    console.log('Using demo jobs data');
+                    // Fallback to demo data
+                    setTimeout(() => {
+                        renderJobs(DEMO_JOBS.slice(0, 3));
+                    }, 500);
+                }
+            }
+        }
+        
+        function renderJobs(jobs) {
+            const jobsList = document.getElementById('todayJobs');
+            
+            if (jobs.length === 0) {
+                jobsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No jobs scheduled for today</div>';
+            } else {
+                jobsList.innerHTML = jobs.map(job => `
+                    <div class="job-item ${job.urgent ? 'urgent' : ''}">
+                        <div class="job-time">${formatTime(job.time)}</div>
+                        <div class="job-details">
+                            <div class="job-client">${job.clientName}</div>
+                            <div class="job-service">${job.service}</div>
+                        </div>
+                        <div class="job-status ${job.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}">
+                            ${job.status}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Load clients
+        async function loadClients() {
+            const clientsList = document.getElementById('clientsList');
+            clientsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            if (isSuperuser) {
+                // Superuser gets all demo clients
+                setTimeout(() => {
+                    renderClients(DEMO_CLIENTS);
+                }, 300);
+            } else {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/clients`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    const clients = await response.json();
+                    renderClients(clients);
+                } catch (error) {
+                    console.log('Using demo clients data');
+                    // Fallback to demo data
+                    setTimeout(() => {
+                        renderClients(DEMO_CLIENTS.slice(0, 4));
+                    }, 500);
+                }
+            }
+        }
+        
+        function renderClients(clients) {
+            const clientsList = document.getElementById('clientsList');
+            
+            if (clients.length === 0) {
+                clientsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No clients yet</div>';
+            } else {
+                clientsList.innerHTML = clients.map(client => `
+                    <div class="client-item" onclick="viewClient('${client.id}')">
+                        <div class="client-avatar">${client.name.charAt(0)}</div>
+                        <div class="client-info">
+                            <div class="client-name">${client.name}</div>
+                            <div class="client-garden">${client.garden || 'Home Garden'}</div>
+                            <div class="client-status">
+                                <div class="status-dot status-${client.healthStatus || 'healthy'}"></div>
+                                <span>${client.nextDue ? `Due: ${client.nextDue}` : 'No schedule'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Load stats
+        async function loadStats() {
+            if (isSuperuser) {
+                // Superuser gets enhanced stats
+                document.getElementById('statJobs').textContent = DEMO_JOBS.length;
+                document.getElementById('statRevenue').textContent = `£${DEMO_JOBS.length * 150}`;
+                document.getElementById('statClients').textContent = DEMO_CLIENTS.length;
+                document.getElementById('statTotalRevenue').textContent = `£${DEMO_JOBS.length * 150 * 12}`;
+                document.getElementById('statCompletedJobs').textContent = Math.floor(DEMO_JOBS.length * 0.75);
+            } else {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/stats`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    const stats = await response.json();
+                    
+                    document.getElementById('statJobs').textContent = stats.todayJobs || 0;
+                    document.getElementById('statRevenue').textContent = `£${stats.todayRevenue || 0}`;
+                    document.getElementById('statClients').textContent = stats.totalClients || 0;
+                    document.getElementById('statTotalRevenue').textContent = `£${(stats.todayRevenue || 0) * 30}`;
+                    document.getElementById('statCompletedJobs').textContent = Math.floor((stats.todayJobs || 0) * 0.75);
+                } catch (error) {
+                    console.error('Failed to load stats:', error);
+                    // Demo stats
+                    document.getElementById('statJobs').textContent = '3';
+                    document.getElementById('statRevenue').textContent = '£450';
+                    document.getElementById('statClients').textContent = '4';
+                    document.getElementById('statTotalRevenue').textContent = '£5,400';
+                    document.getElementById('statCompletedJobs').textContent = '25';
+                }
+            }
+        }
+        
+        // ============ SUPERUSER TOOLS ============
+        function addDemoClient() {
+            if (!isSuperuser) return;
+            
+            const newClientId = DEMO_CLIENTS.length + 1;
+            const demoNames = ['Green House', 'Miller Estate', 'Wilson Garden', 'Davis Farm'];
+            const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
+            
+            const newClient = {
+                id: newClientId.toString(),
+                name: randomName,
+                garden: 'New Garden Setup',
+                healthStatus: 'healthy',
+                nextDue: 'In 1 week'
+            };
+            
+            DEMO_CLIENTS.push(newClient);
+            loadClients();
+            loadStats();
+            
+            alert(`✅ Added demo client: ${randomName}`);
+        }
+        
+        function addDemoJob() {
+            if (!isSuperuser) return;
+            
+            const services = ['Lawn Mowing', 'Tree Pruning', 'Garden Cleanup', 'Soil Treatment', 'Planting Service'];
+            const randomService = services[Math.floor(Math.random() * services.length)];
+            const randomClient = DEMO_CLIENTS[Math.floor(Math.random() * DEMO_CLIENTS.length)];
+            
+            const newJob = {
+                id: (DEMO_JOBS.length + 1).toString(),
+                clientName: randomClient.name,
+                service: randomService,
+                time: `${Math.floor(Math.random() * 12) + 9}:${Math.random() > 0.5 ? '30' : '00'}`,
+                status: 'pending',
+                urgent: Math.random() > 0.7
+            };
+            
+            DEMO_JOBS.push(newJob);
+            loadTodayJobs();
+            loadStats();
+            
+            alert(`✅ Added demo job: ${randomService} for ${randomClient.name}`);
+        }
+        
+        function simulatePayment() {
+            if (!isSuperuser) return;
+            
+            const amount = Math.floor(Math.random() * 500) + 100;
+            const revenueEl = document.getElementById('statRevenue');
+            const totalRevenueEl = document.getElementById('statTotalRevenue');
+            
+            // Update displayed amounts
+            const currentRevenue = parseInt(revenueEl.textContent.replace('£', '')) || 0;
+            const currentTotal = parseInt(totalRevenueEl.textContent.replace('£', '').replace(',', '')) || 0;
+            
+            revenueEl.textContent = `£${currentRevenue + amount}`;
+            totalRevenueEl.textContent = `£${currentTotal + amount}`;
+            
+            alert(`💰 Simulated payment received: £${amount}`);
+        }
+        
+        function clearAllData() {
+            if (!isSuperuser) return;
+            
+            if (confirm('⚠️ Clear all demo data? This will reset clients and jobs.')) {
+                // Keep first few items for demo
+                DEMO_CLIENTS.length = 4;
+                DEMO_JOBS.length = 3;
+                
+                loadDashboard();
+                alert('✅ All demo data cleared (kept basic demo items)');
+            }
+        }
+        
+        function exportAllData() {
+            if (!isSuperuser) return;
+            
+            const exportData = {
+                clients: DEMO_CLIENTS,
+                jobs: DEMO_JOBS,
+                exportDate: new Date().toISOString(),
+                user: currentUser,
+                isSuperuser: isSuperuser
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const link = document.createElement('a');
+            link.href = dataUri;
+            link.download = `gardenmanager-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('📤 Data exported successfully!');
+        }
+        
+        function simulateQRConnect() {
+            if (!isSuperuser) return;
+            
+            openQRScanner();
+            // Auto-simulate after modal opens
+            setTimeout(() => {
+                simulateQRScan();
+            }, 500);
+        }
+        
+        // ============ QR CODE SCANNER ============
+        function openQRScanner() {
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+        
+        function closeQRScanner() {
+            document.getElementById('qrModal').style.display = 'none';
+            document.getElementById('scanResult').style.display = 'none';
+        }
+        
+        function simulateQRScan() {
+            const scanResult = document.getElementById('scanResult');
+            scanResult.style.display = 'block';
+            
+            const demoClient = DEMO_CLIENTS[Math.floor(Math.random() * DEMO_CLIENTS.length)];
+            
+            scanResult.innerHTML = `
+                <h3>✅ Client Found!</h3>
+                <p>Connecting to <strong>${demoClient.name}</strong>...</p>
+                <div style="margin-top: 1rem;">
+                    <button onclick="connectToClient('${demoClient.id}', '${demoClient.name}')" 
+                            style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px;">
+                        Connect Now
+                    </button>
+                    <button onclick="closeQRScanner()" 
+                            style="width: 100%; padding: 0.75rem; background: var(--border); color: var(--text); border: none; border-radius: 8px; margin-top: 0.5rem;">
+                        Cancel
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function connectToClient(clientId, clientName) {
+            try {
+                // In production, this would call the API
+                if (isSuperuser) {
+                    // For superuser, just show success
+                    alert(`✅ Successfully connected to ${clientName}!`);
+                    closeQRScanner();
+                    loadClients(); // Refresh list
+                } else {
+                    const response = await fetch(`${API_BASE_URL}/clients/pair`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            clientId: clientId,
+                            clientName: clientName,
+                            qrData: `gardenbuddy://connect/${clientId}`
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('✅ Successfully connected to client!');
+                        closeQRScanner();
+                        loadClients();
+                    } else {
+                        alert('Connection failed: ' + result.message);
+                    }
+                }
+            } catch (error) {
+                // Demo mode
+                alert(`✅ Demo: Connected to ${clientName}`);
+                closeQRScanner();
+                loadClients();
+            }
+        }
+        
+        // ============ UTILITY FUNCTIONS ============
+        function formatTime(timeString) {
+            if (!timeString) return 'Anytime';
+            return timeString;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            return dateString;
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('loginError');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => errorEl.style.display = 'none', 3000);
+        }
+        
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+        }
+        
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appContent').style.display = 'none';
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('gm_auth_token');
+                localStorage.removeItem('gm_user');
+                localStorage.removeItem('gm_superuser');
+                showLogin();
+            }
+        }
+        
+        // Navigation functions
+        function showDashboard() {
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            // In full app, would load dashboard content
+        }
+        
+        function showCalendar() {
+            alert('📅 Calendar view would open here in full app');
+        }
+        
+        function showClients() {
+            alert('👥 Clients list would open here in full app');
+        }
+        
+        function showMessages() {
+            alert('💬 Messages would open here in full app');
+        }
+        
+        function showProfile() {
+            alert(`👤 Profile:
+Username: ${currentUser?.email}
+Business: ${currentUser?.businessName}
+Access: ${isSuperuser ? '🔓 SUPERUSER' : 'Standard'}`);
+        }
+        
+        function viewAllJobs() {
+            alert(`🛠️ All Jobs view would open here
+Total jobs: ${DEMO_JOBS.length}`);
+        }
+        
+        function viewAllClients() {
+            alert(`👥 All Clients view would open here
+Total clients: ${DEMO_CLIENTS.length}`);
+        }
+        
+        function viewClient(clientId) {
+            const client = DEMO_CLIENTS.find(c => c.id === clientId) || DEMO_CLIENTS[0];
+            alert(`👤 Client Details:
+Name: ${client.name}
+Garden: ${client.garden}
+Status: ${client.healthStatus}
+Next Due: ${client.nextDue}
+
+Actions available in full app:
+• View garden details
+• Message client
+• Schedule job
+• View history`);
+        }
+        
+        function createJob() {
+            alert('🛠️ Job creation form would open here');
+        }
+        
+        function messageAll() {
+            alert('📢 Bulk messaging tool would open here');
+        }
+        
+        function viewCalendar() {
+            alert('📅 Calendar view would open here');
+        }
+        
+        function toggleMenu() {
+            alert('☰ Menu would open here');
+        }
+        
+        function showRegister() {
+            alert('📝 Registration form would open here');
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
