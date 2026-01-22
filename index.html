@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GardenBuddy - Your Garden Intelligence</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <style>
         :root {
             --garden-green: #2D5016;
@@ -698,10 +699,7 @@
                     <div class="header-title">GardenBuddy</div>
                     <div class="header-subtitle">Your garden intelligence</div>
                 </div>
-<<<<<<< HEAD
                 <button class="profile-button" onclick="toggleSettingsModal()">⚙️</button>
-=======
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
                 <button class="profile-button" onclick="toggleProfileModal()">👤</button>
             </div>
         </header>
@@ -728,7 +726,6 @@
             </div>
         </div>
 
-<<<<<<< HEAD
         <!-- Settings Modal -->
         <div id="settingsModal" class="modal">
             <div class="modal-content">
@@ -752,15 +749,6 @@
             <button class="tab-button" onclick="openTab('calendar')">Calendar</button>
         </div>
 
-=======
-        <!-- Tabs for Chat and Contractor Request -->
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab('chat')">Chat</button>
-            <button class="tab-button" onclick="openTab('contractor')">Contractor</button>
-            <button class="tab-button" onclick="openTab('plants')">Plants</button>
-        </div>
-
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
         <!-- Chat Tab Content -->
         <div id="chat" class="tab-content active">
             <div class="chat-container" id="chatContainer">
@@ -834,35 +822,22 @@
 
         <!-- Plants Database Tab Content -->
         <div id="plants" class="tab-content">
-<<<<<<< HEAD
             <div class="plants-tab-content">
                 <h3>Common Garden Plants</h3>
                 <p class="plants-tab-desc">
                     Tap a plant to learn more or add it to your garden.
                 </p>
                 <input class="request-input plants-tab-search" id="plantSearch" placeholder="Search plants..." oninput="filterPlants()" />
-=======
-            <div style="padding: 1rem;">
-                <h3>Common Garden Plants</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                    Tap a plant to learn more or add it to your garden.
-                </p>
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
                 
                 <div class="plant-cards" id="plantDatabase">
                     <!-- Plant cards will be generated here -->
                 </div>
                 
-<<<<<<< HEAD
                 <button class="submit-button plants-tab-back-btn" onclick="openTab('chat')">
-=======
-                <button class="submit-button" style="margin-top: 1rem; width: 100%;" onclick="openTab('chat')">
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
                     Back to Chat
                 </button>
             </div>
         </div>
-<<<<<<< HEAD
 
         <!-- Calendar Tab Content -->
         <div id="calendar" class="tab-content">
@@ -878,8 +853,6 @@
                 </div>
             </div>
         </div>
-=======
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
     </div>
 
     <script>
@@ -896,7 +869,6 @@
             plants: [],
             issues: [],
             harvests: [],
-<<<<<<< HEAD
             version: '1.0.0',
             calendar: [],
             settings: { location: 'London', apiKey: '' }
@@ -913,11 +885,6 @@
         // External Knowledge Base
         let knowledgeBase = null;
 
-=======
-            version: '1.0.0'
-        };
-
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
         // Plant database
         const plantDatabase = {
             'tomato': { emoji: '🍅', type: 'vegetable', sun: 'Full sun (6-8 hours)', water: '1-2 inches per week', daysToHarvest: 60 },
@@ -940,23 +907,18 @@
             if (saved) {
                 try {
                     gardenMemory = JSON.parse(saved);
-<<<<<<< HEAD
                     // Ensure new fields exist
                     if (!gardenMemory.calendar) gardenMemory.calendar = [];
                     if (!gardenMemory.settings) gardenMemory.settings = { location: 'London', apiKey: '' };
                     
                     updateStatsDisplay();
                     renderCalendar();
-=======
-                    updateStatsDisplay();
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
                 } catch (e) {
                     console.error('Failed to load memory:', e);
                 }
             }
         }
 
-<<<<<<< HEAD
         // Load Knowledge Base
         async function loadKnowledgeBase() {
             try {
@@ -968,8 +930,6 @@
             }
         }
 
-=======
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
         // Save to localStorage
         function saveMemory() {
             try {
@@ -980,7 +940,6 @@
             }
         }
 
-<<<<<<< HEAD
         // Toggle Settings Modal
         function toggleSettingsModal() {
             const modal = document.getElementById('settingsModal');
@@ -1046,151 +1005,6 @@
                 saveMemory();
                 renderCalendar();
                 document.getElementById('calEventInput').value = '';
-=======
-        // Toggle Profile Modal
-        function toggleProfileModal() {
-            const modal = document.getElementById('profileModal');
-            modal.style.display = modal.style.display === 'block' ? 'none' : 'flex';
-            
-            // Update time in modal
-            if (modal.style.display === 'flex') {
-                document.getElementById('currentTime').textContent = new Date().toLocaleString();
-            }
-        }
-
-        // Open Tab
-        function openTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-content');
-            const buttons = document.querySelectorAll('.tab-button');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            buttons.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`[onclick="openTab('${tabName}')"]`).classList.add('active');
-            
-            // Initialize plant database if needed
-            if (tabName === 'plants') {
-                initializePlantDatabase();
-            }
-        }
-
-        // Initialize plant database display
-        function initializePlantDatabase() {
-            const container = document.getElementById('plantDatabase');
-            container.innerHTML = '';
-            
-            for (const [name, data] of Object.entries(plantDatabase)) {
-                const card = document.createElement('div');
-                card.className = 'plant-card';
-                card.onclick = () => selectPlant(name, data);
-                card.innerHTML = `
-                    <div class="plant-emoji">${data.emoji}</div>
-                    <div class="plant-name">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
-                `;
-                container.appendChild(card);
-            }
-        }
-
-        // Select plant from database
-        function selectPlant(name, data) {
-            const message = `/teach I planted ${name} today. ${data.sun}. Water: ${data.water}.`;
-            openTab('chat');
-            setTimeout(() => {
-                document.getElementById('userInput').value = message;
-                sendMessage(message);
-            }, 300);
-        }
-
-        // Show plant selector in chat
-        function showPlantSelector() {
-            const chatContainer = document.getElementById('chatContainer');
-            const selectorDiv = document.createElement('div');
-            selectorDiv.className = 'message assistant';
-            selectorDiv.innerHTML = `
-                <div class="message-avatar">🌱</div>
-                <div class="message-content">
-                    <div class="message-bubble">
-                        <div style="margin-bottom: 0.5rem;">Select plants to add to your garden:</div>
-                        <div class="plant-cards">
-                            ${Object.entries(plantDatabase).slice(0, 6).map(([name, data]) => `
-                                <div class="plant-card" onclick="addPlantToGarden('${name}')">
-                                    <div class="plant-emoji">${data.emoji}</div>
-                                    <div class="plant-name">${name}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
-                            Or type "/teach I planted [plant name]" to add custom plants.
-                        </div>
-                    </div>
-                </div>
-            `;
-            chatContainer.appendChild(selectorDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Add plant to garden
-        function addPlantToGarden(plantName) {
-            const data = plantDatabase[plantName];
-            if (data) {
-                gardenMemory.plants.push({
-                    name: plantName,
-                    emoji: data.emoji,
-                    type: data.type,
-                    plantedDate: Date.now(),
-                    location: 'Unknown',
-                    notes: ''
-                });
-                saveMemory();
-                
-                addMessage('assistant', `Added ${plantName} to your garden! Use /teach to specify where it's planted and add more details.`);
-            }
-        }
-
-        // Update stats display
-        function updateStatsDisplay() {
-            document.getElementById('teachingsCount').textContent = gardenMemory.teachings.length;
-            document.getElementById('plantsCount').textContent = gardenMemory.plants.length;
-        }
-
-        // Send Contractor Request (Simulation)
-        function sendContractorRequest() {
-            const name = document.getElementById('contractorName').value;
-            const message = document.getElementById('requestMessage').value;
-            if (message) {
-                alert(`Request sent to ${name || 'contractor'}: "${message}"\n\nThis is a simulation. In a real app, this would send via email or API.`);
-                
-                // Log the request
-                gardenMemory.contractorRequests = gardenMemory.contractorRequests || [];
-                gardenMemory.contractorRequests.push({
-                    to: name,
-                    message: message,
-                    timestamp: Date.now()
-                });
-                saveMemory();
-                
-                // Clear form
-                document.getElementById('contractorName').value = '';
-                document.getElementById('requestMessage').value = '';
-                
-                // Switch back to chat
-                openTab('chat');
-                
-                // Add notification
-                addMessage('assistant', `✓ Contractor request logged. They should respond within 1-2 business days.`);
-            } else {
-                alert('Please enter a message.');
-            }
-        }
-
-        // Add message to chat
-        function addMessage(type, content) {
-            const chatContainer = document.getElementById('chatContainer');
-            
-            // Remove welcome message if it's the first user message
-            if (type === 'user') {
-                const welcome = chatContainer.querySelector('.welcome-message');
-                if (welcome) welcome.remove();
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
             }
         }
 
@@ -1205,7 +1019,6 @@
             const modal = document.getElementById('profileModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'flex';
             
-<<<<<<< HEAD
             // Update time in modal
             if (modal.style.display === 'flex') {
                 document.getElementById('currentTime').textContent = new Date().toLocaleString();
@@ -1825,330 +1638,6 @@ Or use /why to understand my reasoning better.`;
             }
         }
 
-=======
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            
-            let commandBadge = '';
-            if (content.startsWith('/teach')) {
-                commandBadge = '<div class="command-badge">📚 TEACHING</div>';
-                processTeaching(content);
-            } else if (content.startsWith('/wrong')) {
-                commandBadge = '<div class="command-badge">✏️ CORRECTION</div>';
-                processCorrection(content);
-            } else if (content.startsWith('/why')) {
-                commandBadge = '<div class="command-badge">🤔 WHY</div>';
-            } else if (content.startsWith('/help') || content.startsWith('/stats') || content.startsWith('/export')) {
-                commandBadge = '<div class="command-badge">ℹ️ COMMAND</div>';
-            }
-            
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${type === 'user' ? '👤' : '🌱'}</div>
-                <div class="message-content">
-                    ${commandBadge}
-                    <div class="message-bubble">${escapeHtml(formatMessage(content))}</div>
-                </div>
-            `;
-            
-            chatContainer.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 100);
-        }
-
-        // Format message (add line breaks, etc.)
-        function formatMessage(content) {
-            return content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n/g, '<br>')
-                .replace(/•/g, '•');
-        }
-
-        // Process teaching command
-        function processTeaching(content) {
-            const teaching = content.substring(7).trim();
-            if (teaching) {
-                gardenMemory.teachings.push({
-                    text: teaching,
-                    timestamp: Date.now(),
-                    type: 'teaching'
-                });
-                
-                // Try to extract garden info
-                if (teaching.toLowerCase().includes('bed') || teaching.toLowerCase().includes('raised')) {
-                    gardenMemory.gardenLayout.lastUpdate = Date.now();
-                }
-                if (teaching.toLowerCase().includes('planted') || teaching.toLowerCase().includes('growing')) {
-                    gardenMemory.gardenLayout.lastUpdate = Date.now();
-                }
-                
-                saveMemory();
-            }
-        }
-
-        // Process correction command
-        function processCorrection(content) {
-            const correction = content.substring(6).trim();
-            if (correction) {
-                gardenMemory.corrections.push({
-                    text: correction,
-                    timestamp: Date.now(),
-                    type: 'correction'
-                });
-                saveMemory();
-            }
-        }
-
-        // Generate response based on message
-        function generateResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            // Command responses
-            if (message.startsWith('/teach ')) {
-                const teaching = message.substring(7).trim();
-                return `✓ Learned: "${teaching}"
-
-I've added this to my memory. What else would you like to teach me about your garden?`;
-            }
-            
-            if (message.startsWith('/wrong')) {
-                const correction = message.substring(6).trim();
-                if (correction) {
-                    return `✓ Correction noted: "${correction}"
-
-I'll update my understanding accordingly. Thank you for the correction!`;
-                }
-                return "Please tell me what was wrong. Usage: /wrong [correction]";
-            }
-            
-            if (message === '/why') {
-                return `🤔 Let me explain my reasoning...
-
-As GardenBuddy, I base my responses on:
-• What you've taught me about your specific garden
-• General gardening best practices
-• Pattern recognition from your previous interactions
-• Seasonal timing and local conditions
-• My plant database and gardening knowledge
-
-Use /teach to give me more context for better advice!`;
-            }
-            
-            if (message === '/help') {
-                return `🌱 **GardenBuddy Commands:**
-
-**/teach** - Teach me something new
-• Example: /teach I have three raised beds
-• Example: /teach My tomatoes get 6 hours of sun
-
-**/wrong** - Correct my mistake
-• Example: /wrong those are determinate tomatoes
-
-**/why** - Ask for explanation
-• Example: /why
-
-**/stats** - See what I've learned
-• Example: /stats
-
-**/export** - Export your garden data
-• Example: /export
-
-**Regular questions:**
-Just ask me anything about your garden!`;
-            }
-            
-            if (message === '/stats') {
-                const teachings = gardenMemory.teachings.length;
-                const corrections = gardenMemory.corrections.length;
-                const plants = gardenMemory.plants.length;
-                const lastTeaching = teachings > 0 ? 
-                    new Date(gardenMemory.teachings[teachings-1].timestamp).toLocaleDateString() : 
-                    'Never';
-                
-                let plantList = '';
-                if (plants > 0) {
-                    plantList = '\n**Your Plants:**\n';
-                    gardenMemory.plants.slice(0, 5).forEach(p => {
-                        plantList += `• ${p.emoji} ${p.name}\n`;
-                    });
-                    if (plants > 5) plantList += `• ...and ${plants - 5} more`;
-                }
-                
-                return `📊 **Garden Memory Stats:**
-• Teachings learned: ${teachings}
-• Corrections made: ${corrections}
-• Plants tracked: ${plants}
-• Last teaching: ${lastTeaching}
-${plantList}
-
-Keep teaching me with /teach for better personalized advice!`;
-            }
-            
-            if (message === '/export') {
-                const dataStr = JSON.stringify(gardenMemory, null, 2);
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                
-                // Create temporary download link
-                const link = document.createElement('a');
-                link.href = dataUri;
-                link.download = `gardenbuddy-export-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                return `💾 Exported your garden data! 
-
-File saved as: ${link.download}
-
-Your data includes:
-• ${gardenMemory.teachings.length} teachings
-• ${gardenMemory.corrections.length} corrections  
-• ${gardenMemory.plants.length} plants
-• Garden layout information
-
-Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
-            }
-            
-            // Check for garden-related keywords
-            const keywords = {
-                water: "💧 Watering needs depend on your soil type, plant types, and weather. Tell me more about your setup with /teach!",
-                sun: "☀️ Most vegetables need 6-8 hours of direct sun. How many hours of sun does your garden get?",
-                soil: "🌱 Soil quality is crucial! Have you tested your soil's pH or composition?",
-                pest: "🐛 Common garden pests vary by region. What symptoms are you seeing?",
-                harvest: "🌾 Harvest timing depends on your planting dates and varieties. When did you plant?",
-                plant: "🌿 What would you like to plant? I can help with spacing, timing, and care instructions.",
-                tomato: "🍅 Tomatoes need support, consistent watering, and full sun. Are yours in ground or containers?",
-                herb: "🌿 Herbs generally prefer well-drained soil and moderate water. Many are perfect for containers!",
-                bed: "🛏️ Raised beds warm up faster and drain better. How many beds do you have and what sizes?",
-                when: "📅 Planting times vary by zone. What's your USDA hardiness zone?",
-                fertiliz: "🌿 Fertilizer needs depend on soil tests. Have you done a soil test this season?",
-                compost: "♻️ Compost improves soil structure. Do you have a compost pile?",
-                seed: "🌱 Starting seeds indoors extends your season. What are you planning to grow?",
-                season: "🍂 Each season has different tasks. What season is it where you are?"
-            };
-            
-            for (const [keyword, response] of Object.entries(keywords)) {
-                if (lowerMessage.includes(keyword)) {
-                    // Add personalized touch if we have memory
-                    if (gardenMemory.teachings.length > 0) {
-                        return response + "\n\nI remember you've taught me about your garden. Want to give me more specific details?";
-                    }
-                    return response;
-                }
-            }
-            
-            // Default responses based on what we've learned
-            if (gardenMemory.teachings.length === 0) {
-                return `🌱 I'd love to help! First, teach me about your garden using /teach. 
-
-For example:
-• "/teach I have two 4x8 raised beds"
-• "/teach My garden gets morning sun only"
-• "/teach I planted tomatoes and basil in April"
-
-What would you like to teach me first?`;
-            }
-            
-            // If we have some teachings, be more specific
-            const lastTeaching = gardenMemory.teachings[gardenMemory.teachings.length - 1].text;
-            return `Based on what you've taught me (like "${lastTeaching.substring(0, 50)}..."), I can give you more specific advice. 
-
-Could you tell me more details about what you're asking?
-
-Or use /why to understand my reasoning better.`;
-        }
-
-        // Show typing indicator
-        function showTyping() {
-            const chatContainer = document.getElementById('chatContainer');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message assistant';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = `
-                <div class="message-avatar">🌱</div>
-                <div class="message-content">
-                    <div class="message-bubble">
-                        <div class="typing-indicator">
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            chatContainer.appendChild(typingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Hide typing indicator
-        function hideTyping() {
-            const typing = document.getElementById('typingIndicator');
-            if (typing) typing.remove();
-        }
-
-        // Send message
-        function sendMessage(predefined = null) {
-            const input = document.getElementById('userInput');
-            const message = predefined || input.value.trim();
-            
-            if (!message) return;
-            
-            // Add user message
-            addMessage('user', message);
-            
-            if (!predefined) {
-                input.value = '';
-                input.style.height = 'auto';
-            }
-            
-            // Disable send button while processing
-            const sendButton = document.getElementById('sendButton');
-            sendButton.disabled = true;
-            
-            // Show typing indicator
-            showTyping();
-            
-            // Generate response after delay
-            setTimeout(() => {
-                hideTyping();
-                
-                // Generate and add response
-                const response = generateResponse(message);
-                addMessage('assistant', response);
-                
-                // Re-enable send button
-                sendButton.disabled = false;
-                
-                // Focus input
-                if (!predefined) {
-                    input.focus();
-                }
-            }, 800 + Math.random() * 400);
-        }
-
-        // Insert command into input
-        function insertCommand(command) {
-            const input = document.getElementById('userInput');
-            input.value = command;
-            input.focus();
-            input.setSelectionRange(command.length, command.length);
-            
-            // Auto-expand textarea
-            input.style.height = 'auto';
-            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-        }
-
-        // Handle keyboard events
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
         // Auto-resize textarea
         const textarea = document.getElementById('userInput');
         textarea.addEventListener('input', function() {
@@ -2176,10 +1665,7 @@ Or use /why to understand my reasoning better.`;
             
             // Initialize plant database
             initializePlantDatabase();
-<<<<<<< HEAD
             loadKnowledgeBase();
-=======
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
             
             // Focus input on load
             setTimeout(() => {
@@ -2220,40 +1706,25 @@ Or use /why to understand my reasoning better.`;
         // Close modal on outside click
         window.onclick = function(event) {
             const modal = document.getElementById('profileModal');
-<<<<<<< HEAD
             const settingsModal = document.getElementById('settingsModal');
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
             if (event.target === settingsModal) {
                 settingsModal.style.display = 'none';
-=======
-            if (event.target === modal) {
-                modal.style.display = 'none';
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
             }
         }
 
         // Service Worker registration for PWA capabilities
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-<<<<<<< HEAD
                 if (window.location.protocol.startsWith('http')) {
                     navigator.serviceWorker.register('/sw.js').catch(error => {
                         console.log('ServiceWorker registration failed:', error);
                     });
                 }
-=======
-                navigator.serviceWorker.register('/sw.js').catch(error => {
-                    console.log('ServiceWorker registration failed:', error);
-                });
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
             });
         }
     </script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> 5ba7e64fd04408522f9e544a7b1dcd67dbdb43d1
