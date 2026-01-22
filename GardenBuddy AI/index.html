@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GardenBuddy - Your Garden Intelligence</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <style>
+        :root {
+            --garden-green: #2D5016;
+            --soil-brown: #3E2723;
+            --morning-dew: #E8F5E9;
+            --seedling-sprout: #7CB342;
+            --sunset-tomato: #D84315;
+            --sky-blue: #81C784;
+            
+            --bg-primary: #FAFDF7;
+            --bg-chat: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5A5A5A;
+            --border-color: #D4E7D0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.4;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--garden-green) 0%, #3d6b1f 100%);
+            padding: 1rem 1rem;
+            box-shadow: 0 2px 12px rgba(45, 80, 22, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: #1a2910;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(124, 179, 66, 0.4);
+            border: 2px solid var(--seedling-sprout);
+            overflow: hidden;
+        }
+
+        .tech-sprout-svg {
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .header-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 2px;
+        }
+
+        .profile-button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* User Details Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .close-button {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Contractor Request Tab */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background: var(--morning-dew);
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            color: var(--garden-green);
+            border-bottom: 2px solid var(--garden-green);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .request-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .request-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .submit-button {
+            background: var(--garden-green);
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Messages */
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--seedling-sprout);
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--garden-green) 0%, #3d6b1f 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Command Badges */
+        .command-badge {
+            display: inline-block;
+            background: var(--seedling-sprout);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid var(--border-color);
+            position: sticky;
+            bottom: 0;
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .command-hints {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .command-hints::-webkit-scrollbar {
+            display: none;
+        }
+
+        .command-hint {
+            background: var(--morning-dew);
+            color: var(--garden-green);
+            padding: 0.5rem 0.875rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .command-hint:active {
+            background: var(--seedling-sprout);
+            color: white;
+            transform: scale(0.98);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            min-height: 44px;
+            line-height: 1.4;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--seedling-sprout);
+            background: white;
+        }
+
+        .mic-button {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .mic-button:hover {
+            border-color: var(--garden-green);
+            color: var(--garden-green);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .mic-button.recording {
+            background: var(--sunset-tomato);
+            color: white;
+            border-color: var(--sunset-tomato);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(216, 67, 21, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(216, 67, 21, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(216, 67, 21, 0); }
+        }
+
+        .send-button {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--garden-green) 0%, #3d6b1f 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .welcome-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--garden-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-size: 0.95rem;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* Loading Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--seedling-sprout);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Plant Database Cards */
+        .plant-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .plant-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .plant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .plant-card:active {
+            transform: translateY(0);
+        }
+
+        .plant-card.selected {
+            border-color: var(--seedling-sprout);
+            background: var(--morning-dew);
+        }
+
+        .plant-emoji {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .plant-name {
+            font-weight: 600;
+            color: var(--garden-green);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            max-width: 200px;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+            border: 2px solid var(--border-color);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .quick-action {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            background: var(--morning-dew);
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-text {
+            font-weight: 600;
+            color: var(--garden-green);
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--garden-green);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.875rem 1rem;
+            }
+            
+            .avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+            
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .chat-container {
+                padding: 0.875rem;
+            }
+            
+            .message-bubble {
+                padding: 0.625rem 0.875rem;
+                font-size: 0.9rem;
+            }
+            
+            .input-area {
+                padding: 0.875rem;
+            }
+            
+            .input-field {
+                padding: 0.625rem 0.875rem;
+                font-size: 0.9rem;
+            }
+            
+            .plant-cards {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1a08;
+                --bg-chat: #15220f;
+                --text-primary: #e8f5e9;
+                --text-secondary: #a5d6a7;
+                --border-color: #2d5016;
+                --morning-dew: #1a2910;
+            }
+            
+            .message.assistant .message-bubble {
+                background: var(--bg-chat);
+            }
+            
+            .input-area {
+                background: var(--bg-chat);
+            }
+            
+            .input-field {
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+            
+            .command-hint {
+                background: var(--morning-dew);
+                border-color: var(--border-color);
+            }
+            
+            .modal-content {
+                background: var(--bg-chat);
+                color: var(--text-primary);
+            }
+            
+            .plant-card, .quick-action, .stat-card {
+                background: var(--bg-chat);
+            }
+            
+            .request-input {
+                background: var(--bg-chat);
+                color: var(--text-primary);
+                border-color: var(--border-color);
+            }
+        }
+
+        /* Safe area insets for modern phones */
+        @supports (padding: max(0px)) {
+            .header {
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+                padding-top: max(1rem, env(safe-area-inset-top));
+            }
+            
+            .chat-container {
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+            }
+            
+            .input-area {
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+                padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .input-area, .tabs, .profile-button {
+                display: none;
+            }
+            
+            .chat-container {
+                overflow: visible;
+                max-height: none;
+            }
+            
+            .message-bubble {
+                border: 1px solid #ccc;
+            }
+        }
+        /* Tutorial Modal Styles */
+        .tutorial-modal-content {
+            text-align: center;
+            max-width: 500px;
+        }
+        .tutorial-step-hidden {
+            display: none;
+        }
+        .tutorial-step-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .tutorial-step-desc {
+            color: var(--text-secondary);
+            margin: 1rem 0;
+        }
+        .tutorial-message-bubble {
+            background: var(--morning-dew);
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .tutorial-location-input {
+            margin-bottom: 1rem;
+        }
+        .replay-tutorial-btn {
+            margin-top: 0.5rem;
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">GardenBuddy</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- User Details Modal -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="teachingsCount">0</div>
+                        <div class="stat-label">Teachings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="plantsCount">0</div>
+                        <div class="stat-label">Plants</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">OpenWeatherMap API Key</label>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <button class="submit-button settings-save-btn" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button replay-tutorial-btn" onclick="replayTutorial()">Replay Tutorial</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="tutorial-step-icon">🌱</div>
+                    <h2>Welcome to GardenBuddy</h2>
+                    <p class="tutorial-step-desc">Your personal AI-powered gardening assistant that learns and grows with your garden.</p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(2)">Start Tour</button>
+                </div>
+                <div id="tutorialStep2" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🤖</div>
+                    <h2>I Learn From You</h2>
+                    <p class="tutorial-step-desc">Use <strong>/teach</strong> to tell me about your garden.</p>
+                    <div class="message-bubble tutorial-message-bubble">
+                        /teach I have 2 raised beds<br>
+                        /teach My soil is clay-heavy
+                    </div>
+                    <br>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(3)">Next</button>
+                </div>
+                <div id="tutorialStep3" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🛠️</div>
+                    <h2>Smart Tools</h2>
+                    <p class="tutorial-step-desc">
+                        <strong>Plants:</strong> Browse and add plants.<br>
+                        <strong>Calendar:</strong> Track watering and harvest.<br>
+                        <strong>Weather:</strong> Get local forecasts.
+                    </p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(4)">Next</button>
+                </div>
+                <div id="tutorialStep4" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🌍</div>
+                    <h2>Quick Setup</h2>
+                    <p class="tutorial-step-desc">Where is your garden located?</p>
+                    <input class="request-input tutorial-location-input" id="tutorialLocation" placeholder="e.g. London">
+                    <button class="submit-button" type="button" onclick="finishTutorial()">All Set!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for Chat and Contractor Request -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('chat')">Chat</button>
+            <button class="tab-button" onclick="openTab('contractor')">Contractor</button>
+            <button class="tab-button" onclick="openTab('plants')">Plants</button>
+            <button class="tab-button" onclick="openTab('calendar')">Calendar</button>
+        </div>
+
+        <!-- Chat Tab Content -->
+        <div id="chat" class="tab-content active">
+            <div class="chat-container" id="chatContainer">
+                <div class="welcome-message">
+                    <div class="welcome-icon">🌱</div>
+                    <h2 class="welcome-title">Welcome to GardenBuddy</h2>
+                    <p class="welcome-text">
+                        I'll learn about your specific garden and help you tend it successfully. 
+                        Start by teaching me about your garden layout!
+                    </p>
+                    
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
+                            <div class="action-icon">🛏️</div>
+                            <div class="action-text">Teach Layout</div>
+                        </div>
+                        <div class="quick-action" onclick="showPlantSelector()">
+                            <div class="action-icon">🌿</div>
+                            <div class="action-text">Add Plants</div>
+                        </div>
+                        <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
+                            <div class="action-icon">📅</div>
+                            <div class="action-text">Seasonal Tips</div>
+                        </div>
+                        <div class="quick-action" onclick="sendMessage('/stats')">
+                            <div class="action-icon">📊</div>
+                            <div class="action-text">View Stats</div>
+                        </div>
+                        <div class="quick-action" onclick="startDiagnosticWizard()">
+                            <div class="action-icon">🩺</div>
+                            <div class="action-text">Diagnose</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="command-hints">
+                    <div class="command-hint" onclick="insertCommand('/teach ')">💡 /teach</div>
+                    <div class="command-hint" onclick="insertCommand('/wrong ')">✏️ /wrong</div>
+                    <div class="command-hint" onclick="sendMessage('/why')">/why</div>
+                    <div class="command-hint" onclick="sendMessage('/help')">/help</div>
+                    <div class="command-hint" onclick="sendMessage('/export')">💾 /export</div>
+                </div>
+                <div class="input-wrapper">
+                    <textarea 
+                        class="input-field" 
+                        id="userInput" 
+                        placeholder="Tell me about your garden..."
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                    ></textarea>
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
+                    <button class="mic-button" onclick="triggerPhotoUpload()" title="Upload Photo">📷</button>
+                    <button class="mic-button" id="micButton" onclick="toggleVoiceInput()" title="Voice Input">
+                        🎤
+                    </button>
+                    <button class="send-button" onclick="sendMessage()" id="sendButton">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contractor Request Tab Content -->
+        <div id="contractor" class="tab-content">
+            <div class="request-form">
+                <h3>Send a Request to a Contractor</h3>
+                <input class="request-input" id="contractorName" placeholder="Contractor Name (optional)" />
+                <textarea class="request-input" id="requestMessage" placeholder="Describe your request..."></textarea>
+                <button class="submit-button" onclick="sendContractorRequest()">Send Request</button>
+            </div>
+        </div>
+
+        <!-- Plants Database Tab Content -->
+        <div id="plants" class="tab-content">
+            <div class="plants-tab-content">
+                <h3>Common Garden Plants</h3>
+                <p class="plants-tab-desc">
+                    Tap a plant to learn more or add it to your garden.
+                </p>
+                <input class="request-input plants-tab-search" id="plantSearch" placeholder="Search plants..." oninput="filterPlants()" />
+                
+                <div class="plant-cards" id="plantDatabase">
+                    <!-- Plant cards will be generated here -->
+                </div>
+                
+                <button class="submit-button plants-tab-back-btn" onclick="openTab('chat')">
+                    Back to Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- Pro Feature Modal -->
+        <div id="proModal" class="modal">
+            <div class="modal-content pro-modal-content">
+                <span class="close-button" onclick="toggleProModal()">&times;</span>
+                <div class="pro-modal-icon">🚀</div>
+                <h2>GardenBuddy Pro</h2>
+                <p><strong>AI Plant Diagnosis</strong> from photos is coming soon!</p>
+                <p class="pro-modal-desc">
+                    We are training our vision models to detect pests and diseases automatically. Be the first to know when it launches.
+                </p>
+                <div class="request-form">
+                    <input class="request-input" id="proEmail" placeholder="Enter your email" />
+                    <button class="submit-button" type="button" onclick="joinWaitlist()">Join Waitlist</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Tab Content -->
+        <div id="calendar" class="tab-content">
+            <div class="calendar-tab-container">
+                <h3>Garden Calendar</h3>
+                <div class="request-form calendar-form-spacing">
+                    <input class="request-input" id="calEventInput" placeholder="Event (e.g. Water Tomatoes)" />
+                    <input class="request-input" type="date" id="calDateInput" />
+                    <button class="submit-button" onclick="addCalendarEventUI()">Add Event</button>
+                </div>
+                <div id="calendarList" class="calendar-list">
+                    <!-- Events will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extended garden memory
+        let gardenMemory = {
+            teachings: [],
+            corrections: [],
+            gardenLayout: {
+                beds: [],
+                sunPatterns: [],
+                soilType: '',
+                lastUpdate: null
+            },
+            plants: [],
+            issues: [],
+            harvests: [],
+            version: '1.0.0',
+            calendar: [],
+            settings: { location: 'London', apiKey: '' }
+        };
+
+        // Wizard state
+        let wizardState = {
+            active: false,
+            category: null,
+            step: 0,
+            answers: []
+        };
+
+        // External Knowledge Base
+        let knowledgeBase = null;
+
+        // Plant database
+        const plantDatabase = {
+            'tomato': { emoji: '🍅', type: 'vegetable', sun: 'Full sun (6-8 hours)', water: '1-2 inches per week', daysToHarvest: 60 },
+            'basil': { emoji: '🌿', type: 'herb', sun: 'Partial to full sun', water: 'Keep soil moist', daysToHarvest: 30 },
+            'lettuce': { emoji: '🥬', type: 'vegetable', sun: 'Partial sun', water: 'Keep soil moist', daysToHarvest: 45 },
+            'carrot': { emoji: '🥕', type: 'vegetable', sun: 'Full sun', water: '1 inch per week', daysToHarvest: 70 },
+            'pepper': { emoji: '🫑', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 65 },
+            'cucumber': { emoji: '🥒', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 55 },
+            'zucchini': { emoji: '🥒', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 50 },
+            'strawberry': { emoji: '🍓', type: 'fruit', sun: 'Full sun', water: '1 inch per week', daysToHarvest: 90 },
+            'rosemary': { emoji: '🌿', type: 'herb', sun: 'Full sun', water: 'Let soil dry between', daysToHarvest: 90 },
+            'mint': { emoji: '🌿', type: 'herb', sun: 'Partial sun', water: 'Keep soil moist', daysToHarvest: 30 },
+            'sunflower': { emoji: '🌻', type: 'flower', sun: 'Full sun', water: 'Moderate', daysToHarvest: 80 },
+            'lavender': { emoji: '🪻', type: 'herb', sun: 'Full sun', water: 'Drought tolerant', daysToHarvest: 120 }
+        };
+
+        // Load from localStorage
+        function loadMemory() {
+            const saved = localStorage.getItem('gardenbuddy_memory');
+            if (saved) {
+                try {
+                    gardenMemory = JSON.parse(saved);
+                    // Ensure new fields exist
+                    if (!gardenMemory.calendar) gardenMemory.calendar = [];
+                    if (!gardenMemory.settings) gardenMemory.settings = { location: 'London', apiKey: '' };
+                    
+                    updateStatsDisplay();
+                    renderCalendar();
+                } catch (e) {
+                    console.error('Failed to load memory:', e);
+                }
+            }
+        }
+
+        // Load Knowledge Base
+        async function loadKnowledgeBase() {
+            try {
+                const response = await fetch('https://gist.githubusercontent.com/JamesTheGiblet/ddf742303df81ec510b28503208da3dd/raw/3b0a65b5701b22a85e52203015dfce21c37f422b/gardenbuddy-knowledge-base.json');
+                knowledgeBase = await response.json();
+                console.log('Knowledge base loaded:', knowledgeBase.version);
+            } catch (e) {
+                console.error('Failed to load knowledge base:', e);
+            }
+        }
+
+        // Save to localStorage
+        function saveMemory() {
+            try {
+                localStorage.setItem('gardenbuddy_memory', JSON.stringify(gardenMemory));
+                updateStatsDisplay();
+            } catch (e) {
+                console.error('Failed to save memory:', e);
+            }
+        }
+
+        // Toggle Settings Modal
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'flex';
+            
+            if (modal.style.display === 'flex') {
+                document.getElementById('settingLocation').value = gardenMemory.settings.location || '';
+                document.getElementById('settingApiKey').value = gardenMemory.settings.apiKey || '';
+            }
+        }
+
+        // Save Settings
+        function saveSettings() {
+            const loc = document.getElementById('settingLocation').value;
+            const key = document.getElementById('settingApiKey').value;
+            
+            gardenMemory.settings.location = loc;
+            gardenMemory.settings.apiKey = key;
+            saveMemory();
+            
+            toggleSettingsModal();
+            addMessage('assistant', `Settings updated! Location set to ${loc}.`);
+        }
+
+        // Tutorial Functions
+        function initTutorial() {
+            if (!localStorage.getItem('gardenbuddy_tutorial_complete')) {
+                document.getElementById('tutorialModal').style.display = 'flex';
+                showTutorialStep(1);
+            }
+        }
+
+        function showTutorialStep(step) {
+            document.querySelectorAll('.tutorial-step').forEach(el => el.style.display = 'none');
+            document.getElementById('tutorialStep' + step).style.display = 'block';
+        }
+
+        function nextTutorialStep(step) {
+            showTutorialStep(step);
+        }
+
+        function finishTutorial() {
+            const loc = document.getElementById('tutorialLocation').value;
+            if (loc) {
+                gardenMemory.settings.location = loc;
+                saveMemory();
+                // Update settings modal input
+                document.getElementById('settingLocation').value = loc;
+                addMessage('assistant', `Great! I've set your location to ${loc}.`);
+            }
+            localStorage.setItem('gardenbuddy_tutorial_complete', 'true');
+            document.getElementById('tutorialModal').style.display = 'none';
+        }
+        
+        function replayTutorial() {
+            const settings = document.getElementById('settingsModal');
+            if (settings) settings.style.display = 'none';
+            document.getElementById('tutorialModal').style.display = 'flex';
+            showTutorialStep(1);
+        }
+
+        // Calendar Functions
+        function renderCalendar() {
+            const container = document.getElementById('calendarList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const events = gardenMemory.calendar || [];
+            
+            // Sort by date
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (events.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:2rem;">No upcoming events</div>';
+                return;
+            }
+
+            events.forEach((evt, index) => {
+                const div = document.createElement('div');
+                div.className = 'plant-card';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:600; color:var(--garden-green)">${evt.event}</div>
+                        <div style="font-size:0.85rem; color:var(--text-secondary)">${new Date(evt.date).toDateString()}</div>
+                    </div>
+                    <button onclick="deleteCalendarEvent(${index})" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">🗑️</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addCalendarEventUI() {
+            const evt = document.getElementById('calEventInput').value;
+            const date = document.getElementById('calDateInput').value;
+            if (evt && date) {
+                gardenMemory.calendar.push({ event: evt, date: date });
+                saveMemory();
+                renderCalendar();
+                document.getElementById('calEventInput').value = '';
+            }
+        }
+
+        function deleteCalendarEvent(index) {
+            gardenMemory.calendar.splice(index, 1);
+            saveMemory();
+            renderCalendar();
+        }
+
+        // Toggle Profile Modal
+        function toggleProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'flex';
+            
+            // Update time in modal
+            if (modal.style.display === 'flex') {
+                document.getElementById('currentTime').textContent = new Date().toLocaleString();
+            }
+        }
+
+        // Open Tab
+        function openTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[onclick="openTab('${tabName}')"]`).classList.add('active');
+            
+            // Initialize plant database if needed
+            if (tabName === 'plants') {
+                initializePlantDatabase();
+            }
+        }
+
+        // Initialize plant database display
+        function initializePlantDatabase() {
+            const searchInput = document.getElementById('plantSearch');
+            if (searchInput) searchInput.value = '';
+            filterPlants();
+        }
+
+        // Filter and render plants
+        function filterPlants() {
+            const container = document.getElementById('plantDatabase');
+            const searchInput = document.getElementById('plantSearch');
+            const filter = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            container.innerHTML = '';
+            
+            for (const [name, data] of Object.entries(plantDatabase)) {
+                if (name.toLowerCase().includes(filter)) {
+                    const card = document.createElement('div');
+                    card.className = 'plant-card';
+                    card.onclick = () => selectPlant(name, data);
+                    card.innerHTML = `
+                        <div class="plant-emoji">${data.emoji}</div>
+                        <div class="plant-name">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
+                    `;
+                    container.appendChild(card);
+                }
+            }
+            
+            if (container.children.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 1rem;">No plants found</div>';
+            }
+        }
+
+        // Select plant from database
+        function selectPlant(name, data) {
+            const message = `/teach I planted ${name} today. ${data.sun}. Water: ${data.water}.`;
+            openTab('chat');
+            setTimeout(() => {
+                document.getElementById('userInput').value = message;
+                sendMessage(message);
+            }, 300);
+        }
+
+        // Show plant selector in chat
+        function showPlantSelector() {
+            const chatContainer = document.getElementById('chatContainer');
+            const selectorDiv = document.createElement('div');
+            selectorDiv.className = 'message assistant';
+            selectorDiv.innerHTML = `
+                <div class="message-avatar">🌱</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div style="margin-bottom: 0.5rem;">Select plants to add to your garden:</div>
+                        <div class="plant-cards">
+                            ${Object.entries(plantDatabase).slice(0, 6).map(([name, data]) => `
+                                <div class="plant-card" onclick="addPlantToGarden('${name}')">
+                                    <div class="plant-emoji">${data.emoji}</div>
+                                    <div class="plant-name">${name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                            Or type "/teach I planted [plant name]" to add custom plants.
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(selectorDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Add plant to garden
+        function addPlantToGarden(plantName) {
+            const data = plantDatabase[plantName];
+            if (data) {
+                gardenMemory.plants.push({
+                    name: plantName,
+                    emoji: data.emoji,
+                    type: data.type,
+                    plantedDate: Date.now(),
+                    location: 'Unknown',
+                    notes: ''
+                });
+                saveMemory();
+                
+                addMessage('assistant', `Added ${plantName} to your garden! Use /teach to specify where it's planted and add more details.`);
+            }
+        }
+
+        // Update stats display
+        function updateStatsDisplay() {
+            document.getElementById('teachingsCount').textContent = gardenMemory.teachings.length;
+            document.getElementById('plantsCount').textContent = gardenMemory.plants.length;
+        }
+
+        // Send Contractor Request (Simulation)
+        function sendContractorRequest() {
+            const name = document.getElementById('contractorName').value;
+            const message = document.getElementById('requestMessage').value;
+            if (message) {
+                alert(`Request sent to ${name || 'contractor'}: "${message}"\n\nThis is a simulation. In a real app, this would send via email or API.`);
+                
+                // Log the request
+                gardenMemory.contractorRequests = gardenMemory.contractorRequests || [];
+                gardenMemory.contractorRequests.push({
+                    to: name,
+                    message: message,
+                    timestamp: Date.now()
+                });
+                saveMemory();
+                
+                // Clear form
+                document.getElementById('contractorName').value = '';
+                document.getElementById('requestMessage').value = '';
+                
+                // Switch back to chat
+                openTab('chat');
+                
+                // Add notification
+                addMessage('assistant', `✓ Contractor request logged. They should respond within 1-2 business days.`);
+            } else {
+                alert('Please enter a message.');
+            }
+        }
+
+        // Add message to chat
+        function addMessage(type, content) {
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Remove welcome message if it's the first user message
+            if (type === 'user') {
+                const welcome = chatContainer.querySelector('.welcome-message');
+                if (welcome) welcome.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            let commandBadge = '';
+            if (content.startsWith('/teach')) {
+                commandBadge = '<div class="command-badge">📚 TEACHING</div>';
+                processTeaching(content);
+            } else if (content.startsWith('/wrong')) {
+                commandBadge = '<div class="command-badge">✏️ CORRECTION</div>';
+                processCorrection(content);
+            } else if (content.startsWith('/why')) {
+                commandBadge = '<div class="command-badge">🤔 WHY</div>';
+            } else if (content.startsWith('/help') || content.startsWith('/stats') || content.startsWith('/export')) {
+                commandBadge = '<div class="command-badge">ℹ️ COMMAND</div>';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${type === 'user' ? '👤' : '🌱'}</div>
+                <div class="message-content">
+                    ${commandBadge}
+                    <div class="message-bubble">${escapeHtml(formatMessage(content))}</div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 100);
+        }
+
+        // Format message (add line breaks, etc.)
+        function formatMessage(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>')
+                .replace(/•/g, '•');
+        }
+
+        // Process teaching command
+        function processTeaching(content) {
+            const teaching = content.substring(7).trim();
+            if (teaching) {
+                gardenMemory.teachings.push({
+                    text: teaching,
+                    timestamp: Date.now(),
+                    type: 'teaching'
+                });
+                
+                // Try to extract garden info
+                if (teaching.toLowerCase().includes('bed') || teaching.toLowerCase().includes('raised')) {
+                    gardenMemory.gardenLayout.lastUpdate = Date.now();
+                }
+                if (teaching.toLowerCase().includes('planted') || teaching.toLowerCase().includes('growing')) {
+                    gardenMemory.gardenLayout.lastUpdate = Date.now();
+                }
+                
+                saveMemory();
+            }
+        }
+
+        // Process correction command
+        function processCorrection(content) {
+            const correction = content.substring(6).trim();
+            if (correction) {
+                gardenMemory.corrections.push({
+                    text: correction,
+                    timestamp: Date.now(),
+                    type: 'correction'
+                });
+                saveMemory();
+            }
+        }
+
+        // Start Diagnostic Wizard
+        function startDiagnosticWizard() {
+            if (!knowledgeBase || !knowledgeBase.diagnostic_questions) {
+                addMessage('assistant', "⚠️ Knowledge base is loading... please try again in a few seconds.");
+                return;
+            }
+            
+            const categories = Object.keys(knowledgeBase.diagnostic_questions);
+            const buttons = categories.map(cat => 
+                `<button class="command-hint" onclick="selectWizardCategory('${cat}')" style="margin:0.25rem; border:1px solid var(--garden-green);">${cat.replace(/_/g, ' ').toUpperCase()}</button>`
+            ).join('');
+            
+            addMessage('assistant', `🩺 **Diagnostic Wizard**\nI can help identify issues. What type of problem are you seeing?\n\n<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">${buttons}</div>`);
+        }
+
+        // Select Wizard Category
+        function selectWizardCategory(category) {
+            wizardState = {
+                active: true,
+                category: category,
+                step: 0,
+                answers: []
+            };
+            
+            // Visual feedback
+            addMessage('user', `Diagnose ${category.replace(/_/g, ' ')}`);
+            
+            // Ask first question
+            const questions = knowledgeBase.diagnostic_questions[category];
+            setTimeout(() => {
+                addMessage('assistant', `📋 **Question 1/${questions.length}:**\n${questions[0]}`);
+            }, 600);
+        }
+
+        // Handle Wizard Step
+        function handleWizardStep(userMessage) {
+            const questions = knowledgeBase.diagnostic_questions[wizardState.category];
+            
+            // Save answer
+            wizardState.answers.push({
+                question: questions[wizardState.step],
+                answer: userMessage
+            });
+            
+            wizardState.step++;
+            
+            if (wizardState.step < questions.length) {
+                return `📋 **Question ${wizardState.step + 1}/${questions.length}:**\n${questions[wizardState.step]}`;
+            } else {
+                // Finish
+                const category = wizardState.category;
+                const answers = wizardState.answers;
+                
+                // Save issue to memory
+                gardenMemory.issues.push({
+                    type: category,
+                    date: new Date().toISOString(),
+                    details: answers
+                });
+                saveMemory();
+                
+                // Reset state
+                wizardState = { active: false, category: null, step: 0, answers: [] };
+                
+                // Construct summary
+                let summary = answers.map(a => `• **Q:** ${a.question}\n  **A:** ${a.answer}`).join('\n\n');
+                
+                return `✅ **Diagnostic Complete**\n\nHere's what I've recorded:\n\n${summary}\n\nI've saved this to your garden history. Based on these symptoms, check the **${category.replace(/_/g, ' ')}** section in the Knowledge Base or ask me specifically about potential causes like "pests" or "diseases".`;
+            }
+        }
+
+        // Generate response based on message
+        function generateResponse(message) {
+            // Check wizard state
+            if (wizardState.active) {
+                return handleWizardStep(message);
+            }
+
+            const lowerMessage = message.toLowerCase();
+            
+            // Command responses
+            
+            // Check Knowledge Base for dynamic responses
+            const kbResponse = searchKnowledgeBase(lowerMessage);
+            if (kbResponse) return kbResponse;
+
+            if (message.startsWith('/teach ')) {
+                const teaching = message.substring(7).trim();
+                return `✓ Learned: "${teaching}"
+
+I've added this to my memory. What else would you like to teach me about your garden?`;
+            }
+            
+            if (message.startsWith('/wrong')) {
+                const correction = message.substring(6).trim();
+                if (correction) {
+                    return `✓ Correction noted: "${correction}"
+
+I'll update my understanding accordingly. Thank you for the correction!`;
+                }
+                return "Please tell me what was wrong. Usage: /wrong [correction]";
+            }
+            
+            if (message.startsWith('/weather')) {
+                const city = gardenMemory.settings.location || 'London';
+                const apiKey = gardenMemory.settings.apiKey;
+                
+                if (!apiKey) return "Please set your OpenWeatherMap API Key in Settings (⚙️) first.";
+                
+                // Async fetch
+                fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.cod !== 200) throw new Error(data.message);
+                        const weatherMsg = `🌦️ **Weather in ${data.name}:**
+• Condition: ${data.weather[0].description}
+• Temp: ${data.main.temp}°C
+• Humidity: ${data.main.humidity}%`;
+                        addMessage('assistant', weatherMsg);
+                    })
+                    .catch(e => addMessage('assistant', `⚠️ Weather error: ${e.message}`));
+                
+                return "Checking the forecast...";
+            }
+
+            if (message === '/why') {
+                return `🤔 Let me explain my reasoning...
+
+As GardenBuddy, I base my responses on:
+• What you've taught me about your specific garden
+• General gardening best practices
+• Pattern recognition from your previous interactions
+• Seasonal timing and local conditions
+• My plant database and gardening knowledge
+
+Use /teach to give me more context for better advice!`;
+            }
+            
+            if (message === '/help') {
+                return `🌱 **GardenBuddy Commands:**
+
+**/teach** - Teach me something new
+• Example: /teach I have three raised beds
+• Example: /teach My tomatoes get 6 hours of sun
+
+**/wrong** - Correct my mistake
+• Example: /wrong those are determinate tomatoes
+
+**/why** - Ask for explanation
+• Example: /why
+
+**/stats** - See what I've learned
+• Example: /stats
+
+**/export** - Export your garden data
+• Example: /export
+
+**Regular questions:**
+Just ask me anything about your garden!`;
+            }
+            
+            if (message === '/stats') {
+                const teachings = gardenMemory.teachings.length;
+                const corrections = gardenMemory.corrections.length;
+                const plants = gardenMemory.plants.length;
+                const lastTeaching = teachings > 0 ? 
+                    new Date(gardenMemory.teachings[teachings-1].timestamp).toLocaleDateString() : 
+                    'Never';
+                
+                let plantList = '';
+                if (plants > 0) {
+                    plantList = '\n**Your Plants:**\n';
+                    gardenMemory.plants.slice(0, 5).forEach(p => {
+                        plantList += `• ${p.emoji} ${p.name}\n`;
+                    });
+                    if (plants > 5) plantList += `• ...and ${plants - 5} more`;
+                }
+                
+                return `📊 **Garden Memory Stats:**
+• Teachings learned: ${teachings}
+• Corrections made: ${corrections}
+• Plants tracked: ${plants}
+• Last teaching: ${lastTeaching}
+${plantList}
+
+Keep teaching me with /teach for better personalized advice!`;
+            }
+            
+            if (message === '/export') {
+                const dataStr = JSON.stringify(gardenMemory, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                // Create temporary download link
+                const link = document.createElement('a');
+                link.href = dataUri;
+                link.download = `gardenbuddy-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                return `💾 Exported your garden data! 
+
+File saved as: ${link.download}
+
+Your data includes:
+• ${gardenMemory.teachings.length} teachings
+• ${gardenMemory.corrections.length} corrections  
+• ${gardenMemory.plants.length} plants
+• Garden layout information
+
+Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
+            }
+            
+            // Check for garden-related keywords
+            const keywords = {
+                water: "💧 Watering needs depend on your soil type, plant types, and weather. Tell me more about your setup with /teach!",
+                sun: "☀️ Most vegetables need 6-8 hours of direct sun. How many hours of sun does your garden get?",
+                soil: "🌱 Soil quality is crucial! Have you tested your soil's pH or composition?",
+                pest: "🐛 Common garden pests vary by region. What symptoms are you seeing?",
+                harvest: "🌾 Harvest timing depends on your planting dates and varieties. When did you plant?",
+                plant: "🌿 What would you like to plant? I can help with spacing, timing, and care instructions.",
+                tomato: "🍅 Tomatoes need support, consistent watering, and full sun. Are yours in ground or containers?",
+                herb: "🌿 Herbs generally prefer well-drained soil and moderate water. Many are perfect for containers!",
+                bed: "🛏️ Raised beds warm up faster and drain better. How many beds do you have and what sizes?",
+                when: "📅 Planting times vary by zone. What's your USDA hardiness zone?",
+                fertiliz: "🌿 Fertilizer needs depend on soil tests. Have you done a soil test this season?",
+                compost: "♻️ Compost improves soil structure. Do you have a compost pile?",
+                seed: "🌱 Starting seeds indoors extends your season. What are you planning to grow?",
+                season: "🍂 Each season has different tasks. What season is it where you are?"
+            };
+            
+            for (const [keyword, response] of Object.entries(keywords)) {
+                if (lowerMessage.includes(keyword)) {
+                    // Add personalized touch if we have memory
+                    if (gardenMemory.teachings.length > 0) {
+                        return response + "\n\nI remember you've taught me about your garden. Want to give me more specific details?";
+                    }
+                    return response;
+                }
+            }
+            
+            // Default responses based on what we've learned
+            if (gardenMemory.teachings.length === 0) {
+                return `🌱 I'd love to help! First, teach me about your garden using /teach. 
+
+For example:
+• "/teach I have two 4x8 raised beds"
+• "/teach My garden gets morning sun only"
+• "/teach I planted tomatoes and basil in April"
+
+What would you like to teach me first?`;
+            }
+            
+            // If we have some teachings, be more specific
+            const lastTeaching = gardenMemory.teachings[gardenMemory.teachings.length - 1].text;
+            return `Based on what you've taught me (like "${lastTeaching.substring(0, 50)}..."), I can give you more specific advice. 
+
+Could you tell me more details about what you're asking?
+
+Or use /why to understand my reasoning better.`;
+        }
+
+        // Search Knowledge Base
+        function searchKnowledgeBase(query) {
+            if (!knowledgeBase || !knowledgeBase.categories) return null;
+            const cats = knowledgeBase.categories;
+
+            // Lawn
+            if (query.includes('lawn') || query.includes('grass')) {
+                const lawn = cats.lawn_care;
+                if (!lawn) return null;
+                
+                if (query.includes('mow')) {
+                    return `🚜 **Mowing Guide:**\nCool Season: ${lawn.mowing_guidelines.cool_season}\nWarm Season: ${lawn.mowing_guidelines.warm_season}`;
+                }
+                if (query.includes('water')) return `💧 **Watering:** ${lawn.watering_guidelines.general}`;
+                return `🌱 **Lawn Care:**\nSpring: ${lawn.seasonal_tasks.spring.join(', ')}\nSummer: ${lawn.seasonal_tasks.summer.join(', ')}`;
+            }
+
+            // Tomato specific
+            if (query.includes('tomato')) {
+                const t = cats.plants?.common_vegetables?.tomato;
+                if (t && t.care_advice) {
+                    return `🍅 **Tomato Care:**\n• Water: ${t.care_advice.watering}\n• Feed: ${t.care_advice.fertilizing}\n• Problems: ${t.care_advice.problems}`;
+                }
+            }
+
+            // Pests
+            if (query.includes('pest') || query.includes('aphid') || query.includes('slug')) {
+                const pests = cats.plants?.plant_health?.pests;
+                if (pests) {
+                    if (query.includes('aphid')) return `🐜 **Aphids:** ${pests.aphids}`;
+                    if (query.includes('slug')) return `🐌 **Slugs:** ${pests.slugs}`;
+                    return `🐛 **Pest Control:** Check for specific pests like aphids or slugs.`;
+                }
+            }
+
+            return null;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            const chatContainer = document.getElementById('chatContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🌱</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        // Send message
+        function sendMessage(predefined = null) {
+            const input = document.getElementById('userInput');
+            const message = predefined || input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage('user', message);
+            
+            if (!predefined) {
+                input.value = '';
+                input.style.height = 'auto';
+            }
+            
+            // Disable send button while processing
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Generate response after delay
+            setTimeout(() => {
+                hideTyping();
+                
+                // Generate and add response
+                const response = generateResponse(message);
+                addMessage('assistant', response);
+                
+                // Re-enable send button
+                sendButton.disabled = false;
+                
+                // Focus input
+                if (!predefined) {
+                    input.focus();
+                }
+            }, 800 + Math.random() * 400);
+        }
+
+        // Insert command into input
+        function insertCommand(command) {
+            const input = document.getElementById('userInput');
+            input.value = command;
+            input.focus();
+            input.setSelectionRange(command.length, command.length);
+            
+            // Auto-expand textarea
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        }
+
+        // Handle keyboard events
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('userInput');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Prevent accidental zoom on mobile
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // Voice Input Setup
+        let recognition;
+        
+        function initVoiceInput() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    const btn = document.getElementById('micButton');
+                    const input = document.getElementById('userInput');
+                    if (btn) btn.classList.add('recording');
+                    if (input) input.placeholder = "Listening...";
+                };
+
+                recognition.onend = function() {
+                    const btn = document.getElementById('micButton');
+                    const input = document.getElementById('userInput');
+                    if (btn) btn.classList.remove('recording');
+                    if (input) input.placeholder = "Tell me about your garden...";
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    const input = document.getElementById('userInput');
+                    if (input) {
+                        input.value = transcript;
+                        input.focus();
+                        // Trigger auto-resize
+                        input.style.height = 'auto';
+                        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    const btn = document.getElementById('micButton');
+                    if (btn) btn.classList.remove('recording');
+                };
+            } else {
+                const btn = document.getElementById('micButton');
+                if (btn) btn.style.display = 'none';
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                alert("Voice input is not supported in this browser.");
+                return;
+            }
+            const btn = document.getElementById('micButton');
+            if (btn.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Photo Upload Functions
+        function triggerPhotoUpload() {
+            document.getElementById('photoInput').click();
+        }
+
+        function handlePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Display user message with image
+                    const imgHtml = `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid var(--border-color);">`;
+                    addMessage('user', `Uploaded a photo:<br>${imgHtml}`);
+                    
+                    // Assistant response simulation
+                    setTimeout(() => {
+                        addMessage('assistant', `I see you've uploaded a photo! 📸\n\n**Note:** Advanced AI visual diagnosis is a **Pro Feature** currently in development.\n\nI can't analyze this specific image yet, but I can help you diagnose issues through conversation. Try the Diagnostic Wizard!`);
+                        
+                        // Trigger modal to capture demand
+                        setTimeout(() => toggleProModal(), 1500);
+                    }, 1000);
+                };
+                
+                reader.readAsDataURL(file);
+                // Reset input so same file can be selected again if needed
+                input.value = '';
+            }
+        }
+
+        function toggleProModal() {
+            const modal = document.getElementById('proModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+        }
+
+        function joinWaitlist() {
+            const email = document.getElementById('proEmail').value;
+            if (email) {
+                alert(`Thanks! ${email} has been added to the GardenBuddy Pro waitlist.`);
+                toggleProModal();
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadMemory();
+            
+            // Initialize plant database
+            initializePlantDatabase();
+            loadKnowledgeBase();
+            
+            // Initialize Voice Input
+            initVoiceInput();
+            
+            // Check for tutorial
+            initTutorial();
+            
+            // Focus input on load
+            setTimeout(() => {
+                document.getElementById('userInput').focus();
+            }, 100);
+            
+            // Handle orientation changes
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 300);
+            });
+            
+            // Show welcome tip
+            setTimeout(() => {
+                if (gardenMemory.teachings.length === 0) {
+                    const chatContainer = document.getElementById('chatContainer');
+                    const tip = document.createElement('div');
+                    tip.className = 'message assistant';
+                    tip.innerHTML = `
+                        <div class="message-avatar">💡</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <strong>Pro Tip:</strong> Start by teaching me about your garden layout with /teach, or tap a quick action above!
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.appendChild(tip);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            }, 2000);
+        });
+
+        // Save memory before unload
+        window.addEventListener('beforeunload', saveMemory);
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('profileModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const proModal = document.getElementById('proModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+            if (event.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+            if (event.target === proModal) {
+                proModal.style.display = 'none';
+            }
+        }
+
+        // Service Worker registration for PWA capabilities
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                if (window.location.protocol.startsWith('http')) {
+                    navigator.serviceWorker.register('/sw.js').catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
