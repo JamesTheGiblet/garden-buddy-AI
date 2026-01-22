@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GardenBuddy - Free Garden Management for You & Your Clients</title>
+    <meta name="description" content="The only garden management system with a FREE app for your clients. Manage up to 5 clients free, unlimited for £20/month. Stop losing jobs to missed appointments.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="GardenBuddy - Garden Management That Actually Works">
+    <meta property="og:description" content="Manage clients, schedule jobs, get paid faster. First 5 clients FREE forever.">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Honest Trade Palette - Green-focused but professional */
+            --earth-dark: #1a2910;
+            --garden-primary: #2D5016;
+            --fresh-growth: #4a7c2c;
+            --lawn-green: #6B9146;
+            --morning-light: #f4f7f0;
+            --tool-steel: #5a6268;
+            --warning-amber: #d4a017;
+            --money-green: #2e7d32;
+            
+            /* Typography */
+            --font-display: 'Bitter', serif;
+            --font-body: 'Work Sans', sans-serif;
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 2rem;
+            --space-lg: 4rem;
+            --space-xl: 6rem;
+            
+            /* Effects */
+            --shadow-soft: 0 2px 12px rgba(45, 80, 22, 0.08);
+            --shadow-strong: 0 4px 24px rgba(45, 80, 22, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            color: var(--earth-dark);
+            line-height: 1.6;
+            background: var(--morning-light);
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(165deg, var(--earth-dark) 0%, var(--garden-primary) 100%);
+            color: white;
+            padding: var(--space-lg) var(--space-md);
+            position: relative;
+            overflow: hidden;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(107, 145, 70, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(74, 124, 44, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: rgba(107, 145, 70, 0.3);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: var(--space-md);
+            animation: fadeInDown 0.8s ease-out 0.2s both;
+        }
+        
+        .hero h1 .highlight {
+            color: var(--lawn-green);
+            display: inline-block;
+            position: relative;
+        }
+        
+        .hero h1 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--lawn-green);
+            animation: slideIn 0.6s ease-out 1s both;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            margin-bottom: var(--space-lg);
+            opacity: 0.95;
+            max-width: 700px;
+            animation: fadeInDown 0.8s ease-out 0.4s both;
+        }
+        
+        .hero-cta {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+        
+        .cta-primary, .cta-secondary {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-family: var(--font-body);
+        }
+        
+        .cta-primary {
+            background: white;
+            color: var(--garden-primary);
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 32px rgba(255, 255, 255, 0.3);
+        }
+        
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+        
+        /* Social Proof */
+        .social-proof {
+            margin-top: var(--space-lg);
+            padding-top: var(--space-md);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease-out 1s both;
+        }
+        
+        .proof-stats {
+            display: flex;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+        }
+        
+        .proof-stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .proof-number {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--lawn-green);
+            line-height: 1;
+        }
+        
+        .proof-label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 0.25rem;
+        }
+        
+        /* Problem Section */
+        .problem-section {
+            padding: var(--space-xl) var(--space-md);
+            background: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .section-label {
+            color: var(--garden-primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--earth-dark);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--tool-steel);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+        
+        .problem-card {
+            background: var(--morning-light);
+            padding: var(--space-md);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .problem-card:hover {
+            border-color: var(--lawn-green);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .problem-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            margin-bottom: var(--space-xs);
+            color: var(--earth-dark);
+        }
+        
+        .problem-card p {
+            color: var(--tool-steel);
+            line-height: 1.7;
+        }
+        
+        .problem-cost {
+            display: inline-block;
+            margin-top: var(--space-sm);
+            padding: 0.5rem 1rem;
+            background: rgba(212, 160, 23, 0.15);
+            border-radius: 6px;
+            color: var(--warning-amber);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        /* Solution Section */
+        .solution-section {
+            padding: var(--space-xl) var(--space-md);
+            background: linear-gradient(180deg, white 0%, var(--morning-light) 100%);
+        }
+        
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+        
+        .solution-card {
+            background: white;
+            padding: var(--space-md);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .solution-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--garden-primary), var(--lawn-green));
+        }
+        
+        .solution-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: var(--garden-primary);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .solution-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--earth-dark);
+        }
+        
+        .solution-card p {
+            color: var(--tool-steel);
+            margin-bottom: var(--space-md);
+            line-height: 1.7;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-top: var(--space-md);
+        }
+        
+        .feature-list li {
+            padding: var(--space-xs) 0;
+            color: var(--earth-dark);
+            display: flex;
+            align-items: start;
+            gap: var(--space-xs);
+        }
+        
+        .feature-list li::before {
+            content: '✓';
+            color: var(--money-green);
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        /* Pricing Section */
+        .pricing-section {
+            padding: var(--space-xl) var(--space-md);
+            background: var(--earth-dark);
+            color: white;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-md);
+            max-width: 900px;
+            margin: var(--space-lg) auto 0;
+        }
+        
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: var(--space-md);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            border-color: var(--lawn-green);
+            transform: translateY(-4px);
+        }
+        
+        .pricing-card.popular {
+            border-color: var(--lawn-green);
+            background: rgba(107, 145, 70, 0.1);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--lawn-green);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .pricing-description {
+            opacity: 0.85;
+            margin-bottom: var(--space-md);
+            font-size: 0.95rem;
+        }
+        
+        .price {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--lawn-green);
+            line-height: 1;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .price-period {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: var(--space-md);
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin: var(--space-md) 0;
+            padding: var(--space-md) 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pricing-features li {
+            padding: var(--space-xs) 0;
+            display: flex;
+            align-items: start;
+            gap: var(--space-xs);
+            opacity: 0.9;
+        }
+        
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--lawn-green);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .pricing-cta {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            color: var(--garden-primary);
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: var(--space-md);
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-cta:hover {
+            background: var(--lawn-green);
+            color: white;
+            transform: scale(1.02);
+        }
+        
+        .pricing-card.popular .pricing-cta {
+            background: var(--lawn-green);
+            color: white;
+        }
+        
+        .pricing-card.popular .pricing-cta:hover {
+            background: white;
+            color: var(--garden-primary);
+        }
+        
+        /* Comparison Section */
+        .comparison-section {
+            padding: var(--space-xl) var(--space-md);
+            background: white;
+        }
+        
+        .comparison-table {
+            max-width: 900px;
+            margin: var(--space-lg) auto 0;
+            background: var(--morning-light);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--garden-primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            border-bottom: 1px solid rgba(45, 80, 22, 0.1);
+            align-items: center;
+        }
+        
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+        
+        .comparison-row:nth-child(even) {
+            background: white;
+        }
+        
+        .feature-name {
+            font-weight: 500;
+            color: var(--earth-dark);
+        }
+        
+        .check {
+            color: var(--money-green);
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        
+        .cross {
+            color: var(--tool-steel);
+            opacity: 0.3;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        
+        .competitor-price {
+            text-align: center;
+            color: var(--tool-steel);
+            font-size: 0.9rem;
+        }
+        
+        /* FAQ Section */
+        .faq-section {
+            padding: var(--space-xl) var(--space-md);
+            background: var(--morning-light);
+        }
+        
+        .faq-list {
+            max-width: 800px;
+            margin: var(--space-lg) auto 0;
+        }
+        
+        .faq-item {
+            background: white;
+            padding: var(--space-md);
+            border-radius: 12px;
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-soft);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .faq-question {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            color: var(--earth-dark);
+            margin-bottom: var(--space-xs);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-toggle {
+            color: var(--lawn-green);
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+        
+        .faq-answer {
+            color: var(--tool-steel);
+            line-height: 1.7;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            margin-top: var(--space-sm);
+        }
+        
+        /* CTA Section */
+        .final-cta {
+            padding: var(--space-xl) var(--space-md);
+            background: linear-gradient(165deg, var(--garden-primary) 0%, var(--earth-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .final-cta p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: var(--space-lg);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--earth-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: var(--space-lg) var(--space-md) var(--space-md);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .footer-section h4 {
+            color: white;
+            margin-bottom: var(--space-sm);
+            font-family: var(--font-display);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: var(--space-xs);
+        }
+        
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section a:hover {
+            color: var(--lawn-green);
+        }
+        
+        .footer-bottom {
+            max-width: 1200px;
+            margin: var(--space-lg) auto 0;
+            padding-top: var(--space-md);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Email Capture */
+        .email-form {
+            display: flex;
+            gap: var(--space-xs);
+            max-width: 500px;
+            margin: var(--space-lg) auto;
+        }
+        
+        .email-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            font-family: var(--font-body);
+        }
+        
+        .email-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: var(--lawn-green);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .email-submit {
+            padding: 1rem 2rem;
+            background: var(--lawn-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-body);
+        }
+        
+        .email-submit:hover {
+            background: var(--fresh-growth);
+            transform: scale(1.02);
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            :root {
+                --space-lg: 3rem;
+                --space-xl: 4rem;
+            }
+            
+            .hero {
+                min-height: auto;
+                padding: var(--space-lg) var(--space-sm);
+            }
+            
+            .comparison-header,
+            .comparison-row {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .comparison-header > :first-child,
+            .comparison-row > :first-child {
+                font-weight: 600;
+                margin-bottom: var(--space-xs);
+            }
+            
+            .email-form {
+                flex-direction: column;
+            }
+            
+            .proof-stats {
+                gap: var(--space-md);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🌱 Open Source Garden Management</div>
+            <h1>
+                Stop Losing Clients to<br>
+                <span class="highlight">Missed Appointments</span>
+            </h1>
+            <p class="hero-subtitle">
+                The only garden management system with a FREE app for your clients. 
+                Try everything free for 3 months. Then pay only £20-50/month as you grow.
+            </p>
+            <div class="hero-cta">
+                <a href="#pricing" class="cta-primary">
+                    Start Free Today →
+                </a>
+                <a href="#demo" class="cta-secondary">
+                    See How It Works
+                </a>
+            </div>
+            
+            <div class="social-proof">
+                <div class="proof-stats">
+                    <div class="proof-stat">
+                        <span class="proof-number">3</span>
+                        <span class="proof-label">Months free trial</span>
+                    </div>
+                    <div class="proof-stat">
+                        <span class="proof-number">£20</span>
+                        <span class="proof-label">Starting price/month</span>
+                    </div>
+                    <div class="proof-stat">
+                        <span class="proof-number">0</span>
+                        <span class="proof-label">Setup fees</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Problem Section -->
+    <section class="problem-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">The Reality</div>
+                <h2 class="section-title">You're Losing Money Every Day</h2>
+                <p class="section-subtitle">
+                    Paper notebooks, WhatsApp chaos, and forgotten appointments are costing you thousands.
+                </p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">📱</div>
+                    <h3>WhatsApp Nightmare</h3>
+                    <p>Buried messages, confused clients, double bookings. You're spending 2 hours a day just coordinating schedules.</p>
+                    <span class="problem-cost">= £240/month wasted</span>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">📋</div>
+                    <h3>Payment Delays</h3>
+                    <p>Chasing invoices, forgotten payments, awkward conversations. Average 30-day payment delay.</p>
+                    <span class="problem-cost">= £500/month cash flow hit</span>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">❌</div>
+                    <h3>Missed Appointments</h3>
+                    <p>Client forgot, weather changed, no confirmation. 1 in 10 bookings results in a no-show.</p>
+                    <span class="problem-cost">= £300/month lost revenue</span>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">💸</div>
+                    <h3>Expensive Software</h3>
+                    <p>£50-100/month for complicated systems you don't need. Features you'll never use.</p>
+                    <span class="problem-cost">= £600-1200/year wasted</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Solution Section -->
+    <section class="solution-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">The Solution</div>
+                <h2 class="section-title">Garden Management That Actually Works</h2>
+                <p class="section-subtitle">
+                    Two apps. One ecosystem. Your clients get their own FREE garden assistant. 
+                    You get professional client management. Everyone wins.
+                </p>
+            </div>
+            
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <span class="solution-badge">For Your Clients (FREE)</span>
+                    <h3>GardenBuddy Client App</h3>
+                    <p>Your clients download a free, beautiful garden management app that helps them track plants, get weather advice, and manage their garden calendar.</p>
+                    
+                    <ul class="feature-list">
+                        <li>AI garden assistant that learns their setup</li>
+                        <li>Plant tracking and reminders</li>
+                        <li>Weather-based lawn care advice</li>
+                        <li>Garden calendar and task management</li>
+                        <li>100% free forever</li>
+                    </ul>
+                    
+                    <p style="margin-top: 1.5rem; padding: 1rem; background: rgba(45, 80, 22, 0.05); border-radius: 8px; font-size: 0.95rem;">
+                        <strong>💡 The Secret:</strong> When they use GardenBuddy, they see YOUR business name. 
+                        It's free marketing that builds trust and keeps you top-of-mind.
+                    </p>
+                </div>
+                
+                <div class="solution-card">
+                    <span class="solution-badge">For You (Free for 5 clients)</span>
+                    <h3>GardenManager Pro</h3>
+                    <p>Professional client management designed specifically for garden contractors. No bloat. No confusion. Just the tools you actually need.</p>
+                    
+                    <ul class="feature-list">
+                        <li>Client pairing via QR code (30 seconds)</li>
+                        <li>Job scheduling and calendar sync</li>
+                        <li>Automatic appointment reminders</li>
+                        <li>Quick invoicing and payment tracking</li>
+                        <li>Client communication hub</li>
+                        <li>Weather-aware scheduling</li>
+                        <li>Job history and notes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label" style="color: rgba(255,255,255,0.7)">Simple Pricing</div>
+                <h2 class="section-title" style="color: white">Try Free for 3 Months. Then Pay As You Grow.</h2>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.85)">
+                    Full access during trial. No credit card required. Cancel anytime.
+                </p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card popular">
+                    <span class="popular-badge">Start Here</span>
+                    <h3>Free Trial</h3>
+                    <p class="pricing-description">Try everything for 3 months</p>
+                    <div class="price">FREE</div>
+                    <div class="price-period">for 3 months</div>
+                    
+                    <ul class="pricing-features">
+                        <li><strong>Up to 5 clients</strong></li>
+                        <li>All features unlocked</li>
+                        <li>QR client pairing</li>
+                        <li>Job scheduling & calendar</li>
+                        <li>Payment tracking</li>
+                        <li>Client communication</li>
+                        <li>Mobile app access</li>
+                        <li>Email support</li>
+                    </ul>
+                    
+                    <a href="#signup" class="pricing-cta">Start 3-Month Trial</a>
+                    <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; opacity: 0.8;">
+                        No credit card required
+                    </p>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>After Trial</h3>
+                    <p class="pricing-description">Choose your tier based on client count</p>
+                    
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div>
+                                <strong>Standard</strong>
+                                <div style="font-size: 0.85rem; opacity: 0.8;">5-20 clients</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--lawn-green);">£20<span style="font-size: 0.9rem; font-weight: normal;">/mo</span></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div>
+                                <strong>Professional</strong>
+                                <div style="font-size: 0.85rem; opacity: 0.8;">21-50 clients</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--lawn-green);">£35<span style="font-size: 0.9rem; font-weight: normal;">/mo</span></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Enterprise</strong>
+                                <div style="font-size: 0.85rem; opacity: 0.8;">Unlimited clients</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--lawn-green);">£50<span style="font-size: 0.9rem; font-weight: normal;">/mo</span></div>
+                        </div>
+                    </div>
+                    
+                    <ul class="pricing-features">
+                        <li>Everything in trial, plus:</li>
+                        <li>Unlimited clients (Enterprise)</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                        <li>Revenue reports</li>
+                        <li>White-label option (Enterprise)</li>
+                        <li>API access (Enterprise)</li>
+                    </ul>
+                    
+                    <a href="#signup" class="pricing-cta">Start Free Trial</a>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 16px;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: white;">Your Clients Get GardenBuddy FREE Forever</h3>
+                <p style="opacity: 0.9; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    The client app is 100% free with no limits. It's a marketing tool for your business - 
+                    they see your name every time they use it.
+                </p>
+                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-size: 2rem; color: var(--lawn-green); font-weight: bold;">£0</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Client cost (ever)</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; color: var(--lawn-green); font-weight: bold;">∞</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Client features</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; color: var(--lawn-green); font-weight: bold;">100%</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Your branding</div>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 2rem; opacity: 0.8; font-size: 0.95rem;">
+                💳 Cancel anytime. No contracts. No setup fees. Upgrade or downgrade as your business grows.
+            </p>
+        </div>
+    </section>
+    
+    <!-- Comparison Section -->
+    <section class="comparison-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Why GardenBuddy?</div>
+                <h2 class="section-title">Compare The Competition</h2>
+            </div>
+            
+            <div class="comparison-table">
+                <div class="comparison-header">
+                    <div>Feature</div>
+                    <div>GardenBuddy</div>
+                    <div>Jobber</div>
+                    <div>ServiceM8</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">Free trial period</div>
+                    <div><strong>3 months</strong></div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">FREE client app</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">Job scheduling</div>
+                    <div class="check">✓</div>
+                    <div class="check">✓</div>
+                    <div class="check">✓</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">Payment tracking</div>
+                    <div class="check">✓</div>
+                    <div class="check">✓</div>
+                    <div class="check">✓</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">QR client pairing</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">Weather integration</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                
+                <div class="comparison-row">
+                    <div class="feature-name">Monthly cost (after trial)</div>
+                    <div><strong>£20-50</strong></div>
+                    <div class="competitor-price">£29-99</div>
+                    <div class="competitor-price">£25-79</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Questions?</div>
+                <h2 class="section-title">We've Got Answers</h2>
+            </div>
+            
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        How does the free trial work?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        You get full access to everything for 3 months - no credit card required. During the trial, 
+                        you can pair up to 5 clients. After 3 months, choose a paid tier based on how many clients 
+                        you have: £20/month (5-20 clients), £35/month (21-50 clients), or £50/month (unlimited).
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        What's the client pairing process?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Dead simple: Your client downloads the free GardenBuddy app. You generate a QR code in GardenManager Pro. 
+                        They scan it. Done. Takes 30 seconds. They now see your business name in their app.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Do my clients need to pay anything?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Nope. GardenBuddy is 100% free for clients forever. It's a marketing tool for you and a genuinely 
+                        useful garden assistant for them. Win-win.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Can I cancel anytime?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely. No contracts. No cancellation fees. Cancel during your trial with no charge. 
+                        Cancel after and you'll have access until the end of your billing period. Your data is always 
+                        exportable. You can also downgrade between tiers as your client count changes.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        What if I only have 3-4 clients right now?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Perfect! Start your 3-month free trial. Use it to look more professional and win more clients. 
+                        By the time your trial ends, you'll likely have 5-10 clients making £800-1500/month. 
+                        £20/month will be an easy decision.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Is this better than just using WhatsApp?
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        WhatsApp is great for chatting. Terrible for business. GardenBuddy gives you: automated reminders, 
+                        payment tracking, job history, weather-aware scheduling, and professional invoicing. Plus your clients 
+                        get a free garden app. WhatsApp gives you... message chaos.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Final CTA -->
+    <section class="final-cta" id="signup">
+        <div class="container">
+            <h2>Try Everything Free for 3 Months</h2>
+            <p>Join garden contractors who've stopped losing money to chaos. No credit card required.</p>
+            
+            <form class="email-form" onsubmit="handleEarlyAccess(event)">
+                <input 
+                    type="email" 
+                    class="email-input" 
+                    placeholder="your@email.com" 
+                    required
+                    id="earlyAccessEmail"
+                >
+                <button type="submit" class="email-submit">Start Free Trial</button>
+            </form>
+            
+            <p style="margin-top: 1rem; opacity: 0.85; font-size: 0.95rem;">
+                ✓ Full access for 3 months &nbsp;&nbsp; ✓ Up to 5 clients &nbsp;&nbsp; ✓ No credit card required
+            </p>
+            
+            <div class="cta-buttons" style="margin-top: 2rem;">
+                <a href="garden-buddai.html" class="cta-secondary">Try Client App Demo</a>
+                <a href="gardenmanagerpro.html" class="cta-secondary">Try Contractor Demo</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>GardenBuddy</h4>
+                <p style="opacity: 0.7; line-height: 1.7;">
+                    Professional garden management for contractors and clients. 
+                    Part of the BuddAI v2.0 ecosystem.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="https://github.com/gibletscreations/gardenbuddy">GitHub</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                    <li><a href="#license">License (MIT)</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 GardenBuddy by <a href="https://giblets.uk" style="color: var(--lawn-green);">Giblets Creations</a>. 
+            Open source under MIT license.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('active');
+            });
+        });
+        
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Early access form handler
+        function handleEarlyAccess(event) {
+            event.preventDefault();
+            const email = document.getElementById('earlyAccessEmail').value;
+            
+            // In production, this would call your backend API
+            // For now, show success message
+            alert(`✅ Thanks for your interest! We'll contact you at ${email} with early access details.
+            
+In the meantime, try the demo apps below!`);
+            
+            // Reset form
+            event.target.reset();
+            
+            // TODO: Integrate with your backend
+            // fetch('/api/early-access', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ email })
+            // });
+        }
+        
+        // Scroll animations (optional enhancement)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Add animation to sections on scroll
+        document.querySelectorAll('.problem-card, .solution-card, .pricing-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
