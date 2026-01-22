@@ -737,6 +737,47 @@
                     <label class="settings-label settings-label-margin">OpenWeatherMap API Key</label>
                     <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
                     <button class="submit-button settings-save-btn" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button" onclick="replayTutorial()" style="margin-top:0.5rem; background:var(--text-secondary);">Replay Tutorial</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content" style="text-align: center; max-width: 500px;">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
+                    <h2>Welcome to GardenBuddy</h2>
+                    <p style="color: var(--text-secondary); margin: 1rem 0;">Your personal AI-powered gardening assistant that learns and grows with your garden.</p>
+                    <button class="submit-button" onclick="nextTutorialStep(2)">Start Tour</button>
+                </div>
+                <div id="tutorialStep2" class="tutorial-step" style="display:none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                    <h2>I Learn From You</h2>
+                    <p style="color: var(--text-secondary); margin: 1rem 0;">Use <strong>/teach</strong> to tell me about your garden.</p>
+                    <div class="message-bubble" style="background: var(--morning-dew); display: inline-block; margin-bottom: 1rem; text-align: left; font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        /teach I have 2 raised beds<br>
+                        /teach My soil is clay-heavy
+                    </div>
+                    <br>
+                    <button class="submit-button" onclick="nextTutorialStep(3)">Next</button>
+                </div>
+                <div id="tutorialStep3" class="tutorial-step" style="display:none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛠️</div>
+                    <h2>Smart Tools</h2>
+                    <p style="color: var(--text-secondary); margin: 1rem 0;">
+                        <strong>Plants:</strong> Browse and add plants.<br>
+                        <strong>Calendar:</strong> Track watering and harvest.<br>
+                        <strong>Weather:</strong> Get local forecasts.
+                    </p>
+                    <button class="submit-button" onclick="nextTutorialStep(4)">Next</button>
+                </div>
+                <div id="tutorialStep4" class="tutorial-step" style="display:none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🌍</div>
+                    <h2>Quick Setup</h2>
+                    <p style="color: var(--text-secondary); margin: 1rem 0;">Where is your garden located?</p>
+                    <input class="request-input" id="tutorialLocation" placeholder="e.g. London" style="margin-bottom: 1rem;">
+                    <button class="submit-button" onclick="finishTutorial()">All Set!</button>
                 </div>
             </div>
         </div>
@@ -962,6 +1003,43 @@
             
             toggleSettingsModal();
             addMessage('assistant', `Settings updated! Location set to ${loc}.`);
+        }
+
+        // Tutorial Functions
+        function initTutorial() {
+            if (!localStorage.getItem('gardenbuddy_tutorial_complete')) {
+                document.getElementById('tutorialModal').style.display = 'flex';
+                showTutorialStep(1);
+            }
+        }
+
+        function showTutorialStep(step) {
+            document.querySelectorAll('.tutorial-step').forEach(el => el.style.display = 'none');
+            document.getElementById('tutorialStep' + step).style.display = 'block';
+        }
+
+        function nextTutorialStep(step) {
+            showTutorialStep(step);
+        }
+
+        function finishTutorial() {
+            const loc = document.getElementById('tutorialLocation').value;
+            if (loc) {
+                gardenMemory.settings.location = loc;
+                saveMemory();
+                // Update settings modal input
+                document.getElementById('settingLocation').value = loc;
+                addMessage('assistant', `Great! I've set your location to ${loc}.`);
+            }
+            localStorage.setItem('gardenbuddy_tutorial_complete', 'true');
+            document.getElementById('tutorialModal').style.display = 'none';
+        }
+        
+        function replayTutorial() {
+            const settings = document.getElementById('settingsModal');
+            if (settings) settings.style.display = 'none';
+            document.getElementById('tutorialModal').style.display = 'flex';
+            showTutorialStep(1);
         }
 
         // Calendar Functions
@@ -1666,6 +1744,9 @@ Or use /why to understand my reasoning better.`;
             // Initialize plant database
             initializePlantDatabase();
             loadKnowledgeBase();
+            
+            // Check for tutorial
+            initTutorial();
             
             // Focus input on load
             setTimeout(() => {
