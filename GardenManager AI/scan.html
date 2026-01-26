@@ -289,12 +289,24 @@
 
                 if (error) throw error;
 
-                alert(`✅ Successfully connected to !`);
+                alert(`✅ Successfully connected to ${clientName}!`);
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Connection error:', error);
-                // Fallback for demo/duplicate key errors
-                alert(`✅ Successfully connected to ! (Demo)`);
+                
+                // Fallback: Save to local storage so it appears in dashboard
+                const newClient = {
+                    id: 'local_' + Date.now(),
+                    client_name: clientName,
+                    garden_details: 'New Connection',
+                    paired_at: new Date().toISOString()
+                };
+                
+                const existing = JSON.parse(localStorage.getItem('gm_demo_clients') || '[]');
+                existing.unshift(newClient);
+                localStorage.setItem('gm_demo_clients', JSON.stringify(existing));
+
+                alert(`✅ Successfully connected to ${clientName}! (Demo Mode)`);
                 window.location.href = 'index.html';
             }
         }

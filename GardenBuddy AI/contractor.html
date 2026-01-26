@@ -163,7 +163,7 @@
 
             if (authToken) {
                 try {
-                    const { data: { user } } = await auth.getUser();
+                    const user = await auth.getUser();
                     if (user) {
                         initUserView(user);
                     } else {

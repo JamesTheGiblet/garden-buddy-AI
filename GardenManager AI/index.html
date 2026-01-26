@@ -852,6 +852,8 @@
             clientsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             
             try {
+                let formattedClients = [];
+
                 // Fetch pairings (clients) from Supabase
                 const { data: pairings, error } = await supabaseClient
                     .from('pairings')
@@ -859,15 +861,28 @@
                     .eq('contractor_id', currentUser.id)
                     .order('paired_at', { ascending: false });
 
-                if (error) throw error;
+                if (!error && pairings) {
+                    formattedClients = pairings.map(p => ({
+                        id: p.id,
+                        name: p.client_name,
+                        garden: p.garden_details || 'Home Garden',
+                        healthStatus: 'healthy',
+                        nextDue: ''
+                    }));
+                }
 
-                const formattedClients = pairings.map(p => ({
-                    id: p.id,
-                    name: p.client_name,
-                    garden: p.garden_details || 'Home Garden',
-                    healthStatus: 'healthy', // Default for now
-                    nextDue: '' // Would need job query to populate
-                }));
+                // Merge with Local Demo Clients (from scan.html fallback)
+                const localClients = JSON.parse(localStorage.getItem('gm_demo_clients') || '[]');
+                if (localClients.length > 0) {
+                    const localFormatted = localClients.map(p => ({
+                        id: p.id,
+                        name: p.client_name,
+                        garden: p.garden_details || 'Home Garden',
+                        healthStatus: 'healthy',
+                        nextDue: 'Just Added'
+                    }));
+                    formattedClients = [...localFormatted, ...formattedClients];
+                }
 
                 renderClients(formattedClients);
                 
@@ -876,7 +891,23 @@
                 updateBusinessInfo();
             } catch (error) {
                 console.error('Error loading clients:', error);
-                clientsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--danger);">Failed to load clients</div>';
+                
+                // Even on error, try to show local clients
+                const localClients = JSON.parse(localStorage.getItem('gm_demo_clients') || '[]');
+                if (localClients.length > 0) {
+                    const formattedClients = localClients.map(p => ({
+                        id: p.id,
+                        name: p.client_name,
+                        garden: p.garden_details || 'Home Garden',
+                        healthStatus: 'healthy',
+                        nextDue: 'Just Added'
+                    }));
+                    renderClients(formattedClients);
+                    currentUser.clientCount = formattedClients.length;
+                    updateBusinessInfo();
+                } else {
+                    clientsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--danger);">Failed to load clients</div>';
+                }
             }
         }
         
