@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Features - GardenBuddy</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <style>
+        :root {
+            --garden-green: #2D5016;
+            --bg-primary: #FAFDF7;
+            --text-secondary: #222222;
+            --border-color: #D4E7D0;
+            --seedling-sprout: #7CB342;
+            --morning-dew: #E8F5E9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .features-container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: var(--garden-green);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .feature-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.8rem;
+            transition: transform 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            background: var(--morning-dew);
+            border-color: var(--garden-green);
+        }
+        .feature-icon {
+            font-size: 2rem;
+            background: var(--morning-dew);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .feature-content h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--garden-green);
+        }
+        .feature-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        .back-btn {
+            display: block;
+            margin: 2rem auto 0;
+            padding: 0.8rem 2rem;
+            background: var(--garden-green);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            width: fit-content;
+        }
+        .back-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="features-container">
+        <h1>🌟 GardenBuddy Pro</h1>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📸</div>
+            <div class="feature-content">
+                <h3>AI Photo Diagnosis</h3>
+                <p>Upload photos of sick plants and let our advanced AI identify pests, diseases, and nutrient deficiencies instantly.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎤</div>
+            <div class="feature-content">
+                <h3>Voice Commands</h3>
+                <p>Talk to your garden assistant naturally. Just say "Hey GardenBuddy, when should I water my tomatoes?"</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-content">
+                <h3>Advanced Analytics</h3>
+                <p>Track plant health trends, harvest yields, and get data-driven insights to optimize your garden's productivity.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🌱</div>
+            <div class="feature-content">
+                <h3>Unlimited Plants</h3>
+                <p>Remove the 5-plant limit. Track every single vegetable, herb, flower, and tree in your garden without restrictions.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <div class="feature-content">
+                <h3>Cloud Sync & Backup</h3>
+                <p>Never lose your garden data. Automatically sync across all your devices and keep your garden history safe in the cloud.</p>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-btn">Back to Garden</a>
+    </div>
+</body>
+</html>

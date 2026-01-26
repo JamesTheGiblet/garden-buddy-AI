@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - GardenBuddy</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="auth-emoji">🌱</div>
+        <h2 id="authTitle">Welcome Back</h2>
+        <p id="authSubtitle" class="auth-subtitle">Sign in to sync your garden</p>
+        
+        <input type="email" id="authEmail" class="auth-input" placeholder="Email">
+        <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+        <div class="remember-me-row">
+            <input type="checkbox" id="rememberMe" class="remember-me-checkbox" checked>
+            <label for="rememberMe" class="remember-me-label">Remember Me</label>
+        </div>
+        <div id="authError" class="auth-error"></div>
+        
+        <button id="authMainBtn" class="auth-btn" type="button">Sign In</button>
+        <button id="authToggleBtn" class="auth-btn auth-toggle-btn" type="button">Create Account</button>
+        <button id="resendBtn" class="auth-btn auth-toggle-btn resend-btn" type="button">Resend Confirmation Email</button>
+        <button id="forgotPasswordBtn" class="continue-guest-btn forgot-password-btn" type="button">Forgot Password?</button>
+        <p id="continueGuestBtn" class="continue-guest-btn">Continue as Guest</p>
+    </div>
+
+    <script type="module">
+        import { auth } from './supabase-client.js';
+
+        async function handleLogin() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('authMainBtn');
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            if (!validateEmail(email)) {
+                errorEl.textContent = "Invalid email";
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Signing In...';
+            errorEl.style.display = 'none';
+
+            try {
+                const data = await auth.signIn(email, password);
+                if (data.session) {
+                    if (rememberMe) {
+                        localStorage.setItem('gb_token', data.session.access_token);
+                    } else {
+                        sessionStorage.setItem('gb_token', data.session.access_token);
+                    }
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                if (error.status === 429 || (error.message && error.message.toLowerCase().includes('rate limit'))) {
+                    errorEl.textContent = "Too many attempts. Please wait a minute before trying again.";
+                } else {
+                    errorEl.textContent = error.message || "Login failed";
+                }
+                
+                if (error.message && error.message.toLowerCase().includes("email not confirmed")) {
+                    document.getElementById('resendBtn').style.display = 'block';
+                }
+                
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = "Sign In";
+            }
+        }
+
+        async function handleResend() {
+            const email = document.getElementById('authEmail').value;
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('resendBtn');
+            
+            if (!validateEmail(email)) {
+                errorEl.textContent = "Please enter your email address";
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+
+            try {
+                await auth.resendConfirmation(email);
+                alert("Confirmation email sent! Please check your inbox.");
+                btn.style.display = 'none';
+                errorEl.style.display = 'none';
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Resend Confirmation Email";
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('authEmail').value;
+            const errorEl = document.getElementById('authError');
+            
+            if (!validateEmail(email)) {
+                errorEl.textContent = "Please enter your email address to reset password";
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                await auth.resetPasswordForEmail(email);
+                alert("Password reset email sent! Please check your inbox.");
+                errorEl.style.display = 'none';
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function skipAuth() {
+            localStorage.setItem('guestMode', 'true');
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('authToggleBtn').onclick = () => window.location.href = 'registration.html';
+        document.getElementById('authMainBtn').onclick = handleLogin;
+        document.getElementById('resendBtn').onclick = handleResend;
+        document.getElementById('forgotPasswordBtn').onclick = handleForgotPassword;
+        document.getElementById('continueGuestBtn').onclick = skipAuth;
+
+        // Check if already logged in
+        window.onload = () => {
+            if (localStorage.getItem('gb_token') || localStorage.getItem('guestMode')) {
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+</body>
+</html>

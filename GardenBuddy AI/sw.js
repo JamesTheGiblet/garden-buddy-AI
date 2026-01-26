@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gardenbuddy-v1';
+const CACHE_NAME = 'gardenbuddy-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -33,7 +33,16 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                return response || fetch(event.request);
+                return response || fetch(event.request).catch(() => {
+                    // Fallback for offline/network errors
+                    if (event.request.url.includes('/api/')) {
+                        return new Response(JSON.stringify({ error: 'Network error' }), {
+                            status: 503,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    }
+                    return new Response('Network error', { status: 408 });
+                });
             })
     );
 });

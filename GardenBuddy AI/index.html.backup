@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GardenBuddy - Your Garden Intelligence</title>
-    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <style>
@@ -14,6 +14,33 @@
             overflow: hidden;
             clip: rect(1px, 1px, 1px, 1px);
             white-space: nowrap;
+        }
+        /* Contractor Tab Styles for inline style removal */
+        .contractor-pair-card {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .contractor-pair-desc {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+        }
+        .contractor-pair-id {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .contractor-paired-view {
+            display: none;
+        }
+        .contractor-paired-card {
+            margin-top: 1rem;
+        }
+        .contractor-connected {
+            color: var(--garden-green);
+        }
+        .contractor-hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 1rem 0;
         }
         /* Add Custom Plant Button */
         .add-custom-plant-btn {
@@ -52,19 +79,15 @@
     .upgrade-modal-desc {
         margin-bottom: 2rem;
     }
-    .pro-features-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.8rem;
-        text-align: left;
-        margin: 1.5rem 0;
-        font-size: 0.95rem;
-    }
-    .pro-feature-item {
-        line-height: 1.4;
-    }
+    </style>
         :root {
             --garden-green: #2D5016;
+        }
+
+        /* Hide file input for photo upload */
+        .hidden-file-input {
+            display: none;
+        }
             --soil-brown: #3E2723;
             --morning-dew: #E8F5E9;
             --seedling-sprout: #7CB342;
@@ -76,11 +99,6 @@
             --text-primary: #000000;
             --text-secondary: #222222;
             --border-color: #D4E7D0;
-        }
-
-        /* Hide file input for photo upload */
-        .hidden-file-input {
-            display: none;
         }
 
         /* Button style classes for inline style removal */
@@ -101,6 +119,37 @@
         .report-bug-btn {
             background-color: var(--text-secondary);
             margin-top: 0.5rem;
+        }
+
+        /* Auth Screen custom classes for inline style removal */
+        .auth-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .auth-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .auth-hidden {
+            display: none;
+        }
+        .auth-error {
+            color: var(--sunset-tomato);
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            display: none;
+        }
+        .auth-toggle-btn {
+            background: transparent;
+            color: var(--garden-green);
+            border: 1px solid var(--garden-green);
+            margin-top: 0.5rem;
+        }
+        .continue-guest-btn {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
         }
 
         * {
@@ -870,6 +919,50 @@
             opacity: 1;
         }
 
+        /* Auth Screen */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-primary);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            background: var(--garden-green);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
         .qr-display {
             background: white;
             padding: 1rem;
@@ -1024,20 +1117,35 @@
         .qr-logo-overlay-text {
             font-size: 1.5rem;
         }
-    /* Pro Tab custom styles for inline style removal */
-    .pro-features-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-    }
-    .pro-back-btn {
-        margin-top: 1rem;
-    }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Auth Screen -->
+        <div id="auth-screen">
+            <div class="auth-card">
+                <div class="auth-emoji">🌱</div>
+                <h2 id="authTitle">Welcome Back</h2>
+                <p id="authSubtitle" class="auth-subtitle">Sign in to sync your garden</p>
+                
+                <input type="text" id="authName" class="auth-input auth-hidden" placeholder="Your Name">
+                <label for="authUserType" class="visually-hidden">User Type</label>
+                <select id="authUserType" class="auth-input auth-hidden" title="User Type">
+                    <option value="" disabled selected>I am a...</option>
+                    <option value="homeowner">Homeowner</option>
+                    <option value="contractor">Gardener/Contractor</option>
+                </select>
+                <input type="email" id="authEmail" class="auth-input" placeholder="Email">
+                <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+                <div id="authError" class="auth-error"></div>
+                
+                <button id="authMainBtn" class="auth-btn" type="button">Sign In</button>
+                <button id="authToggleBtn" class="auth-btn auth-toggle-btn" type="button">Create Account</button>
+                
+                <p id="continueGuestBtn" class="continue-guest-btn">Continue as Guest</p>
+            </div>
+        </div>
+
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -1067,8 +1175,8 @@
                     <div class="header-title">GardenBuddy</div>
                     <div class="header-subtitle">Your garden intelligence</div>
                 </div>
-                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
-                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+                <button class="profile-button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" onclick="toggleProfileModal()">👤</button>
             </div>
         </header>
 
@@ -1163,11 +1271,10 @@
 
         <!-- Tabs for Chat and Contractor Request -->
         <div class="tabs">
-            <button class="tab-button active" type="button" onclick="openTab('chat')">Chat</button>
-            <button class="tab-button" type="button" onclick="window.location.href='contractor.html'">Contractor</button>
-            <button class="tab-button" type="button" onclick="openTab('plants')">Plants</button>
-            <button class="tab-button" type="button" onclick="openTab('calendar')">Calendar</button>
-            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
+            <button class="tab-button active" onclick="openTab('chat')">Chat</button>
+            <button class="tab-button" onclick="openTab('contractor')">Contractor</button>
+            <button class="tab-button" onclick="openTab('plants')">Plants</button>
+            <button class="tab-button" onclick="openTab('calendar')">Calendar</button>
         </div>
 
         <!-- Chat Tab Content -->
@@ -1227,13 +1334,39 @@
                     ></textarea>
                     <label for="photoInput" class="visually-hidden">Upload Photo</label>
                     <input type="file" id="photoInput" accept="image/*" class="hidden-file-input" onchange="handlePhotoUpload(this)" title="Upload Photo">
-                    <button class="mic-button" type="button" onclick="triggerPhotoUpload()" title="Upload Photo">📷</button>
-                    <button class="mic-button" type="button" id="micButton" onclick="toggleVoiceInput()" title="Voice Input">
+                    <button class="mic-button" onclick="triggerPhotoUpload()" title="Upload Photo">📷</button>
+                    <button class="mic-button" id="micButton" onclick="toggleVoiceInput()" title="Voice Input">
                         🎤
                     </button>
-                    <button class="send-button" type="button" onclick="sendMessage()" id="sendButton">
+                    <button class="send-button" onclick="sendMessage()" id="sendButton">
                         ➤
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contractor Request Tab Content -->
+        <div id="contractor" class="tab-content">
+            <div class="request-form">
+                <h3>My Gardener</h3>
+                
+                <div id="not-paired-view">
+                    <div class="stat-card contractor-pair-card">
+                        <h3>Pair with a Professional</h3>
+                        <p class="contractor-pair-desc">Show this code to your gardener to connect.</p>
+                        <div class="qr-display" id="pairing-qr">QR Code</div>
+                        <p class="contractor-pair-id">ID: <span id="clientIdDisplay">...</span></p>
+                    </div>
+                </div>
+
+                <div id="paired-view" class="contractor-paired-view">
+                    <div class="stat-card contractor-paired-card">
+                        <h3 id="contractorDisplayName">GreenThumb Services</h3>
+                        <p class="contractor-connected">● Connected</p>
+                        <hr class="contractor-hr">
+                        <textarea class="request-input" id="requestMessage" placeholder="Describe your request..."></textarea>
+                        <button class="submit-button" type="button" onclick="sendContractorRequest()">Request Visit</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1268,26 +1401,19 @@
             <h2>🌟 Upgrade to Pro</h2>
             <p class="upgrade-modal-desc">Unlock unlimited plants and advanced features</p>
             
-            <div class="pro-features-grid">
-                <div class="pro-feature-item">🎤 <strong>Voice input</strong> - "Hey GardenBuddy, when should I water?"</div>
-                <div class="pro-feature-item">📸 <strong>Photo diagnosis</strong> - Upload sick plant → AI identifies issue</div>
-                <div class="pro-feature-item">📊 <strong>Advanced analytics</strong> - Plant health trends, harvest predictions</div>
-                <div class="pro-feature-item">🔔 <strong>Smart notifications</strong> - "Water tomatoes today" push alerts</div>
-                <div class="pro-feature-item">📅 <strong>Unlimited calendar events</strong> - Free = 10, Pro = unlimited</div>
-                <div class="pro-feature-item">🌱 <strong>Unlimited plants</strong> - Free = 5, Pro = unlimited</div>
-                <div class="pro-feature-item">☁️ <strong>Cloud backup</strong> - Auto-sync across devices</div>
-                <div class="pro-feature-item">🎨 <strong>Custom themes</strong> - Personalize interface</div>
-                <div class="pro-feature-item">📈 <strong>Seasonal planning</strong> - AI suggests planting schedule</div>
-                <div class="pro-feature-item">💬 <strong>Priority support</strong> - Fast response times</div>
-            </div>
-            
             <!-- Pricing Options -->
             <div class="pricing-options">
               <!-- Monthly Plan -->
               <div class="pricing-card" onclick="selectPlan('monthly')">
                 <h3>Monthly</h3>
                 <div class="price">£2.99<span>/month</span></div>
-                <button class="upgrade-button" type="button" onclick="handleUpgrade('monthly')">
+                <ul>
+                  <li>✓ Unlimited plants</li>
+                  <li>✓ Voice input</li>
+                  <li>✓ Photo analysis</li>
+                  <li>✓ Priority support</li>
+                </ul>
+                <button class="upgrade-button" onclick="handleUpgrade('monthly')">
                   Choose Monthly
                 </button>
               </div>
@@ -1298,14 +1424,19 @@
                 <h3>Yearly</h3>
                 <div class="price">£28.99<span>/year</span></div>
                 <div class="savings">Save £6.89/year</div>
-                <button class="upgrade-button" type="button" onclick="handleUpgrade('yearly')">
+                <ul>
+                  <li>✓ Everything in Monthly</li>
+                  <li>✓ 2 months free</li>
+                  <li>✓ Early access to features</li>
+                </ul>
+                <button class="upgrade-button" onclick="handleUpgrade('yearly')">
                   Choose Yearly
                 </button>
               </div>
             </div>
             
             <p class="upgrade-modal-note">
-              📧 Clicking choose will open your email client to request access.
+              💳 Secure payment via Stripe • Cancel anytime
             </p>
           </div>
         </div>
@@ -1388,24 +1519,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Pro Tab Content -->
-        <div id="pro" class="tab-content">
-            <div class="plants-tab-content">
-                <h3>🌟 Pro Dashboard</h3>
-                <p class="plants-tab-desc">
-                    You have access to all premium features.
-                </p>
-                <div class="pro-features-grid pro-features-card">
-                    <div class="pro-feature-item">✅ <strong>Voice input</strong> - Active</div>
-                    <div class="pro-feature-item">✅ <strong>Photo diagnosis</strong> - Active</div>
-                    <div class="pro-feature-item">✅ <strong>Unlimited plants</strong> - Active</div>
-                    <div class="pro-feature-item">✅ <strong>Cloud backup</strong> - Active</div>
-                    <div class="pro-feature-item">✅ <strong>Priority Support</strong> - Active</div>
-                </div>
-                <button class="submit-button pro-back-btn" type="button" onclick="openTab('chat')">Back to Chat</button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -1413,10 +1526,7 @@
         const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
             ? 'http://localhost:3000/api' 
             : 'https://api.gardenbuddy.app';
-        let authToken = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
-        let currentUserId = null;
-        let currentUserEmail = null;
-        let isProUser = false;
+        let authToken = localStorage.getItem('gb_token');
 
         // Extended garden memory
         let gardenMemory = {
@@ -1446,23 +1556,7 @@
         };
 
         // External Knowledge Base
-        let knowledgeBase = {
-            version: "1.0.0-fallback",
-            categories: {
-                lawn_care: {
-                    mowing_guidelines: { cool_season: "Mow high (3-4 inches)", warm_season: "Mow lower (1-2 inches)" },
-                    watering_guidelines: { general: "Water deeply and infrequently (1 inch per week)" },
-                    seasonal_tasks: { spring: ["Aerating", "Overseeding"], summer: ["Watering"], fall: ["Raking"] }
-                }
-            },
-            diagnostic_questions: {
-                general_checkup: [
-                    "Is the plant wilting?",
-                    "Are there visible pests?",
-                    "Is the soil moisture consistent?"
-                ]
-            }
-        };
+        let knowledgeBase = null;
 
         // Plant database
         let plantDatabase = {};
@@ -1494,6 +1588,41 @@
                 console.log('Knowledge base loaded:', knowledgeBase.version);
             } catch (e) {
                 console.error('Failed to load knowledge base:', e);
+                // Fallback foundation of knowledge
+                knowledgeBase = {
+                    version: "1.0.0-fallback",
+                    categories: {
+                        lawn_care: {
+                            mowing_guidelines: {
+                                cool_season: "Mow high (3-4 inches)",
+                                warm_season: "Mow lower (1-2 inches)"
+                            },
+                            watering_guidelines: {
+                                general: "Water deeply and infrequently (1 inch per week)"
+                            },
+                            seasonal_tasks: {
+                                spring: ["Aerating", "Overseeding", "Fertilizing"],
+                                summer: ["Watering", "Mowing high"],
+                                fall: ["Raking leaves", "Winterizing"]
+                            }
+                        },
+                        plants: {
+                            plant_health: {
+                                pests: {
+                                    aphids: "Spray with water or neem oil",
+                                    slugs: "Use beer traps or copper tape"
+                                }
+                            }
+                        }
+                    },
+                    diagnostic_questions: {
+                        general_checkup: [
+                            "Is the plant wilting?",
+                            "Are there visible pests?",
+                            "Is the soil moisture consistent?"
+                        ]
+                    }
+                };
             }
         }
 
@@ -1614,40 +1743,13 @@
             });
         }
 
-        async function addCalendarEvent(evt, date) {
-            gardenMemory.calendar.push({ event: evt, date: date });
-            saveMemory();
-            renderCalendar();
-            
-            // Supabase Sync
-            if (window.supabase && authToken) {
-                try {
-                    if (!currentUserId) {
-                        const { data: { user } } = await window.supabase.auth.getUser();
-                        if (user) currentUserId = user.id;
-                    }
-
-                    if (currentUserId) {
-                        const payload = { 
-                            title: evt, 
-                            event_date: date,
-                            user_id: currentUserId
-                        };
-
-                        const { error } = await window.supabase
-                            .from('events')
-                            .insert([payload]);
-                        if (error) console.error('Supabase event sync error:', error);
-                    }
-                } catch (e) { console.error('Supabase event sync failed', e); }
-            }
-        }
-
         function addCalendarEventUI() {
             const evt = document.getElementById('calEventInput').value;
             const date = document.getElementById('calDateInput').value;
             if (evt && date) {
-                addCalendarEvent(evt, date);
+                gardenMemory.calendar.push({ event: evt, date: date });
+                saveMemory();
+                renderCalendar();
                 document.getElementById('calEventInput').value = '';
             }
         }
@@ -1675,13 +1777,8 @@
             const buttons = document.querySelectorAll('.tab-button');
             tabs.forEach(tab => tab.classList.remove('active'));
             buttons.forEach(btn => btn.classList.remove('active'));
-            
-            const tabContent = document.getElementById(tabName);
-            if (tabContent) tabContent.classList.add('active');
-            
-            let activeBtn = document.querySelector(`[onclick="openTab('${tabName}')"]`);
-            if (!activeBtn && tabName === 'pro') activeBtn = document.querySelector(`[onclick="handleProTab()"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[onclick="openTab('${tabName}')"]`).classList.add('active');
             
             // Initialize plant database if needed
             if (tabName === 'plants') {
@@ -1689,46 +1786,19 @@
             }
         }
 
-        function handleProTab() {
-            if (isProUser) {
-                openTab('pro');
-            } else {
-                showProLimitModal();
-            }
-        }
-
         // Initialize plant database display
         async function initializePlantDatabase() {
-            console.log("Loading plant database...");
             if (Object.keys(plantDatabase).length === 0) {
-                let loaded = false;
-
-                // 1. Try Supabase
-                if (window.supabase) {
-                    try {
-                        const { data, error } = await window.supabase
-                            .from('plants')
-                            .select('*');
-                        
-                        if (!error && data && data.length > 0) {
-                            data.forEach(p => {
-                                plantDatabase[p.name.toLowerCase()] = {
-                                    emoji: (p.metadata && p.metadata.emoji) ? p.metadata.emoji : '🌱',
-                                    type: p.type || 'vegetable',
-                                    sun: p.sun || 'Unknown',
-                                    water: p.water || 'Regular',
-                                    daysToHarvest: p.days_to_harvest || 0
-                                };
-                            });
-                            loaded = true;
-                        }
-                    } catch (err) {
-                        console.warn("Supabase plant fetch failed", err);
+                try {
+                    const res = await fetch(`${API_BASE_URL}/plants`);
+                    if (res.ok) {
+                        plantDatabase = await res.json();
+                    } else {
+                        throw new Error('API response not ok');
                     }
-                }
-
-                // 2. Fallback to local data if Supabase/API fails or is empty
-                if (!loaded) {
+                } catch (e) {
+                    console.error("Could not fetch plants from API", e);
+                    // Fallback to local data if API fails
                     plantDatabase = {
                         'tomato': { emoji: '🍅', type: 'vegetable', sun: 'Full sun (6-8 hours)', water: '1-2 inches per week', daysToHarvest: 60 },
                         'basil': { emoji: '🌿', type: 'herb', sun: 'Partial to full sun', water: 'Keep soil moist', daysToHarvest: 30 },
@@ -1815,60 +1885,26 @@
         }
 
         // Add plant to garden
-        async function addPlantToGarden(plantName) {
-            const limit = isProUser ? Infinity : 5;
-            if (gardenMemory.plants.length >= limit) {
+        function addPlantToGarden(plantName) {
+            if (gardenMemory.plants.length >= 18) {
                 showProLimitModal();
                 return;
             }
 
-            // Normalize name for lookup
-            const lookupName = plantName.toLowerCase();
-            const data = plantDatabase[lookupName] || { emoji: '🌱', type: 'vegetable' };
-
-            const newPlant = {
-                name: plantName,
-                emoji: data.emoji,
-                type: data.type,
-                plantedDate: Date.now(),
-                location: 'Unknown',
-                notes: ''
-            };
-
-            gardenMemory.plants.push(newPlant);
-            saveMemory();
-            
-            // Supabase Sync
-            if (window.supabase && authToken) {
-                try {
-                    if (!currentUserId) {
-                        const { data: { user } } = await window.supabase.auth.getUser();
-                        if (user) currentUserId = user.id;
-                    }
-
-                    if (currentUserId) {
-                        const payload = { 
-                            name: newPlant.name,
-                            type: newPlant.type,
-                            planted_at: new Date(newPlant.plantedDate).toISOString(),
-                            location: newPlant.location,
-                            notes: newPlant.notes,
-                            user_id: currentUserId,
-                            metadata: { emoji: newPlant.emoji }
-                        };
-
-                        const { error } = await window.supabase
-                            .from('plants')
-                            .insert([payload]);
-                            
-                        if (error) {
-                            console.error('Supabase plant sync error:', error);
-                        }
-                    }
-                } catch (e) { console.error('Supabase plant sync failed', e); }
+            const data = plantDatabase[plantName];
+            if (data) {
+                gardenMemory.plants.push({
+                    name: plantName,
+                    emoji: data.emoji,
+                    type: data.type,
+                    plantedDate: Date.now(),
+                    location: 'Unknown',
+                    notes: ''
+                });
+                saveMemory();
+                
+                addMessage('assistant', `Added ${plantName} to your garden! Use /teach to specify where it's planted and add more details.`);
             }
-            
-            addMessage('assistant', `Added ${plantName} to your garden! Use /teach to specify where it's planted and add more details.`);
         }
 
         // Update stats display
@@ -1877,52 +1913,169 @@
             document.getElementById('plantsCount').textContent = gardenMemory.plants.length;
         }
 
-        async function handleLogout() {
-            if (confirm("Are you sure you want to logout?")) {
-                if (window.supabaseAuth) await window.supabaseAuth.signOut();
-                localStorage.removeItem('gb_token');
-                sessionStorage.removeItem('gb_token');
-                localStorage.removeItem('guestMode');
-                authToken = null;
-                window.location.href = 'login.html';
+        // --- Auth & API Logic ---
+        async function handleLogin() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('gb_token', authToken);
+                    document.getElementById('auth-screen').style.display = 'none';
+                    initUserData(data.user);
+                } else {
+                    alert('Login failed: ' + (data.message || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error('API Error', e);
+                // Fallback for demo
+                alert('Demo Mode: Logging in locally');
+                skipAuth();
             }
         }
 
-        function initGuestUI() {
+        let isRegistering = false;
+
+        function toggleAuthMode() {
+            isRegistering = !isRegistering;
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const nameInput = document.getElementById('authName');
+            const mainBtn = document.getElementById('authMainBtn');
+            const toggleBtn = document.getElementById('authToggleBtn');
+
+            if (isRegistering) {
+                title.innerText = 'Create Account';
+                subtitle.innerText = 'Join GardenBuddy today';
+                nameInput.style.display = 'block';
+                mainBtn.innerText = 'Sign Up';
+                mainBtn.onclick = performRegister;
+                toggleBtn.innerText = 'Already have an account? Sign In';
+            } else {
+                title.innerText = 'Welcome Back';
+                subtitle.innerText = 'Sign in to sync your garden';
+                nameInput.style.display = 'none';
+                mainBtn.innerText = 'Sign In';
+                mainBtn.onclick = handleLogin;
+                toggleBtn.innerText = 'Create Account';
+            }
+        }
+
+        async function performRegister() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+
+            if (!email || !password || !name) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, name })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    handleAuthSuccess(data);
+                } else {
+                    alert('Registration failed: ' + (data.message || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error('API Error', e);
+                alert('Demo Mode: Registration simulated (Backend offline)');
+            }
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('gb_token');
+                authToken = null;
+                toggleProfileModal();
+                document.getElementById('auth-screen').style.display = 'flex';
+            }
+        }
+
+        function skipAuth() {
+            document.getElementById('auth-screen').style.display = 'none';
             // Generate random ID for guest
             const guestId = 'guest_' + Math.floor(Math.random() * 10000);
-            // Store for contractor page
-            localStorage.setItem('gb_guest_id', guestId);
+            document.getElementById('clientIdDisplay').innerText = guestId;
+            // Generate QR (Mock)
+            document.getElementById('pairing-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy://connect/${guestId}" alt="Pairing QR">`;
         }
 
-        async function initUserData(user) {
-            currentUserId = user.id;
-            currentUserEmail = user.email;
-            
-            const name = user.user_metadata?.name || user.name || user.email;
-            if (name) document.getElementById('userName').innerText = name;
-            
-            await checkProStatus(user.id);
+        function handleAuthSuccess(data) {
+            authToken = data.token;
+            localStorage.setItem('gb_token', authToken);
+            document.getElementById('auth-screen').style.display = 'none';
+            initUserData(data.user);
         }
 
-        async function checkProStatus(userId) {
-            if (!window.supabase) return;
+        function initUserData(user) {
+            document.getElementById('clientIdDisplay').innerText = user.id;
+            if (user.name) document.getElementById('userName').innerText = user.name;
+            
+            // Generate QR for logged in user
+            document.getElementById('pairing-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy://connect/${user.id}" alt="Pairing QR">`;
+
+            // Check for contractor
+            if (user.contractorId) {
+                document.getElementById('not-paired-view').style.display = 'none';
+                document.getElementById('paired-view').style.display = 'block';
+                document.getElementById('contractorDisplayName').innerText = user.contractorName || 'Your Gardener';
+            }
+        }
+
+        async function sendContractorRequest() {
+            if (!authToken) return alert("Please sign in to contact your gardener.");
+            const message = document.getElementById('requestMessage').value;
+            
             try {
-                // Query profiles table for subscription status
-                const { data, error } = await window.supabase
-                    .from('user_profiles')
-                    .select('subscription_tier')
-                    .eq('id', userId)
-                    .maybeSingle();
-                
-                if (data && data.subscription_tier === 'pro') {
-                    isProUser = true;
-                    document.getElementById('userSubscription').innerText = 'Pro Plan';
-                } else {
-                    isProUser = false;
-                    document.getElementById('userSubscription').innerText = 'Free Plan';
+                const res = await fetch(`${API_BASE_URL}/requests`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type: 'visit_request', note: message })
+                });
+                if (res.ok) {
+                    alert("Request sent to your gardener!");
+                    document.getElementById('requestMessage').value = '';
+                    openTab('chat');
+                    addMessage('assistant', `✓ Contractor request sent. They should respond shortly.`);
                 }
-            } catch (e) { console.error('Pro check failed', e); }
+            } catch (e) {
+                alert("Request sent! (Demo)");
+                openTab('chat');
+            }
         }
 
         // Add message to chat
@@ -1947,7 +2100,6 @@
                 processCorrection(content);
             } else if (content.startsWith('/why')) {
                 commandBadge = '<div class="command-badge">🤔 WHY</div>';
-                processWhy(content);
             } else if (content.startsWith('/help') || content.startsWith('/stats') || content.startsWith('/export')) {
                 commandBadge = '<div class="command-badge">ℹ️ COMMAND</div>';
             }
@@ -1977,7 +2129,7 @@
         }
 
         // Process teaching command
-        async function processTeaching(content) {
+        function processTeaching(content) {
             const teaching = content.substring(7).trim();
             if (teaching) {
                 gardenMemory.teachings.push({
@@ -1985,50 +2137,6 @@
                     timestamp: Date.now(),
                     type: 'teaching'
                 });
-                
-                // Supabase Sync
-                if (window.supabase && authToken) {
-                    try {
-                        if (!currentUserId) {
-                            const { data: { user } } = await window.supabase.auth.getUser();
-                            if (user) currentUserId = user.id;
-                        }
-
-                        if (currentUserId) {
-                            const payload = { 
-                                teaching_type: 'teach',
-                                content: teaching, 
-                                created_at: new Date().toISOString(),
-                                user_id: currentUserId 
-                            };
-
-                            const { error } = await window.supabase
-                                .from('teachings')
-                                .insert([payload]);
-                            if (error) console.error('Supabase teaching sync error:', error);
-                        }
-                    } catch (e) { console.error('Supabase sync failed', e); }
-                }
-
-                // Intelligent Parsing (Planting)
-                // Regex to catch "planted [plant]"
-                const plantedMatch = teaching.match(/planted\s+(?:a\s+|an\s+|some\s+)?([a-zA-Z]+)/i);
-                if (plantedMatch && plantedMatch[1]) {
-                    let plantName = plantedMatch[1].toLowerCase();
-                    // Simple de-pluralization
-                    if (plantName.endsWith('es')) plantName = plantName.slice(0, -2);
-                    else if (plantName.endsWith('s')) plantName = plantName.slice(0, -1);
-                    
-                    // Check database or add as custom
-                    const dbMatch = Object.keys(plantDatabase).find(k => k === plantName || k.includes(plantName));
-                    const finalName = dbMatch ? (dbMatch.charAt(0).toUpperCase() + dbMatch.slice(1)) : (plantName.charAt(0).toUpperCase() + plantName.slice(1));
-
-                    await addPlantToGarden(finalName);
-                    
-                    // Add Calendar Event
-                    const today = new Date().toISOString().split('T')[0];
-                    await addCalendarEvent(`Planted ${finalName}`, today);
-                }
                 
                 // Try to extract garden info
                 if (teaching.toLowerCase().includes('bed') || teaching.toLowerCase().includes('raised')) {
@@ -2043,7 +2151,7 @@
         }
 
         // Process correction command
-        async function processCorrection(content) {
+        function processCorrection(content) {
             const correction = content.substring(6).trim();
             if (correction) {
                 gardenMemory.corrections.push({
@@ -2052,57 +2160,6 @@
                     type: 'correction'
                 });
                 saveMemory();
-
-                // Supabase Sync
-                if (window.supabase && authToken) {
-                    try {
-                        if (!currentUserId) {
-                            const { data: { user } } = await window.supabase.auth.getUser();
-                            if (user) currentUserId = user.id;
-                        }
-
-                        if (currentUserId) {
-                            const payload = { 
-                                teaching_type: 'wrong',
-                                content: correction, 
-                                created_at: new Date().toISOString(),
-                                user_id: currentUserId 
-                            };
-
-                            const { error } = await window.supabase
-                                .from('teachings')
-                                .insert([payload]);
-                            if (error) console.error('Supabase correction sync error:', error);
-                        }
-                    } catch (e) { console.error('Supabase sync failed', e); }
-                }
-            }
-        }
-
-        // Process why command
-        async function processWhy(content) {
-            // Supabase Sync for 'why' requests
-            if (window.supabase && authToken) {
-                try {
-                    if (!currentUserId) {
-                        const { data: { user } } = await window.supabase.auth.getUser();
-                        if (user) currentUserId = user.id;
-                    }
-
-                    if (currentUserId) {
-                        const payload = { 
-                            teaching_type: 'why',
-                            content: content, // Log the full command/question
-                            created_at: new Date().toISOString(),
-                            user_id: currentUserId 
-                        };
-
-                        const { error } = await window.supabase
-                            .from('teachings')
-                            .insert([payload]);
-                        if (error) console.error('Supabase why sync error:', error);
-                    }
-                } catch (e) { console.error('Supabase sync failed', e); }
             }
         }
 
@@ -2616,10 +2673,6 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
                 alert("Voice input is not supported in this browser.");
                 return;
             }
-            if (!isProUser) {
-                showProLimitModal();
-                return;
-            }
             const btn = document.getElementById('micButton');
             if (btn.classList.contains('recording')) {
                 recognition.stop();
@@ -2645,14 +2698,10 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
                     
                     // Assistant response simulation
                     setTimeout(() => {
-                        if (isProUser) {
-                            addMessage('assistant', `📸 **Pro Analysis:**\nI've analyzed your photo. It looks like your plant is healthy, but keep an eye on soil moisture consistency.`);
-                        } else {
-                            addMessage('assistant', `I see you've uploaded a photo! 📸\n\n**Note:** Advanced AI visual diagnosis is a **Pro Feature**.\n\nI can't analyze this specific image yet, but I can help you diagnose issues through conversation.`);
-                            
-                            // Trigger modal to capture demand
-                            setTimeout(() => toggleProModal(), 1500);
-                        }
+                        addMessage('assistant', `I see you've uploaded a photo! 📸\n\n**Note:** Advanced AI visual diagnosis is a **Pro Feature** currently in development.\n\nI can't analyze this specific image yet, but I can help you diagnose issues through conversation. Try the Diagnostic Wizard!`);
+                        
+                        // Trigger modal to capture demand
+                        setTimeout(() => toggleProModal(), 1500);
                     }, 1000);
                 };
                 
@@ -2729,8 +2778,7 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
         }
 
         function saveNewPlant() {
-            const limit = isProUser ? Infinity : 5;
-            if (gardenMemory.plants.length >= limit) {
+            if (gardenMemory.plants.length >= 18) {
                 toggleAddPlantModal();
                 showProLimitModal();
                 return;
@@ -2786,14 +2834,40 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
         }
 
         function handleUpgrade(plan) {
-            const email = currentUserEmail || prompt("Please enter your email address for the pro account:");
-            if (!email) return;
-            
-            const subject = `GardenBuddy Pro Upgrade Request - ${plan.toUpperCase()}`;
-            const body = `I would like to upgrade to the ${plan} plan.\n\nUser ID: ${currentUserId || 'Guest'}\nEmail: ${email}\n\nPlease send me payment instructions.`;
-            
-            window.location.href = `mailto:gibletscreations@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            closeUpgradeModal();
+          const userEmail = getCurrentUserEmail() || prompt('Enter your email:');
+          
+          if (!userEmail) {
+            alert('Email required for checkout');
+            return;
+          }
+          
+          const userId = getCurrentUserId();
+          
+          // Call Stripe function
+          upgradeToPro(userEmail, userId, plan);
+        }
+
+        function getCurrentUserEmail() {
+          const memory = JSON.parse(localStorage.getItem('gardenbuddy_memory') || '{}');
+          return memory.userEmail || null;
+        }
+
+        function getCurrentUserId() {
+          const memory = JSON.parse(localStorage.getItem('gardenbuddy_memory') || '{}');
+          return memory.userId || 'guest_' + Date.now();
+        }
+
+        async function upgradeToPro(userEmail, userId, plan) {
+            const priceId = plan === 'yearly' ? 'price_YEARLY' : 'price_MONTHLY';
+            try {
+                const res = await fetch(`${API_BASE_URL}/create-checkout`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ priceId, userId, userEmail, plan })
+                });
+                const data = await res.json();
+                if(data.url) window.location.href = data.url;
+            } catch(e) { console.error(e); alert('Checkout failed'); }
         }
 
         // --- Share Logic ---
@@ -2835,69 +2909,25 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
         }
 
         // Initialize on load
-        window.addEventListener('load', async () => {
-            // Check Auth First
-            const token = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
-            const guest = localStorage.getItem('guestMode');
-            
-            if (!token && !guest) {
-                window.location.href = 'login.html';
-                return;
-            }
-
+        window.addEventListener('load', () => {
             loadMemory();
             
             // Initialize plant database
             initializePlantDatabase();
             loadKnowledgeBase();
             
-            // Check Supabase session
-            if (window.supabase && token) {
-                const { data: { session } } = await window.supabaseAuth.getSession();
-                if (session) {
-                    authToken = session.access_token;
-                    if (localStorage.getItem('gb_token')) {
-                        localStorage.setItem('gb_token', authToken);
-                    } else {
-                        sessionStorage.setItem('gb_token', authToken);
-                    }
-                    await initUserData(session.user);
-                } else {
-                    // Token invalid or expired
-                    localStorage.removeItem('gb_token');
-                    sessionStorage.removeItem('gb_token');
-                    if (!guest) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-                }
-
-                // Listen for auth changes (expiration, sign out, refresh)
-                window.supabaseAuth.onAuthChange((event, session) => {
-                    if (event === 'SIGNED_OUT') {
-                        localStorage.removeItem('gb_token');
-                        sessionStorage.removeItem('gb_token');
-                        if (!localStorage.getItem('guestMode')) {
-                            window.location.href = 'login.html';
-                        }
-                    } else if (event === 'TOKEN_REFRESHED' && session) {
-                        const newToken = session.access_token;
-                        if (localStorage.getItem('gb_token')) {
-                            localStorage.setItem('gb_token', newToken);
-                        } else {
-                            sessionStorage.setItem('gb_token', newToken);
-                        }
-                    }
-                });
-            } else if (guest) {
-                initGuestUI();
-            }
-            
             // Initialize Voice Input
             initVoiceInput();
             
             // Check for tutorial
             initTutorial();
+            
+            // Check Auth
+            if (authToken) {
+                document.getElementById('auth-screen').style.display = 'none';
+                // In real app, fetch user profile here
+                skipAuth(); // Just to init UI for demo
+            }
             
             // Focus input on load
             setTimeout(() => {
@@ -2958,50 +2988,22 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
                 shareModal.style.display = 'none';
             }
         }
-
-        // Explicitly attach functions to window to prevent ReferenceErrors
-        window.sendMessage = sendMessage;
-        window.insertCommand = insertCommand;
-        window.openTab = openTab;
-        window.toggleProfileModal = toggleProfileModal;
-        window.toggleSettingsModal = toggleSettingsModal;
-        window.toggleAddPlantModal = toggleAddPlantModal;
-        window.toggleShareModal = toggleShareModal;
-        window.saveSettings = saveSettings;
-        window.clearAllData = clearAllData;
-        window.reportBug = reportBug;
-        window.replayTutorial = replayTutorial;
-        window.handleLogout = handleLogout;
-        window.startDiagnosticWizard = startDiagnosticWizard;
-        window.selectWizardCategory = selectWizardCategory;
-        window.showPlantSelector = showPlantSelector;
-        window.addPlantToGarden = addPlantToGarden;
-        window.saveNewPlant = saveNewPlant;
-        window.addCalendarEventUI = addCalendarEventUI;
-        window.deleteCalendarEvent = deleteCalendarEvent;
-        window.triggerPhotoUpload = triggerPhotoUpload;
-        window.toggleVoiceInput = toggleVoiceInput;
-        window.handlePhotoUpload = handlePhotoUpload;
-        window.copyShareLink = copyShareLink;
-        window.shareNative = shareNative;
-        window.nextTutorialStep = nextTutorialStep;
-        window.finishTutorial = finishTutorial;
-        window.filterPlants = filterPlants;
-        window.handleKeyPress = handleKeyPress;
-        window.handleProTab = handleProTab;
     </script>
-
-    <!-- 🔥 SUPABASE INTEGRATION -->
+    <!-- Supabase Client -->
     <script type="module">
-        import { supabase, auth, db, realtime } from './supabase-client.js';
-
-        // Make Supabase services available globally for the inline scripts
-        window.supabase = supabase;
-        window.supabaseAuth = auth;
-        window.db = db;
-        window.realtime = realtime;
-
-        console.log('✅ Supabase initialized from client.');
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+    
+      // 🔥 REPLACE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+      const SUPABASE_URL = 'https://xxxxxxxxxxxxx.supabase.co'
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      console.log('✅ Supabase initialized')
+    </script>
+    
+    <!-- Your existing app.js with modifications below -->
+    <script>
+      // Your existing JavaScript code will go here with Supabase integration
     </script>
 </body>
 </html>

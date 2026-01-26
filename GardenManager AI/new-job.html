@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Job - GardenManager Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --background: #F8FDF8;
+            --surface: #FFFFFF;
+            --text: #1A1A1A;
+            --text-secondary: #666666;
+            --border: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --danger: #F44336;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            padding: 0.5rem;
+            margin-left: -0.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--surface);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.1s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .col {
+            flex: 1;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h1>Create New Job</h1>
+    </header>
+
+    <div class="content">
+        <form id="jobForm" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label class="form-label">Client</label>
+                <select id="clientSelect" class="form-select" required>
+                    <option value="">Select a client...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Service Type</label>
+                <input type="text" id="serviceInput" class="form-input" placeholder="e.g. Lawn Mowing" required list="serviceSuggestions">
+                <datalist id="serviceSuggestions">
+                    <option value="Lawn Mowing">
+                    <option value="Hedge Trimming">
+                    <option value="Weeding">
+                    <option value="Garden Cleanup">
+                    <option value="Planting">
+                    <option value="Fertilizing">
+                </datalist>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="dateInput" class="form-input" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" id="timeInput" class="form-input" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Price (£)</label>
+                <input type="number" id="priceInput" class="form-input" placeholder="0.00" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea id="notesInput" class="form-textarea" rows="3" placeholder="Gate code, specific instructions..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="urgentInput">
+                    Mark as Urgent
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">Schedule Job</button>
+        </form>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://mpodufbvckfxafgnazyv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wb2R1ZmJ2Y2tmeGFmZ25henl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTcyMDQsImV4cCI6MjA4NDk5MzIwNH0.yGJYd4I2Il_S5qedpBpujz-tPUjw-tD1HVH7TgwQZUA";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                loadClients();
+                
+                // Set default date to today
+                document.getElementById('dateInput').valueAsDate = new Date();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        async function loadClients() {
+            try {
+                const { data: pairings, error } = await supabaseClient
+                    .from('pairings')
+                    .select('id, client_name, garden_details')
+                    .eq('contractor_id', currentUser.id)
+                    .order('client_name');
+
+                if (error) throw error;
+
+                const select = document.getElementById('clientSelect');
+                
+                if (pairings.length === 0) {
+                    const option = document.createElement('option');
+                    option.text = "No clients found (Scan a client first)";
+                    option.disabled = true;
+                    select.add(option);
+                    return;
+                }
+
+                pairings.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id; // This is the pairing_id
+                    option.text = `${client.client_name} (${client.garden_details || 'Home'})`;
+                    select.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading clients:', error);
+                alert('Failed to load clients list');
+            }
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const clientSelect = document.getElementById('clientSelect');
+            if (!clientSelect.value) {
+                alert('Please select a client');
+                return;
+            }
+
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'flex';
+
+            const jobData = {
+                contractor_id: currentUser.id,
+                pairing_id: clientSelect.value, // Link to the specific client pairing
+                service: document.getElementById('serviceInput').value,
+                scheduled_date: document.getElementById('dateInput').value,
+                scheduled_time: document.getElementById('timeInput').value,
+                price: parseFloat(document.getElementById('priceInput').value) || 0,
+                notes: document.getElementById('notesInput').value,
+                urgent: document.getElementById('urgentInput').checked,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('jobs')
+                    .insert(jobData);
+
+                if (error) throw error;
+
+                alert('✅ Job scheduled successfully!');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error creating job:', error);
+                alert('Failed to create job: ' + error.message);
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

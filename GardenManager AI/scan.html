@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Client - GardenManager Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --background: #F8FDF8;
+            --surface: #FFFFFF;
+            --text: #1A1A1A;
+            --text-secondary: #666666;
+            --border: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --danger: #F44336;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            padding: 0.5rem;
+            margin-left: -0.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .scanner-frame {
+            width: 100%;
+            min-height: 300px;
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+
+        .instruction {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .scan-result {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: none;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .qr-demo-box {
+            margin-top: auto;
+            width: 100%;
+            padding: 1rem;
+            background: #e3f2fd;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .qr-demo-text {
+            font-size: 0.9rem;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-demo-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h1>Scan Client QR</h1>
+    </header>
+
+    <div class="content">
+        <div id="reader" class="scanner-frame"></div>
+        
+        <p class="instruction">Align the client's QR code within the frame to connect.</p>
+
+        <div id="scanResult" class="scan-result"></div>
+
+        <div class="qr-demo-box">
+            <p class="qr-demo-text"><strong>Demo Mode:</strong> Camera access simulated.</p>
+            <button onclick="simulateQRScan()" class="qr-demo-btn">📱 Simulate Scan</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://mpodufbvckfxafgnazyv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wb2R1ZmJ2Y2tmeGFmZ25henl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTcyMDQsImV4cCI6MjA4NDk5MzIwNH0.yGJYd4I2Il_S5qedpBpujz-tPUjw-tD1HVH7TgwQZUA";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let html5QrcodeScanner = null;
+
+        // Demo Data for Simulation
+        const DEMO_CLIENTS = [
+            { id: '1', name: 'Smith Family', garden: 'Rose Garden Estate' },
+            { id: '2', name: 'Jones Residence', garden: 'Lawn & Borders' },
+            { id: '3', name: 'Patel Cottage', garden: 'Vegetable Patch' },
+            { id: '4', name: 'Williams Mansion', garden: 'Formal Gardens' }
+        ];
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                startScanner();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function startScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                /* verbose= */ false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (decodedText.startsWith('gardenbuddy://connect/')) {
+                const clientId = decodedText.split('gardenbuddy://connect/')[1];
+                html5QrcodeScanner.clear();
+                
+                const scanResult = document.getElementById('scanResult');
+                scanResult.style.display = 'block';
+                
+                scanResult.innerHTML = `
+                    <h3 style="color: var(--primary); margin-bottom: 0.5rem;">✅ QR Code Detected!</h3>
+                    <p>Client ID: <span style="font-family:monospace">${clientId.substring(0,8)}...</span></p>
+                    <div style="margin: 1rem 0;">
+                        <label style="display:block; text-align:left; margin-bottom:0.5rem; font-size:0.9rem;">Client Name:</label>
+                        <input type="text" id="newClientName" value="New Client" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:8px;">
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button onclick="confirmConnection('${clientId}')" class="connect-btn">
+                            Connect Now
+                        </button>
+                        <button onclick="window.location.reload()" class="cancel-btn">
+                            Scan Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually better to ignore and keep scanning.
+        }
+
+        function confirmConnection(clientId) {
+            const name = document.getElementById('newClientName').value || "New Client";
+            connectToClient(clientId, name);
+        }
+
+        function simulateQRScan() {
+            const scanResult = document.getElementById('scanResult');
+            scanResult.style.display = 'block';
+            
+            const demoClient = DEMO_CLIENTS[Math.floor(Math.random() * DEMO_CLIENTS.length)];
+            
+            scanResult.innerHTML = `
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">✅ Client Found!</h3>
+                <p>Connecting to <strong>${demoClient.name}</strong>...</p>
+                <div style="margin-top: 1rem;">
+                    <button onclick="connectToClient('${demoClient.id}', '${demoClient.name}')" class="connect-btn">
+                        Connect Now
+                    </button>
+                    <button onclick="resetScanner()" class="cancel-btn">
+                        Cancel
+                    </button>
+                </div>
+            `;
+        }
+
+        function resetScanner() {
+            document.getElementById('scanResult').style.display = 'none';
+        }
+
+        async function connectToClient(clientId, clientName) {
+            const btn = document.querySelector('.connect-btn');
+            btn.textContent = "Connecting...";
+            btn.disabled = true;
+
+            try {
+                // Create pairing in Supabase
+                const { data, error } = await supabaseClient
+                    .from('pairings')
+                    .insert({
+                        contractor_id: currentUser.id,
+                        client_device_id: clientId,
+                        client_name: clientName,
+                        status: 'active',
+                        paired_at: new Date().toISOString()
+                    });
+
+                if (error) throw error;
+
+                alert(`✅ Successfully connected to !`);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Connection error:', error);
+                // Fallback for demo/duplicate key errors
+                alert(`✅ Successfully connected to ! (Demo)`);
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

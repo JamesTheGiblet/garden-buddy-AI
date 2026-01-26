@@ -1311,8 +1311,8 @@
             </p>
             
             <div class="cta-buttons">
-                <a href="GardenBuddy AI/index.html" class="cta-secondary">Try Client App Demo</a>
-                <a href="GardenManager AI/index.html" class="cta-secondary">Try Contractor Demo</a>
+                <a href="GardenBuddy%20AI/index.html" class="cta-secondary">Try Client App Demo</a>
+                <a href="GardenManager%20AI/index.html" class="cta-secondary">Try Contractor Demo</a>
             </div>
         </div>
     </section>
@@ -1367,7 +1367,9 @@
     <script>
         // FAQ Toggle
         document.querySelectorAll('.faq-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                // Prevent closing when clicking inside the answer (allows text selection)
+                if (e.target.closest('.faq-answer')) return;
                 item.classList.toggle('active');
             });
         });
