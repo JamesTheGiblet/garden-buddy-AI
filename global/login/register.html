@@ -45,6 +45,8 @@
         <div style="text-align: center; margin-top: 1rem;">
             <a onclick="handleResend(this)" style="color: #666; font-size: 0.85rem; text-decoration: underline; cursor: pointer;">Resend Verification Email</a>
         </div>
+        
+        <a onclick="skipAuth()" class="business-link" style="cursor: pointer;">Continue as Guest (Home Gardeners only)</a>
 
         <a href="register_contractor.html" class="business-link">Register as Business / Contractor</a>
     </div>
@@ -54,6 +56,11 @@
     <script src="../../supabase-client.js"></script>
     <script>
         // Auth is now available globally via window.auth
+
+        window.skipAuth = function() {
+            localStorage.setItem('guestMode', 'true');
+            window.location.href = '../../GardenBuddy AI/index.html';
+        }
 
         async function handleRegister() {
             const name = document.getElementById('authName').value;

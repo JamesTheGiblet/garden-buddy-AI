@@ -81,10 +81,13 @@
                         OpenWeatherMap API Key
                         <span class="info-icon" tabindex="0">?
                             <span class="info-tooltip">
-                                This data is saved locally in your browser's storage. It is never sent to our servers. If you clear your browser history/data, this key will be lost.
+                                This data is saved locally. <a href="https://home.openweathermap.org/users/sign_up" target="_blank" style="color: #fff; text-decoration: underline;">Get a free API key here</a>.
                             </span>
                         </span>
                     </label>
+                    <div style="font-size: 0.75rem; color: #666; margin-bottom: 0.5rem;">
+                        Don't have a key? <a href="https://home.openweathermap.org/users/sign_up" target="_blank" style="color: var(--garden-primary);">Sign up for free</a> to get weather updates.
+                    </div>
                     <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
                     <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
                     <button class="submit-button replay-tutorial-btn" type="button" onclick="replayTutorial()">Replay Tutorial</button>
@@ -184,6 +187,8 @@
             <div class="input-area">
                 <div class="command-hints">
                     <div class="command-hint" onclick="insertCommand('/teach ')">💡 /teach</div>
+                    <div class="command-hint" onclick="insertCommand('My plant is ')">🌿 Plant Issue</div>
+                    <div class="command-hint" onclick="insertCommand('When should I ')">📅 Timing</div>
                     <div class="command-hint" onclick="insertCommand('/gist add ')">📝 /gist</div>
                     <div class="command-hint" onclick="insertCommand('/wrong ')">✏️ /wrong</div>
                     <div class="command-hint" onclick="sendMessage('/why')">/why</div>
@@ -500,6 +505,10 @@
             gardenMemory.settings.apiKey = key;
             saveMemory();
             
+            // Update profile location display
+            const userLocEl = document.getElementById('userLocation');
+            if (userLocEl) userLocEl.textContent = loc;
+
             toggleSettingsModal();
             addMessage('assistant', `Settings updated! Location set to ${loc}.`);
         }
@@ -1456,11 +1465,23 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
         }
 
         // Send message
+        let guestInteractionCount = parseInt(localStorage.getItem('gb_guest_interactions') || '0');
+        const GUEST_LIMIT = 15;
+
         function sendMessage(predefined = null) {
             const input = document.getElementById('userInput');
             const message = predefined || input.value.trim();
             
             if (!message) return;
+
+            // Guest Limit Check
+            if (!authToken && !isProUser) {
+                guestInteractionCount++;
+                localStorage.setItem('gb_guest_interactions', guestInteractionCount);
+                if (guestInteractionCount > GUEST_LIMIT) {
+                    return addMessage('assistant', `⚠️ **Usage Limit Reached**\n\nYou've reached the limit of free guest interactions. To continue saving your garden data and getting AI advice, please create a free account.\n\n<button class="submit-button" onclick="window.location.href='../global/login/register.html'">Create Free Account</button>`);
+                }
+            }
             
             // Add user message
             addMessage('user', message);
