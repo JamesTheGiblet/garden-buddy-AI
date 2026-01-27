@@ -126,6 +126,7 @@
                     <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
                     <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
                     <button class="submit-button replay-tutorial-btn" type="button" onclick="replayTutorial()">Replay Tutorial</button>
+                    <button class="submit-button clear-chat-btn" type="button" onclick="clearChatHistory()" style="background-color: #FF9800; margin-top: 0.5rem;">Clear Chat History</button>
                     <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
                     <button class="submit-button report-bug-btn" type="button" onclick="reportBug()">Report Bug</button>
                 </div>
@@ -191,29 +192,29 @@
                         Manage your clients, schedule jobs, and track your business growth.
                         Start by scanning a client's QR code or adding a new job!
                     </p>
-                    
-                    <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
-                            <div class="action-icon">🛏️</div>
-                            <div class="action-text">Teach Layout</div>
-                        </div>
-                        <div class="quick-action" onclick="showPlantSelector()">
-                            <div class="action-icon">🌿</div>
-                            <div class="action-text">Add Plants</div>
-                        </div>
-                        <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
-                            <div class="action-icon">📅</div>
-                            <div class="action-text">Seasonal Tips</div>
-                        </div>
-                        <div class="quick-action" onclick="sendMessage('/stats')">
-                            <div class="action-icon">📊</div>
-                            <div class="action-text">View Stats</div>
-                        </div>
-                        <div class="quick-action" onclick="startDiagnosticWizard()">
-                            <div class="action-icon">🩺</div>
-                            <div class="action-text">Diagnose</div>
-                        </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
+                        <div class="action-icon">🛏️</div>
+                        <div class="action-text">Teach Layout</div>
+                    </div>
+                    <div class="quick-action" onclick="showPlantSelector()">
+                        <div class="action-icon">🌿</div>
+                        <div class="action-text">Add Plants</div>
+                    </div>
+                    <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
+                        <div class="action-icon">📅</div>
+                        <div class="action-text">Seasonal Tips</div>
+                    </div>
+                    <div class="quick-action" onclick="sendMessage('/stats')">
+                        <div class="action-icon">📊</div>
+                        <div class="action-text">View Stats</div>
+                    </div>
+                    <div class="quick-action" onclick="startDiagnosticWizard()">
+                        <div class="action-icon">🩺</div>
+                        <div class="action-text">Diagnose</div>
                     </div>
                 </div>
             </div>
@@ -227,6 +228,7 @@
                     <div class="command-hint" onclick="sendMessage('/why')">/why</div>
                     <div class="command-hint" onclick="sendMessage('/help')">/help</div>
                     <div class="command-hint" onclick="sendMessage('/export')">💾 /export</div>
+                    <div class="command-hint" onclick="clearChatHistory()">🗑️ Clear</div>
                 </div>
                 <div class="input-wrapper">
                     <textarea 
@@ -489,6 +491,45 @@
             
             toggleSettingsModal();
             addMessage('assistant', `Settings updated! Location set to ${loc}.`);
+        }
+
+        // Clear Chat History
+        function clearChatHistory() {
+            if (confirm("Are you sure you want to clear your chat history?")) {
+                gardenMemory.chatHistory = [];
+                saveMemory();
+                
+                // Clear UI
+                const chatContainer = document.getElementById('chatContainer');
+                const messages = chatContainer.querySelectorAll('.message');
+                messages.forEach(msg => msg.remove());
+                
+                // Restore welcome message if missing
+                if (!chatContainer.querySelector('.welcome-message')) {
+                    const welcomeDiv = document.createElement('div');
+                    welcomeDiv.className = 'welcome-message';
+                    welcomeDiv.innerHTML = `
+                        <div class="welcome-icon">🌱</div>
+                        <h2 class="welcome-title">Welcome to GardenManager</h2>
+                        <p class="welcome-text">
+                            Manage your clients, schedule jobs, and track your business growth.
+                            Start by scanning a client's QR code or adding a new job!
+                        </p>
+                    `;
+                    const quickActions = chatContainer.querySelector('.quick-actions');
+                    if (quickActions) {
+                        chatContainer.insertBefore(welcomeDiv, quickActions);
+                    } else {
+                        chatContainer.prepend(welcomeDiv);
+                    }
+                }
+                
+                // Close settings modal if open
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal && (settingsModal.style.display === 'flex' || settingsModal.style.display === 'block')) {
+                    settingsModal.style.display = 'none';
+                }
+            }
         }
 
         // Clear All Data
@@ -837,7 +878,7 @@
                 <div class="message-avatar">${type === 'user' ? '👤' : '🌱'}</div>
                 <div class="message-content">
                     ${commandBadge}
-                    <div class="message-bubble">${escapeHtml(formatMessage(content))}</div>
+                    <div class="message-bubble">${formatMessage(content)}</div>
                 </div>
             `;
             
@@ -859,7 +900,13 @@
 
         // Format message (add line breaks, etc.)
         function formatMessage(content) {
-            return content
+            let text = content
+                .replace(/<text>/g, '')
+                .replace(/<\/text>/g, '');
+            
+            text = escapeHtml(text);
+            
+            return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>')
                 .replace(/•/g, '•');
@@ -1888,6 +1935,7 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
         window.toggleShareModal = toggleShareModal;
         window.saveSettings = saveSettings;
         window.clearAllData = clearAllData;
+        window.clearChatHistory = clearChatHistory;
         window.reportBug = reportBug;
         window.replayTutorial = replayTutorial;
         window.handleLogout = handleLogout;

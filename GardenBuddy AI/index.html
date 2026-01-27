@@ -173,29 +173,29 @@
                         I'll learn about your specific garden and help you tend it successfully. 
                         Start by teaching me about your garden layout!
                     </p>
-                    
-                    <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
-                            <div class="action-icon">🛏️</div>
-                            <div class="action-text">Teach Layout</div>
-                        </div>
-                        <div class="quick-action" onclick="showPlantSelector()">
-                            <div class="action-icon">🌿</div>
-                            <div class="action-text">Add Plants</div>
-                        </div>
-                        <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
-                            <div class="action-icon">📅</div>
-                            <div class="action-text">Seasonal Tips</div>
-                        </div>
-                        <div class="quick-action" onclick="sendMessage('/stats')">
-                            <div class="action-icon">📊</div>
-                            <div class="action-text">View Stats</div>
-                        </div>
-                        <div class="quick-action" onclick="startDiagnosticWizard()">
-                            <div class="action-icon">🩺</div>
-                            <div class="action-text">Diagnose</div>
-                        </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
+                        <div class="action-icon">🛏️</div>
+                        <div class="action-text">Teach Layout</div>
+                    </div>
+                    <div class="quick-action" onclick="showPlantSelector()">
+                        <div class="action-icon">🌿</div>
+                        <div class="action-text">Add Plants</div>
+                    </div>
+                    <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
+                        <div class="action-icon">📅</div>
+                        <div class="action-text">Seasonal Tips</div>
+                    </div>
+                    <div class="quick-action" onclick="sendMessage('/stats')">
+                        <div class="action-icon">📊</div>
+                        <div class="action-text">View Stats</div>
+                    </div>
+                    <div class="quick-action" onclick="startDiagnosticWizard()">
+                        <div class="action-icon">🩺</div>
+                        <div class="action-text">Diagnose</div>
                     </div>
                 </div>
             </div>
@@ -211,6 +211,7 @@
                     <div class="command-hint" onclick="sendMessage('/why')">/why</div>
                     <div class="command-hint" onclick="sendMessage('/help')">/help</div>
                     <div class="command-hint" onclick="sendMessage('/export')">💾 /export</div>
+                    <div class="command-hint" onclick="clearChatHistory()">🗑️ Clear</div>
                 </div>
                 <div class="input-wrapper">
                     <textarea 
@@ -547,7 +548,37 @@
             if (confirm("Are you sure you want to clear your chat history?")) {
                 gardenMemory.chatHistory = [];
                 saveMemory();
-                location.reload();
+                
+                // Clear messages from DOM
+                const chatContainer = document.getElementById('chatContainer');
+                const messages = chatContainer.querySelectorAll('.message');
+                messages.forEach(msg => msg.remove());
+                
+                // Restore welcome message if missing
+                if (!chatContainer.querySelector('.welcome-message')) {
+                    const welcomeDiv = document.createElement('div');
+                    welcomeDiv.className = 'welcome-message';
+                    welcomeDiv.innerHTML = `
+                        <div class="welcome-icon">🌱</div>
+                        <h2 class="welcome-title">Welcome to Garden Buddy 4U</h2>
+                        <p class="welcome-text">
+                            I'll learn about your specific garden and help you tend it successfully. 
+                            Start by teaching me about your garden layout!
+                        </p>
+                    `;
+                    const quickActions = chatContainer.querySelector('.quick-actions');
+                    if (quickActions) {
+                        chatContainer.insertBefore(welcomeDiv, quickActions);
+                    } else {
+                        chatContainer.prepend(welcomeDiv);
+                    }
+                }
+                
+                // Close settings modal if open
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal && (settingsModal.style.display === 'flex' || settingsModal.style.display === 'block')) {
+                    settingsModal.style.display = 'none';
+                }
             }
         }
 
@@ -1010,7 +1041,7 @@
                 <div class="message-avatar">${type === 'user' ? '👤' : '🌱'}</div>
                 <div class="message-content">
                     ${commandBadge}
-                    <div class="message-bubble">${escapeHtml(formatMessage(content))}</div>
+                    <div class="message-bubble">${formatMessage(content)}</div>
                 </div>
             `;
             
@@ -1032,9 +1063,13 @@
 
         // Format message (add line breaks, etc.)
         function formatMessage(content) {
-            return content
+            let text = content
                 .replace(/<text>/g, '')
-                .replace(/<\/text>/g, '')
+                .replace(/<\/text>/g, '');
+            
+            text = escapeHtml(text);
+            
+            return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>')
                 .replace(/•/g, '•');
