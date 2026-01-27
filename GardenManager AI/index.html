@@ -749,6 +749,11 @@
         function updateStatsDisplay() {
             document.getElementById('teachingsCount').textContent = gardenMemory.teachings.length;
             document.getElementById('plantsCount').textContent = gardenMemory.plants.length;
+            
+            // Update location in profile
+            if (gardenMemory.settings && gardenMemory.settings.location) {
+                document.getElementById('userLocation').textContent = gardenMemory.settings.location;
+            }
         }
 
         async function handleLogout() {
