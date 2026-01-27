@@ -7,6 +7,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
     <style>
         :root {
             --primary: #2E7D32;
@@ -146,8 +147,6 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://mpodufbvckfxafgnazyv.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wb2R1ZmJ2Y2tmeGFmZ25henl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTcyMDQsImV4cCI6MjA4NDk5MzIwNH0.yGJYd4I2Il_S5qedpBpujz-tPUjw-tD1HVH7TgwQZUA";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         document.getElementById('registerBtn').addEventListener('click', register);

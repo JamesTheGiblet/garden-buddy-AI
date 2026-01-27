@@ -2,7 +2,10 @@ const CACHE_NAME = 'gardenbuddy-v2';
 const ASSETS = [
     './',
     './index.html',
-    './manifest.json'
+    './manifest.webmanifest',
+    '../image/logo.svg',
+    '../config.js',
+    '../supabase-client.js'
 ];
 
 // Install event - cache assets

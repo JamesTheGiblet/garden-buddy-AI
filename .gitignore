@@ -31,4 +31,4 @@ Thumbs.db
 *.sln
 *.sw?
 
-GardenBuddy AI/config.js
+/config.js

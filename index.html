@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GardenBuddy - Free Garden Management for You & Your Clients</title>
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="icon" type="image/svg+xml" href="image/logo.svg">
     <meta name="description" content="The only garden management system with a FREE app for your clients. Manage up to 5 clients free, unlimited for £20/month. Stop losing jobs to missed appointments.">
     
     <!-- Open Graph -->
@@ -60,6 +60,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s ease;
+            -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
             opacity: 0;
             pointer-events: none;
@@ -186,6 +189,23 @@
             animation: fadeInDown 0.8s ease-out 0.4s both;
         }
         
+        .hero h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            margin-bottom: var(--space-sm);
+            opacity: 0.9;
+            font-weight: 400;
+            animation: fadeInDown 0.8s ease-out 0.3s both;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: var(--space-md);
+            max-width: 600px;
+            opacity: 0.9;
+            animation: fadeInDown 0.8s ease-out 0.4s both;
+        }
+        
         .hero-cta {
             display: flex;
             gap: var(--space-sm);
@@ -204,6 +224,8 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
             font-family: var(--font-body);
+            cursor: pointer;
+            border: none;
         }
         
         .cta-primary {
@@ -226,6 +248,29 @@
         .cta-secondary:hover {
             background: rgba(255, 255, 255, 0.1);
             border-color: white;
+        }
+        
+        .trust-signals {
+            margin-top: var(--space-md);
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.8s both;
+        }
+        
+        .hero-image {
+            flex: 1;
+            padding-left: var(--space-md);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+        
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow-strong);
         }
         
         /* Social Proof */
@@ -349,6 +394,70 @@
             font-size: 0.95rem;
         }
         
+        /* Problems Section (New) */
+        .problems {
+            padding: var(--space-xl) var(--space-md);
+            background: white;
+            text-align: center;
+        }
+
+        .problems h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--earth-dark);
+            margin-bottom: var(--space-lg);
+        }
+
+        .problems .problem-grid {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 0;
+        }
+
+        .problem {
+            background: var(--morning-light);
+            padding: var(--space-md);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .problem:hover {
+            border-color: var(--lawn-green);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .problem .icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .problem h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            margin-bottom: var(--space-xs);
+            color: var(--earth-dark);
+        }
+
+        .problem p {
+            color: var(--tool-steel);
+            line-height: 1.7;
+            margin-bottom: var(--space-sm);
+        }
+
+        .cost {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(212, 160, 23, 0.15);
+            border-radius: 6px;
+            color: var(--warning-amber);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
         /* Solution Section */
         .solution-section {
             padding: var(--space-xl) var(--space-md);
@@ -940,88 +1049,73 @@
             opacity: 0.8;
             font-size: 0.95rem;
         }
+    .final-cta-launch {
+        margin: 2rem 0;
+    }
+    .final-cta-launch-link {
+        text-decoration: none;
+        display: inline-block;
+    }
     </style>
 </head>
 <body>
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">🌱 Open Source Garden Management</div>
-            <h1>
-                Stop Losing Clients to<br>
-                <span class="highlight">Missed Appointments</span>
-            </h1>
-            <p class="hero-subtitle">
-                The only garden management system with a FREE app for your clients. 
-                Try everything free for 3 months. Then pay only £20-50/month as you grow.
-            </p>
+            <h1>Your AI Garden Assistant</h1>
+            <h2>Built for Professional Gardeners</h2>
+            <p>Stop losing time to admin. Get instant plant ID, job planning, 
+               and customer reports in one simple tool.</p>
+            
             <div class="hero-cta">
-                <a href="#pricing" class="cta-primary">
-                    Start Free Today →
-                </a>
-                <a href="#demo" class="cta-secondary">
-                    See How It Works
-                </a>
+                <button onclick="showUserTypeModal()" class="cta-primary">
+                    Start Free - No Card Required
+                </button>
+                <button onclick="scrollToDemo()" class="cta-secondary">
+                    Watch 2-Min Demo
+                </button>
             </div>
             
-            <div class="social-proof">
-                <div class="proof-stats">
-                    <div class="proof-stat">
-                        <span class="proof-number">3</span>
-                        <span class="proof-label">Months free trial</span>
-                    </div>
-                    <div class="proof-stat">
-                        <span class="proof-number">£20</span>
-                        <span class="proof-label">Starting price/month</span>
-                    </div>
-                    <div class="proof-stat">
-                        <span class="proof-number">0</span>
-                        <span class="proof-label">Setup fees</span>
-                    </div>
-                </div>
+            <div class="trust-signals">
+                ✓ Free 3-month trial  
+                ✓ 5 clients included  
+                ✓ Cancel anytime
             </div>
+        </div>
+        
+        <div class="hero-image">
+            <!-- Screenshot of the app -->
+            <img src="/images/app-screenshot.png" alt="GardenBuddy Interface">
         </div>
     </section>
     
     <!-- Problem Section -->
-    <section class="problem-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">The Reality</div>
-                <h2 class="section-title">You're Losing Money Every Day</h2>
-                <p class="section-subtitle">
-                    Paper notebooks, WhatsApp chaos, and forgotten appointments are costing you thousands.
-                </p>
+    <section class="problems">
+        <h2>You're Wasting 10+ Hours Per Week On:</h2>
+        
+        <div class="problem-grid">
+            <div class="problem">
+                <div class="icon">📱</div>
+                <h3>WhatsApp Chaos</h3>
+                <p>Buried messages. Missed appointments. 
+                   Lost job details.</p>
+                <span class="cost">= £200/week lost</span>
             </div>
             
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <div class="problem-icon">📱</div>
-                    <h3>WhatsApp Nightmare</h3>
-                    <p>Buried messages, confused clients, double bookings. You're spending 2 hours a day just coordinating schedules.</p>
-                    <span class="problem-cost">= £240/month wasted</span>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">📋</div>
-                    <h3>Payment Delays</h3>
-                    <p>Chasing invoices, forgotten payments, awkward conversations. Average 30-day payment delay.</p>
-                    <span class="problem-cost">= £500/month cash flow hit</span>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">❌</div>
-                    <h3>Missed Appointments</h3>
-                    <p>Client forgot, weather changed, no confirmation. 1 in 10 bookings results in a no-show.</p>
-                    <span class="problem-cost">= £300/month lost revenue</span>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">💸</div>
-                    <h3>Expensive Software</h3>
-                    <p>£50-100/month for complicated systems you don't need. Features you'll never use.</p>
-                    <span class="problem-cost">= £600-1200/year wasted</span>
-                </div>
+            <div class="problem">
+                <div class="icon">📋</div>
+                <h3>Paper Notes</h3>
+                <p>Can't find what you wrote. Client asks 
+                   "what did we discuss?"</p>
+                <span class="cost">= Unprofessional look</span>
+            </div>
+            
+            <div class="problem">
+                <div class="icon">🤷</div>
+                <h3>Plant ID Guesswork</h3>
+                <p>Spend 15 minutes searching Google. 
+                   Still not sure.</p>
+                <span class="cost">= Look inexperienced</span>
             </div>
         </div>
     </section>
@@ -1341,8 +1435,8 @@
             <h2>Try Everything Free for 3 Months</h2>
             <p>Join garden contractors who've stopped losing money to chaos. Production ready.</p>
             
-            <div style="margin: 2rem 0;">
-                <a href="GardenManager%20AI/registration.html" class="email-submit" style="text-decoration: none; display: inline-block;">Launch GardenManager Pro</a>
+            <div class="final-cta-launch">
+                <a href="GardenManager%20AI/registration.html" class="email-submit final-cta-launch-link">Launch GardenManager Pro</a>
             </div>
             
             <p class="trial-benefits">
@@ -1429,6 +1523,15 @@
             }
         }
 
+        function showUserTypeModal() {
+            document.getElementById('roleModal').classList.add('active');
+        }
+
+        function scrollToDemo() {
+            // Scroll to the solution section as a demo area
+            document.querySelector('.solution-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
         // FAQ Toggle
         document.querySelectorAll('.faq-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -1490,7 +1593,7 @@ In the meantime, try the demo apps below!`);
         }, observerOptions);
         
         // Add animation to sections on scroll
-        document.querySelectorAll('.problem-card, .solution-card, .pricing-card, .faq-item').forEach(el => {
+        document.querySelectorAll('.problem, .problem-card, .solution-card, .pricing-card, .faq-item').forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(20px)';
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';

@@ -7,6 +7,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
     <style>
         :root {
             --primary: #2E7D32;
@@ -147,6 +148,12 @@
         }
         
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .label-flex {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -158,8 +165,8 @@
     <div class="content">
         <form id="jobForm" onsubmit="handleSubmit(event)">
             <div class="form-group">
-                <label class="form-label">Client</label>
-                <select id="clientSelect" class="form-select" required>
+                <label class="form-label" for="clientSelect">Client</label>
+                <select id="clientSelect" class="form-select" required aria-label="Client">
                     <option value="">Select a client...</option>
                 </select>
             </div>
@@ -181,13 +188,13 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Date</label>
-                        <input type="date" id="dateInput" class="form-input" required>
+                        <input type="date" id="dateInput" class="form-input" required placeholder="Select date" title="Select date">
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Time</label>
-                        <input type="time" id="timeInput" class="form-input" required>
+                        <input type="time" id="timeInput" class="form-input" required placeholder="Select time" title="Select time">
                     </div>
                 </div>
             </div>
@@ -203,7 +210,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                <label class="form-label label-flex">
                     <input type="checkbox" id="urgentInput">
                     Mark as Urgent
                 </label>
@@ -218,8 +225,6 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://mpodufbvckfxafgnazyv.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wb2R1ZmJ2Y2tmeGFmZ25henl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTcyMDQsImV4cCI6MjA4NDk5MzIwNH0.yGJYd4I2Il_S5qedpBpujz-tPUjw-tD1HVH7TgwQZUA";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;

@@ -63,7 +63,7 @@ GardenBuddy is a comprehensive gardening intelligence platform that combines AI 
 
 ### Browser Version (Simplest)
 
-1. Download the `gardenbuddy.html` file
+1. Download the `index.html` file
 
 2. Open it in any modern browser (Chrome, Firefox, Safari, Edge)
 
@@ -148,7 +148,7 @@ graph TD
 
 ```txt
 gardenbuddy/
-├── gardenbuddy.html          # Main application file
+├── index.html                # Main application file
 ├── README.md                 # This documentation
 ├── LICENSE                   # MIT License
 ├── CONTRIBUTING.md          # Contribution guidelines
@@ -374,7 +374,7 @@ git checkout -b feature/your-feature
 # ... edit files ...
 
 # 4. Test your changes
-# Open gardenbuddy.html in browser
+# Open index.html in browser
 
 # 5. Commit and push
 git add .

@@ -6,7 +6,7 @@
     <title>GardenBuddy - Your Garden Intelligence</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
     <style>
         .visually-hidden {
             position: absolute !important;
@@ -1320,7 +1320,7 @@
                 <div class="qr-share-container">
                     <img id="shareQrCode" src="" alt="Share QR Code" class="share-qr-img">
                     <div class="qr-logo-overlay">
-                        <img src="logo.svg" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <img src="../image/logo.svg" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span class="qr-logo-overlay-text visually-hidden">🌱</span>
                     </div>
                 </div>
@@ -2992,8 +2992,9 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
     </script>
 
     <!-- 🔥 SUPABASE INTEGRATION -->
+    <script src="../config.js"></script>
     <script type="module">
-        import { supabase, auth, db, realtime } from './supabase-client.js';
+        import { supabase, auth, db, realtime } from '../supabase-client.js';
 
         // Make Supabase services available globally for the inline scripts
         window.supabase = supabase;
