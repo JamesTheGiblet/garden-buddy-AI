@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - GardenBuddy Ecosystem</title>
+    <link rel="icon" type="image/svg+xml" href="../../image/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/auth.css">
+</head>
+<body>
+    <a href="../../index.html" class="nav-home">← Home</a>
+    <div class="auth-card">
+        <img src="../../image/logo.svg" alt="GardenBuddy" class="logo">
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Join the GardenBuddy ecosystem</p>
+        
+        <input type="text" id="authName" class="auth-input" placeholder="Full Name">
+        <input type="email" id="authEmail" class="auth-input" placeholder="Email Address">
+        <!-- Input referenced from GardenBuddy AI/login.html in this repository. -->
+        <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+        
+        <label for="authRole" class="auth-label">Account Type</label>
+        <select id="authRole" class="auth-select" title="Select your account type">
+            <option value="client">I am a Home Gardener (Free)</option>
+            <option value="contractor">I am a Professional Contractor</option>
+        </select>
+
+        <div id="authError" class="auth-error"></div>
+        
+        <button id="authRegisterBtn" class="auth-btn" type="button">Sign Up</button>
+        <!-- Button referenced from GardenBuddy AI/registration.html in this repository. -->
+        <button onclick="window.location.href='login.html'" class="auth-btn auth-toggle-btn" type="button">Already have an account?</button>
+    </div>
+
+    <script src="../../config.js"></script>
+    <script type="module">
+        import { auth } from '../../supabase-client.js';
+
+        async function handleRegister() {
+            const name = document.getElementById('authName').value;
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const role = document.getElementById('authRole').value;
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('authRegisterBtn');
+
+            if (!name || !email || !password) {
+                showError("All fields are required");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 3C21 3 19 13 10 16C5 17.5 2 16 2 16C2 16 5.5 13.5 8 10C10.5 6.5 10 2 10 2C10 2 17 2 21 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16L4 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Creating Account...`;
+            errorEl.style.display = 'none';
+
+            try {
+                // Pass role as userType to auth.signUp
+                const { data, error } = await auth.signUp(email, password, name, role);
+                
+                if (error) throw error;
+
+                if (data.session) {
+                    localStorage.setItem('gb_token', data.session.access_token);
+                    
+                    if (role === 'contractor') {
+                        window.location.href = '../../GardenManager AI/index.html';
+                    } else {
+                        window.location.href = '../../GardenBuddy AI/index.html';
+                    }
+                } else {
+                    // Email confirmation required case
+                    window.location.href = `check_email.html?email=${encodeURIComponent(email)}`;
+                }
+            } catch (error) {
+                showError(error.message || "Registration failed");
+                btn.disabled = false;
+                btn.textContent = "Sign Up";
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('authRegisterBtn').onclick = handleRegister;
+    </script>
+</body>
+</html>

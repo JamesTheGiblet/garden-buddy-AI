@@ -23,8 +23,9 @@ export const auth = {
       options: {
         data: {
           name: name,
-          user_type: userType
-        }
+          role: userType
+        },
+        emailRedirectTo: new URL('email_confirmed.html', window.location.href).href
       }
     })
     
@@ -90,7 +91,7 @@ export const auth = {
   // Reset password for email
   async resetPasswordForEmail(email) {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href.replace(/login\.html|index\.html/, 'password_reset.html')
+      redirectTo: new URL('password_reset.html', window.location.href).href
     })
     if (error) throw error
     return data

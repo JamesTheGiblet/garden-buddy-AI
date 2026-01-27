@@ -1,0 +1,22 @@
+:root {
+    --earth-dark: #1a2910;
+    --garden-primary: #2D5016;
+    --fresh-growth: #4a7c2c;
+    --lawn-green: #6B9146;
+    --morning-light: #f4f7f0;
+    --tool-steel: #5a6268;
+    --warning-amber: #d4a017;
+    --money-green: #2e7d32;
+    
+    --font-display: 'Bitter', serif;
+    --font-body: 'Work Sans', sans-serif;
+    
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 6rem;
+    
+    --shadow-soft: 0 2px 12px rgba(45, 80, 22, 0.08);
+    --shadow-strong: 0 4px 24px rgba(45, 80, 22, 0.15);
+}

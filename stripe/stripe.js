@@ -22,9 +22,7 @@ const PRICES = {
  * @param {string} userId - User's ID (optional)
  * @param {string} plan - 'monthly' or 'yearly'
  */
-async function upgradeToP
-
-ro(userEmail, userId = null, plan = 'monthly') {
+async function upgradeToPro(userEmail, userId = null, plan = 'monthly') {
   try {
     console.log('Starting upgrade to Pro:', { userEmail, userId, plan });
     
@@ -176,7 +174,7 @@ async function handlePaymentSuccess() {
     
     // Redirect to app after 2 seconds
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = '../../GardenManager AI/index.html';
     }, 2000);
     
   } catch (error) {

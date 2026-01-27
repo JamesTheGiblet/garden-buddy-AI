@@ -52,7 +52,7 @@ garden-buddy-AI/
 │   └── README.md         # Contractor App Documentation
 │
 ├── gardener.html         # Landing Page for Gardeners
-├── index.html            # Main Landing Page
+├── landing_page.html     # Main Landing Page
 └── config.js             # Shared Configuration
 ```
 

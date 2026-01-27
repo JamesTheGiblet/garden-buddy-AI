@@ -4,1171 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GardenManager Pro</title>
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../config.js"></script>
     <style>
-        :root {
-            --primary: #2E7D32;
-            --primary-dark: #1B5E20;
-            --primary-light: #4CAF50;
-            --accent: #00C853;
-            --background: #F8FDF8;
-            --surface: #FFFFFF;
-            --text: #1A1A1A;
-            --text-secondary: #666666;
-            --danger: #F44336;
-            --warning: #FF9800;
-            --success: #4CAF50;
-            --border: #E0E0E0;
-            --shadow: 0 2px 8px rgba(0,0,0,0.1);
-            --bottom-bar: 60px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.4;
-            padding-bottom: var(--bottom-bar);
-            overflow-x: hidden;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            color: white;
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .business-info h1 {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .business-info .subtitle {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-
-        /* Superuser Badge */
-        .superuser-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: linear-gradient(135deg, #ff9800, #ff5722);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            z-index: 101;
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 0.5rem;
-        }
-
-        .stat-number {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            opacity: 0.8;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 1rem;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-button {
-            background: var(--surface);
-            border: none;
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s;
-        }
-
-        .action-button:active {
-            transform: scale(0.98);
-        }
-
-        .action-button .icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .action-button .label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--primary);
-        }
-
-        .action-button.scan {
-            background: linear-gradient(135deg, var(--accent), var(--primary-light));
-            color: white;
-        }
-
-        .action-button.scan .label {
-            color: white;
-        }
-
-        .action-button.super {
-            background: linear-gradient(135deg, #ff9800, #ff5722);
-            color: white;
-        }
-
-        .action-button.super .label {
-            color: white;
-        }
-
-        /* Dashboard Cards */
-        .dashboard-card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .view-all {
-            color: var(--primary);
-            font-size: 0.9rem;
-            text-decoration: none;
-        }
-
-        /* Clients List */
-        .clients-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .client-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem;
-            background: var(--background);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-        }
-
-        .client-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-
-        .client-avatar {
-            width: 50px;
-            height: 50px;
-            background: var(--primary-light);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .client-info {
-            flex: 1;
-        }
-
-        .client-name {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .client-garden {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
-
-        .client-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .status-healthy { background: var(--success); }
-        .status-warning { background: var(--warning); }
-        .status-urgent { background: var(--danger); }
-
-        /* Jobs Today */
-        .jobs-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .job-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--background);
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s;
-        }
-
-        .job-item:hover {
-            transform: translateX(5px);
-        }
-
-        .job-item.urgent {
-            border-left-color: var(--danger);
-            background: #FFEBEE;
-        }
-
-        .job-time {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .job-details {
-            flex: 1;
-            margin-left: 1rem;
-        }
-
-        .job-client {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .job-service {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .job-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-pending { background: #FFF3E0; color: #E65100; }
-        .status-confirmed { background: #E8F5E9; color: var(--success); }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem 0;
-            height: var(--bottom-bar);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: var(--text-secondary);
-            padding: 0.5rem;
-            flex: 1;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-icon {
-            font-size: 1.3rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .nav-label {
-            font-size: 0.7rem;
-        }
-
-        /* QR Scanner Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1001;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--surface);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            text-align: center;
-        }
-
-        .modal-body {
-            padding: 2rem;
-            text-align: center;
-        }
-
-        #qr-scanner {
-            width: 100%;
-            height: 300px;
-            background: #000;
-            margin: 1rem 0;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        /* Loading States */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Superuser Tools Panel */
-        .superuser-panel {
-            background: linear-gradient(135deg, #fff3e0, #ffecb3);
-            border: 2px solid #ff9800;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .superuser-panel h3 {
-            color: #e65100;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .superuser-tools {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-
-        .super-tool {
-            background: white;
-            border: 1px solid #ffcc80;
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .super-tool:hover {
-            background: #fff3e0;
-        }
-
-        /* Responsive */
-        @media (min-width: 768px) {
-            .quick-actions {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .stats-bar {
-                grid-template-columns: repeat(5, 1fr);
-            }
-            
-            .superuser-tools {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        /* Custom classes for moved inline styles */
-        .superuser-badge-hidden {
-            display: none;
-        }
-        .logout-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            margin-left: auto;
-            cursor: pointer;
-        }
-        .superuser-panel-hidden {
-            display: none;
-        }
-        .quick-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        .quick-stats-item {
-            text-align: center;
-            padding: 0.75rem;
-            background: var(--background);
-            border-radius: 8px;
-        }
-        .quick-stats-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .quick-stats-value.success {
-            color: var(--success);
-        }
-        .quick-stats-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        .message-badge {
-            display: none;
-            position: absolute;
-            top: 5px;
-            right: 25%;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .scan-result {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: var(--background);
-            border-radius: 10px;
-            display: none;
-        }
-        .qr-demo-box {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #e3f2fd;
-            border-radius: 8px;
-        }
-        .qr-demo-text {
-            font-size: 0.9rem;
-            color: #1976d2;
-            margin-bottom: 0.5rem;
-        }
-        .qr-demo-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: #2196f3;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        header { background-color: #2e7d32; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { margin: 0; font-size: 1.25rem; }
+        .menu-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        main { padding: 1rem; max-width: 600px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn { display: block; width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        .btn-primary { background-color: #2e7d32; color: white; }
+        .btn-primary:hover { background-color: #1b5e20; }
+        .btn-secondary { background-color: #e8f5e9; color: #2e7d32; }
+        .btn-secondary:hover { background-color: #c8e6c9; }
+        
+        /* New Dashboard Styles */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .stat-card { background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.5rem; font-weight: bold; color: #2e7d32; }
+        .stat-label { font-size: 0.875rem; color: #666; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+        .list-group { list-style: none; padding: 0; margin: 0; }
+        .list-item { border-bottom: 1px solid #eee; padding: 0.75rem 0; display: flex; justify-content: space-between; align-items: center; }
+        .list-item:last-child { border-bottom: none; }
+        .item-main { font-weight: 500; }
+        .item-sub { font-size: 0.85rem; color: #666; }
+        .status-badge { padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; }
+        .status-pending { background: #fff3e0; color: #e65100; }
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 <body>
-    <!-- Main App -->
-    <div>
-        <!-- Superuser Badge -->
-        <div id="superuserBadge" class="superuser-badge superuser-badge-hidden">
-            🔓 SUPERUSER
+    <header>
+        <h1>GardenManager Pro</h1>
+        <button class="menu-btn" onclick="handleLogout()" style="font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.5); padding: 0.25rem 0.75rem; border-radius: 4px;">Log Out</button>
+    </header>
+    <main>
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="todayJobsCount">0</div>
+                <div class="stat-label">Jobs Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalClientsCount">0</div>
+                <div class="stat-label">Total Clients</div>
+            </div>
         </div>
 
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <button type="button" class="menu-toggle" onclick="toggleMenu()">☰</button>
-                <div class="business-info">
-                    <h1 id="businessName">Loading...</h1>
-                    <div class="subtitle" id="businessSubtitle">Loading...</div>
-                </div>
-                <button type="button" onclick="logout()" class="logout-btn">🚪</button>
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <div class="action-grid">
+                <button class="btn btn-primary" onclick="window.location.href='scan.html'">📱 Scan Client</button>
+                <button class="btn btn-primary" onclick="window.location.href='new-job.html'">🛠️ New Job</button>
+                <button class="btn btn-secondary" onclick="messageAll()">📢 Message All</button>
+                <button class="btn btn-secondary" onclick="viewCalendar()">📅 Calendar</button>
             </div>
-            
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-number" id="statJobs">0</div>
-                    <div class="stat-label">Today</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statRevenue">£0</div>
-                    <div class="stat-label">Revenue</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statClients">0</div>
-                    <div class="stat-label">Clients</div>
-                </div>
-            </div>
-        </header>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Superuser Tools Panel (Shows only for superuser) -->
-            <div id="superuserPanel" class="superuser-panel superuser-panel-hidden">
-                <h3>⚡ Superuser Tools</h3>
-                <div class="superuser-tools">
-                    <div class="super-tool" onclick="addDemoClient()">➕ Add Demo Client</div>
-                    <div class="super-tool" onclick="addDemoJob()">🛠️ Add Demo Job</div>
-                    <div class="super-tool" onclick="simulatePayment()">💰 Simulate Payment</div>
-                    <div class="super-tool" onclick="clearAllData()">🗑️ Clear All Data</div>
-                    <div class="super-tool" onclick="exportAllData()">📤 Export Data</div>
-                    <div class="super-tool" onclick="window.location.href='scan.html'">📱 Simulate QR Connect</div>
-                </div>
-            </div>
+        <div class="card">
+            <h3>Today's Jobs</h3>
+            <ul class="list-group" id="jobsList">
+                <li class="list-item" style="justify-content: center; color: #666;">Loading...</li>
+            </ul>
+        </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <button type="button" class="action-button scan" onclick="window.location.href='scan.html'">
-                    <div class="icon">📱</div>
-                    <div class="label">Scan Client</div>
-                </button>
-                <button type="button" class="action-button" onclick="window.location.href='new-job.html'">
-                    <div class="icon">🛠️</div>
-                    <div class="label">New Job</div>
-                </button>
-                <button type="button" class="action-button" onclick="messageAll()">
-                    <div class="icon">📢</div>
-                    <div class="label">Message All</div>
-                </button>
-                <button type="button" class="action-button" onclick="viewCalendar()">
-                    <div class="icon">📅</div>
-                    <div class="label">Calendar</div>
-                </button>
-            </div>
-
-            <!-- Today's Jobs -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h2 class="card-title">🛠️ Today's Jobs</h2>
-                    <a href="#" class="view-all" onclick="viewAllJobs()">View All</a>
-                </div>
-                <div class="jobs-list" id="todayJobs">
-                    <!-- Jobs loaded dynamically -->
-                    <div class="loading"><div class="spinner"></div></div>
-                </div>
-            </div>
-
-            <!-- Clients -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h2 class="card-title">👥 Recent Clients</h2>
-                    <a href="#" class="view-all" onclick="viewAllClients()">View All</a>
-                </div>
-                <div class="clients-list" id="clientsList">
-                    <!-- Clients loaded dynamically -->
-                    <div class="loading"><div class="spinner"></div></div>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h2 class="card-title">📊 Quick Stats</h2>
-                </div>
-                <div class="quick-stats-grid">
-                    <div class="quick-stats-item">
-                        <div class="quick-stats-value" id="statTotalRevenue">£0</div>
-                        <div class="quick-stats-label">Total Revenue</div>
-                    </div>
-                    <div class="quick-stats-item">
-                        <div class="quick-stats-value success" id="statCompletedJobs">0</div>
-                        <div class="quick-stats-label">Completed Jobs</div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item active" onclick="showDashboard()">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Home</div>
-            </a>
-            <a href="#calendar" class="nav-item" onclick="showCalendar()">
-                <div class="nav-icon">📅</div>
-                <div class="nav-label">Calendar</div>
-            </a>
-            <a href="#clients" class="nav-item" onclick="showClients()">
-                <div class="nav-icon">👥</div>
-                <div class="nav-label">Clients</div>
-            </a>
-            <a href="#messages" class="nav-item" onclick="showMessages()">
-                <div class="nav-icon">💬</div>
-                <div class="nav-label">Messages</div>
-                <span id="messageBadge" class="message-badge">3</span>
-            </a>
-            <a href="#profile" class="nav-item" onclick="showProfile()">
-                <div class="nav-icon">👤</div>
-                <div class="nav-label">Profile</div>
-            </a>
-        </nav>
-    </div>
-
+        <div class="card">
+            <h3>Recent Clients</h3>
+            <ul class="list-group" id="clientsList">
+                <li class="list-item" style="justify-content: center; color: #666;">Loading...</li>
+            </ul>
+        </div>
+    </main>
     <script>
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase client using variables from config.js
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // App State
-        let currentUser = null;
-        let authToken = null;
-        let isSuperuser = false;
-        
-        // Demo Data
-        const DEMO_CLIENTS = [
-            { id: '1', name: 'Smith Family', garden: 'Rose Garden Estate', healthStatus: 'urgent', nextDue: 'Today' },
-            { id: '2', name: 'Jones Residence', garden: 'Lawn & Borders', healthStatus: 'healthy', nextDue: 'Mar 20' },
-            { id: '3', name: 'Patel Cottage', garden: 'Vegetable Patch', healthStatus: 'warning', nextDue: 'Overdue' },
-            { id: '4', name: 'Williams Mansion', garden: 'Formal Gardens', healthStatus: 'healthy', nextDue: 'Apr 1' },
-            { id: '5', name: 'Brown Apartment', garden: 'Balcony Garden', healthStatus: 'healthy', nextDue: 'Mar 25' },
-            { id: '6', name: 'Taylor Villa', garden: 'Orchard & Pond', healthStatus: 'warning', nextDue: 'Mar 22' }
-        ];
+        function initApp() {
+            console.log('Welcome to GardenManager Pro!');
+            loadDashboardData();
+        }
 
-        const DEMO_JOBS = [
-            { id: '1', clientName: 'Smith Family', service: 'Rose Pruning', time: '09:00', status: 'confirmed', urgent: true },
-            { id: '2', clientName: 'Jones Residence', service: 'Lawn Treatment', time: '11:30', status: 'confirmed', urgent: false },
-            { id: '3', clientName: 'Williams Mansion', service: 'Hedge Trimming', time: '14:00', status: 'pending', urgent: false },
-            { id: '4', clientName: 'Patel Cottage', service: 'Vegetable Bed Prep', time: '16:00', status: 'pending', urgent: false }
-        ];
-
-        // Initialize app
-        async function initApp() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+        async function loadDashboardData() {
+            const { data, error } = await sb.auth.getSession();
             
-            if (session) {
-                currentUser = session.user;
-                // Add business info to user object if available in metadata
-                currentUser.businessName = session.user.user_metadata?.businessName || 'GardenManager Pro';
-                currentUser.location = session.user.user_metadata?.location || '';
-                
-                authToken = session.access_token;
-                
-                // Hardcoded superuser check
-                if (currentUser.email && currentUser.email.toLowerCase() === 'gilbertjam@live.com') {
-                    isSuperuser = true;
-                    document.getElementById('superuserBadge').classList.remove('superuser-badge-hidden');
-                    document.getElementById('superuserPanel').classList.remove('superuser-panel-hidden');
-                } else {
-                    isSuperuser = false;
-                }
-                
-                await loadDashboard();
-            } else {
-                window.location.href = 'login.html';
+            if (error || !data.session) {
+                console.log('Not logged in or connection error');
+                window.location.href = '../global/login/login.html';
+                return;
             }
-        }
-        
-        // Load dashboard data
-        async function loadDashboard() {
-            updateBusinessInfo();
-            await loadTodayJobs();
-            await loadClients();
-            await loadStats();
-        }
-        
-        // Update business info
-        function updateBusinessInfo() {
-            document.getElementById('businessName').textContent = currentUser?.businessName || 'GardenManager Pro';
-            document.getElementById('businessSubtitle').textContent = 
-                `${currentUser?.clientCount || 0} Clients • ${currentUser?.location || ''} ${isSuperuser ? '• 🔓 SUPERUSER' : ''}`;
-        }
-        
-        // Load today's jobs
-        async function loadTodayJobs() {
-            const jobsList = document.getElementById('todayJobs');
-            
-            // Show loading
-            jobsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Fetch jobs from Supabase
-                const { data: jobs, error } = await supabaseClient
-                    .from('jobs')
-                    .select(`
-                        *,
-                        pairing:pairing_id (
-                            *
-                        )
-                    `)
-                    .eq('contractor_id', currentUser.id)
-                    .eq('scheduled_date', today);
 
-                if (error) throw error;
+            const user = data.session.user;
+            console.log('✅ Supabase Connected as ' + user.email);
 
-                // Map Supabase data to UI format
-                const formattedJobs = jobs.map(job => ({
-                    id: job.id,
-                    clientName: job.pairing?.client_name || job.pairing?.name || 'Unknown Client',
-                    service: job.service,
-                    time: (job.scheduled_time || '00:00').substring(0, 5),
-                    status: job.status,
-                    urgent: job.urgent
-                }));
-
-                renderJobs(formattedJobs);
-            } catch (error) {
-                console.error('Error loading jobs:', error);
-                jobsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--danger);">Failed to load jobs</div>';
-            }
-        }
-        
-        function renderJobs(jobs) {
-            const jobsList = document.getElementById('todayJobs');
+            // 1. Get Stats (Clients count)
+            const { count: clientCount } = await sb
+                .from('pairings')
+                .select('*', { count: 'exact', head: true })
+                .eq('contractor_id', user.id);
             
-            if (jobs.length === 0) {
-                jobsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No jobs scheduled for today</div>';
-            } else {
-                jobsList.innerHTML = jobs.map(job => `
-                    <div class="job-item ${job.urgent ? 'urgent' : ''}">
-                        <div class="job-time">${formatTime(job.time)}</div>
-                        <div class="job-details">
-                            <div class="job-client">${job.clientName}</div>
-                            <div class="job-service">${job.service}</div>
+            document.getElementById('totalClientsCount').innerText = clientCount || 0;
+
+            // 2. Get Today's Jobs
+            const today = new Date().toISOString().split('T')[0];
+            const { data: jobs } = await sb
+                .from('jobs')
+                .select(`*, pairings ( client_name )`)
+                .eq('contractor_id', user.id)
+                .eq('scheduled_date', today)
+                .order('scheduled_time');
+
+            const jobsList = document.getElementById('jobsList');
+            jobsList.innerHTML = '';
+
+            if (jobs && jobs.length > 0) {
+                document.getElementById('todayJobsCount').innerText = jobs.length;
+                jobs.forEach(job => {
+                    const clientName = job.pairings?.client_name || 'Unknown Client';
+                    const time = job.scheduled_time ? job.scheduled_time.substring(0, 5) : '--:--';
+                    
+                    const li = document.createElement('li');
+                    li.className = 'list-item';
+                    li.innerHTML = `
+                        <div>
+                            <div class="item-main">${clientName}</div>
+                            <div class="item-sub">${time} • ${job.service}</div>
                         </div>
-                        <div class="job-status ${job.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}">
-                            ${job.status}
-                        </div>
-                    </div>
-                `).join('');
+                        <span class="status-badge status-${job.status}">${job.status}</span>
+                    `;
+                    jobsList.appendChild(li);
+                });
+            } else {
+                document.getElementById('todayJobsCount').innerText = '0';
+                jobsList.innerHTML = '<li class="list-item" style="justify-content: center;"><a href="new-job.html" style="color: #2e7d32; text-decoration: none; font-weight: 500;">No jobs scheduled today. Create one!</a></li>';
             }
-        }
-        
-        // Load clients
-        async function loadClients() {
+
+            // 3. Get Recent Clients
+            const { data: clients } = await sb
+                .from('pairings')
+                .select('*')
+                .eq('contractor_id', user.id)
+                .order('paired_at', { ascending: false })
+                .limit(5);
+
             const clientsList = document.getElementById('clientsList');
-            clientsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            
-            try {
-                let formattedClients = [];
+            clientsList.innerHTML = '';
 
-                // Fetch pairings (clients) from Supabase
-                const { data: pairings, error } = await supabaseClient
-                    .from('pairings')
-                    .select('*')
-                    .eq('contractor_id', currentUser.id)
-                    .order('paired_at', { ascending: false });
-
-                if (!error && pairings) {
-                    formattedClients = pairings.map(p => ({
-                        id: p.id,
-                        name: p.client_name,
-                        garden: p.garden_details || 'Home Garden',
-                        healthStatus: 'healthy',
-                        nextDue: ''
-                    }));
-                }
-
-                // Merge with Local Demo Clients (from scan.html fallback)
-                const localClients = JSON.parse(localStorage.getItem('gm_demo_clients') || '[]');
-                if (localClients.length > 0) {
-                    const localFormatted = localClients.map(p => ({
-                        id: p.id,
-                        name: p.client_name,
-                        garden: p.garden_details || 'Home Garden',
-                        healthStatus: 'healthy',
-                        nextDue: 'Just Added'
-                    }));
-                    formattedClients = [...localFormatted, ...formattedClients];
-                }
-
-                renderClients(formattedClients);
-                
-                // Update client count in header
-                currentUser.clientCount = formattedClients.length;
-                updateBusinessInfo();
-            } catch (error) {
-                console.error('Error loading clients:', error);
-                
-                // Even on error, try to show local clients
-                const localClients = JSON.parse(localStorage.getItem('gm_demo_clients') || '[]');
-                if (localClients.length > 0) {
-                    const formattedClients = localClients.map(p => ({
-                        id: p.id,
-                        name: p.client_name,
-                        garden: p.garden_details || 'Home Garden',
-                        healthStatus: 'healthy',
-                        nextDue: 'Just Added'
-                    }));
-                    renderClients(formattedClients);
-                    currentUser.clientCount = formattedClients.length;
-                    updateBusinessInfo();
-                } else {
-                    clientsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--danger);">Failed to load clients</div>';
-                }
-            }
-        }
-        
-        function renderClients(clients) {
-            const clientsList = document.getElementById('clientsList');
-            
-            if (clients.length === 0) {
-                clientsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No clients yet</div>';
-            } else {
-                clientsList.innerHTML = clients.map(client => `
-                    <div class="client-item" onclick="viewClient('${client.id}')">
-                        <div class="client-avatar">${client.name.charAt(0)}</div>
-                        <div class="client-info">
-                            <div class="client-name">${client.name}</div>
-                            <div class="client-garden">${client.garden || 'Home Garden'}</div>
-                            <div class="client-status">
-                                <div class="status-dot status-${client.healthStatus || 'healthy'}"></div>
-                                <span>${client.nextDue ? `Due: ${client.nextDue}` : 'No schedule'}</span>
-                            </div>
+            if (clients && clients.length > 0) {
+                clients.forEach(client => {
+                    const li = document.createElement('li');
+                    li.className = 'list-item';
+                    li.innerHTML = `
+                        <div>
+                            <div class="item-main">${client.client_name}</div>
+                            <div class="item-sub">${client.garden_details || 'No details'}</div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                    clientsList.appendChild(li);
+                });
+            } else {
+                clientsList.innerHTML = '<li class="list-item" style="justify-content: center;"><a href="scan.html" style="color: #2e7d32; text-decoration: none; font-weight: 500;">No clients yet. Scan one!</a></li>';
             }
         }
-        
-        // Load stats
-        async function loadStats() {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Get today's jobs stats
-                const { data: todayJobs, error: jobsError } = await supabaseClient
-                    .from('jobs')
-                    .select('price, status')
-                    .eq('contractor_id', currentUser.id)
-                    .eq('scheduled_date', today);
 
-                if (jobsError) throw jobsError;
-
-                const jobCount = todayJobs.length;
-                const revenue = todayJobs.reduce((sum, job) => sum + (job.price || 0), 0);
-                
-                // Get total clients count
-                const { count: clientCount, error: clientError } = await supabaseClient
-                    .from('pairings')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('contractor_id', currentUser.id);
-
-                if (clientError) throw clientError;
-
-                // Get total completed jobs
-                const { count: completedCount, error: completedError } = await supabaseClient
-                    .from('jobs')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('contractor_id', currentUser.id)
-                    .eq('status', 'completed');
-
-                if (completedError) throw completedError;
-
-                // Update UI
-                document.getElementById('statJobs').textContent = jobCount;
-                document.getElementById('statRevenue').textContent = `£${revenue}`;
-                document.getElementById('statClients').textContent = clientCount;
-                document.getElementById('statCompletedJobs').textContent = completedCount;
-                
-                // Estimate total revenue (mock calculation for now as it requires heavy query)
-                document.getElementById('statTotalRevenue').textContent = `£${revenue * 30}`; 
-
-            } catch (error) {
-                console.error('Failed to load stats:', error);
-            }
-        }
-        
-        // ============ SUPERUSER TOOLS ============
-        function addDemoClient() {
-            if (!isSuperuser) return;
-            
-            const newClientId = DEMO_CLIENTS.length + 1;
-            const demoNames = ['Green House', 'Miller Estate', 'Wilson Garden', 'Davis Farm'];
-            const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
-            
-            const newClient = {
-                id: newClientId.toString(),
-                name: randomName,
-                garden: 'New Garden Setup',
-                healthStatus: 'healthy',
-                nextDue: 'In 1 week'
-            };
-            
-            DEMO_CLIENTS.push(newClient);
-            loadClients();
-            loadStats();
-            
-            alert(`✅ Added demo client: ${randomName}`);
-        }
-        
-        function addDemoJob() {
-            if (!isSuperuser) return;
-            
-            const services = ['Lawn Mowing', 'Tree Pruning', 'Garden Cleanup', 'Soil Treatment', 'Planting Service'];
-            const randomService = services[Math.floor(Math.random() * services.length)];
-            const randomClient = DEMO_CLIENTS[Math.floor(Math.random() * DEMO_CLIENTS.length)];
-            
-            const newJob = {
-                id: (DEMO_JOBS.length + 1).toString(),
-                clientName: randomClient.name,
-                service: randomService,
-                time: `${Math.floor(Math.random() * 12) + 9}:${Math.random() > 0.5 ? '30' : '00'}`,
-                status: 'pending',
-                urgent: Math.random() > 0.7
-            };
-            
-            DEMO_JOBS.push(newJob);
-            loadTodayJobs();
-            loadStats();
-            
-            alert(`✅ Added demo job: ${randomService} for ${randomClient.name}`);
-        }
-        
-        function simulatePayment() {
-            if (!isSuperuser) return;
-            
-            const amount = Math.floor(Math.random() * 500) + 100;
-            const revenueEl = document.getElementById('statRevenue');
-            const totalRevenueEl = document.getElementById('statTotalRevenue');
-            
-            // Update displayed amounts
-            const currentRevenue = parseInt(revenueEl.textContent.replace('£', '')) || 0;
-            const currentTotal = parseInt(totalRevenueEl.textContent.replace('£', '').replace(',', '')) || 0;
-            
-            revenueEl.textContent = `£${currentRevenue + amount}`;
-            totalRevenueEl.textContent = `£${currentTotal + amount}`;
-            
-            alert(`💰 Simulated payment received: £${amount}`);
-        }
-        
-        function clearAllData() {
-            if (!isSuperuser) return;
-            
-            if (confirm('⚠️ Clear all demo data? This will reset clients and jobs.')) {
-                // Keep first few items for demo
-                DEMO_CLIENTS.length = 4;
-                DEMO_JOBS.length = 3;
-                
-                loadDashboard();
-                alert('✅ All demo data cleared (kept basic demo items)');
-            }
-        }
-        
-        function exportAllData() {
-            if (!isSuperuser) return;
-            
-            const exportData = {
-                clients: DEMO_CLIENTS,
-                jobs: DEMO_JOBS,
-                exportDate: new Date().toISOString(),
-                user: currentUser,
-                isSuperuser: isSuperuser
-            };
-            
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const link = document.createElement('a');
-            link.href = dataUri;
-            link.download = `gardenmanager-export-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('📤 Data exported successfully!');
-        }
-        
-        // ============ UTILITY FUNCTIONS ============
-        function formatTime(timeString) {
-            if (!timeString) return 'Anytime';
-            return timeString;
-        }
-        
-        function formatDate(dateString) {
-            if (!dateString) return 'Unknown';
-            return dateString;
-        }
-        
-        async function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                await supabaseClient.auth.signOut();
-                window.location.href = '../index.html';
-            }
-        }
-        
-        // Navigation functions
-        function showDashboard() {
-            // Update active nav
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-            // In full app, would load dashboard content
-        }
-        
-        function showCalendar() {
-            alert('📅 Calendar view would open here in full app');
-        }
-        
-        function showClients() {
-            alert('👥 Clients list would open here in full app');
-        }
-        
-        function showMessages() {
-            alert('💬 Messages would open here in full app');
-        }
-        
-        function showProfile() {
-            alert(`👤 Profile:
-Username: ${currentUser?.email}
-Business: ${currentUser?.businessName}
-Access: ${isSuperuser ? '🔓 SUPERUSER' : 'Standard'}`);
-        }
-        
-        function viewAllJobs() {
-            alert(`🛠️ All Jobs view would open here
-Total jobs: ${DEMO_JOBS.length}`);
-        }
-        
-        function viewAllClients() {
-            alert(`👥 All Clients view would open here
-Total clients: ${DEMO_CLIENTS.length}`);
-        }
-        
-        function viewClient(clientId) {
-            const client = DEMO_CLIENTS.find(c => c.id === clientId) || DEMO_CLIENTS[0];
-            alert(`👤 Client Details:
-Name: ${client.name}
-Garden: ${client.garden}
-Status: ${client.healthStatus}
-Next Due: ${client.nextDue}
-
-Actions available in full app:
-• View garden details
-• Message client
-• Schedule job
-• View history`);
-        }
-        
         function messageAll() {
             alert('📢 Bulk messaging tool would open here');
         }
-        
+
         function viewCalendar() {
             alert('📅 Calendar view would open here');
         }
-        
-        function toggleMenu() {
-            alert('☰ Menu would open here');
+
+        async function handleLogout() {
+            await sb.auth.signOut();
+            window.location.href = '../global/login/login.html';
         }
-        
+
         // Initialize on load
         document.addEventListener('DOMContentLoaded', initApp);
-        
+
         // Service Worker for PWA
-        if ('serviceWorker' in navigator) {
+        // Only register service worker if supported and not running on file:// protocol
+        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
+                navigator.serviceWorker.register('./sw.js');
             });
         }
     </script>
