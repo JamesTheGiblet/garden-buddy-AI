@@ -468,8 +468,11 @@
         async function loadKnowledgeBase() {
             try {
                 const response = await fetch('https://gist.githubusercontent.com/JamesTheGiblet/a112d7f704ed1a2f1cb6595a51e6f5a8/raw/f308454349355b4567eaf2d4fea73c00af58c848/garden-buddy-ai-json');
-                knowledgeBase = await response.json();
-                console.log('Knowledge base loaded:', knowledgeBase.version);
+                const data = await response.json();
+                if (data && data.diagnostic_questions) {
+                    knowledgeBase = data;
+                    console.log('Knowledge base loaded:', knowledgeBase.version);
+                }
             } catch (e) {
                 console.error('Failed to load knowledge base:', e);
             }
@@ -958,6 +961,8 @@
         // Format message (add line breaks, etc.)
         function formatMessage(content) {
             return content
+                .replace(/<text>/g, '')
+                .replace(/<\/text>/g, '')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>')
                 .replace(/•/g, '•');
@@ -1341,6 +1346,10 @@ Keep teaching me with /teach for better personalized advice!`;
             }
             
             if (message === '/export') {
+                if (!authToken && !isProUser) {
+                    return "⚠️ **Guest Mode Restriction**\n\nExporting data is only available for registered accounts. Please create a free account to save and export your garden data.";
+                }
+
                 const dataStr = JSON.stringify(gardenMemory, null, 2);
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                 
@@ -1369,6 +1378,7 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
             // Check for garden-related keywords
             const keywords = {
                 water: "💧 Watering is an art! It depends on your soil and plants. How often are you currently watering, and do you check if the soil is dry first?",
+                season: getSeasonalTips(),
                 sun: "☀️ Sunlight is energy for plants. Most veggies need 6-8 hours. Do you know which parts of your garden get the most sun?",
                 soil: "🌱 Soil health is the foundation of a good garden. Have you ever tested your soil pH, or do you add compost regularly?",
                 pest: "🐛 Pests can be annoying. What kind of damage are you seeing? Holes in leaves, discolored spots, or visible bugs?",
@@ -1380,8 +1390,7 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
                 when: "📅 Timing is everything. To help with dates, I need to know your location. Are you in the UK, US, or elsewhere?",
                 fertiliz: "🌿 Feeding plants gives them a boost. What kind of fertilizer do you use? Organic compost, liquid feed, or granules?",
                 compost: "♻️ Black gold! Compost improves everything. Do you make your own compost pile, or buy it in bags?",
-                seed: "🌱 Starting from seed is rewarding. Are you starting them indoors on a windowsill, or sowing directly outside?",
-                season: "🍂 Gardening changes with the seasons. What are your main goals for this current season?"
+                seed: "🌱 Starting from seed is rewarding. Are you starting them indoors on a windowsill, or sowing directly outside?"
             };
             
             for (const [keyword, response] of Object.entries(keywords)) {
@@ -1401,6 +1410,25 @@ Import it anytime by pasting into LocalStorage or use /import (coming soon).`;
             
             // Fallback to proactive conversation
             return `I'm listening! ${getNextConversationPrompt()}`;
+        }
+
+        function getSeasonalTips() {
+            const month = new Date().getMonth(); // 0-11
+            const tips = [
+                "❄️ **January:** It's cold! Focus on planning your year, ordering seeds, and pruning apple/pear trees while dormant.",
+                "❄️ **February:** Prune wisteria and late-flowering clematis. Chit seed potatoes indoors.",
+                "🌱 **March:** Sow tomatoes and peppers indoors. Plant onion sets and early potatoes outside if soil is not frozen.",
+                "🌱 **April:** Sow hardy annuals. Protect fruit blossom from late frosts. Keep weeding!",
+                "🌱 **May:** Plant out frost-tender veggies like zucchini and beans once frost risk passes. Earth up potatoes.",
+                "☀️ **June:** Water regularly, especially containers. Pinch out tomato side shoots. Harvest early salads.",
+                "☀️ **July:** Harvest courgettes, beans, and peas. Keep watering. Deadhead flowers to prolong blooming.",
+                "☀️ **August:** Harvest time! Tomatoes, peppers, and corn should be ready. Water in dry spells.",
+                "🍂 **September:** Harvest maincrop potatoes. Plant spring cabbage. Net ponds before leaf fall.",
+                "🍂 **October:** Tidy up fallen leaves. Cut back perennials. Plant garlic and autumn onion sets.",
+                "🍂 **November:** Plant tulip bulbs. Lift dahlia tubers. Protect tender plants from frost.",
+                "❄️ **December:** Protect outdoor taps. Harvest winter veg like parsnips and leeks. Review your garden year!"
+            ];
+            return tips[month];
         }
 
         // Search Knowledge Base
