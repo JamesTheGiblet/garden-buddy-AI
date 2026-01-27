@@ -1,0 +1,1915 @@
+<!-- GardenBuddy AI/chat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Garden Buddy 4U</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <style>
+        .api-key-info { font-size: 0.75rem; color: #666; margin-bottom: 0.5rem; }
+        .external-link-white { color: #fff; text-decoration: underline; }
+        .external-link-primary { color: var(--garden-primary); }
+
+        /* Sidebar & Layout Styles */
+        .chat-wrapper {
+            display: flex;
+            height: calc(100vh - 135px); /* Adjust for header + tabs */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-sidebar {
+            width: 260px;
+            background-color: #f9fbf9;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: var(--garden-green);
+            font-size: 1rem;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .history-group { margin-bottom: 1rem; }
+        .history-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin: 0.5rem 0.5rem 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .history-item {
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background 0.2s;
+        }
+        .history-item:hover { background-color: #e8f5e9; }
+
+        .chat-main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-width: 0;
+            background: white;
+        }
+
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.25rem;
+        }
+
+        /* Mobile Responsive Sidebar */
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                background: white;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                width: 80%;
+                max-width: 300px;
+            }
+            .chat-sidebar.open { transform: translateX(0); }
+            
+            .sidebar-overlay {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3);
+                z-index: 15;
+            }
+            .sidebar-overlay.active { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">Garden Buddy 4U</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- User Details Modal -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="teachingsCount">0</div>
+                        <div class="stat-label">Teachings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="plantsCount">0</div>
+                        <div class="stat-label">Plants</div>
+                    </div>
+                </div>
+                <button class="submit-button share-btn" type="button" onclick="toggleShareModal()">Share with a Friend</button>
+                <button class="submit-button logout-btn" type="button" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">
+                        OpenWeatherMap API Key
+                        <span class="info-icon" tabindex="0">?
+                            <span class="info-tooltip">
+                                This data is saved locally. <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-white">Get a free API key here</a>.
+                            </span>
+                        </span>
+                    </label>
+                    <div class="api-key-info">
+                        Don't have a key? <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-primary">Sign up for free</a> to get weather updates.
+                    </div>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button replay-tutorial-btn" type="button" onclick="replayTutorial()">Replay Tutorial</button>
+                    <button class="submit-button clear-chat-btn" type="button" onclick="clearChatHistory()" style="background-color: #FF9800; margin-top: 0.5rem;">Clear Chat History</button>
+                    <button class="submit-button export-chat-btn" type="button" onclick="exportChatHistory()" style="background-color: #4CAF50; margin-top: 0.5rem;">Export Chat History</button>
+                    <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
+                    <button class="submit-button report-bug-btn" type="button" onclick="reportBug()">Report Bug</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="tutorial-step-icon">🌱</div>
+                    <h2>Welcome to Garden Buddy 4U</h2>
+                    <p class="tutorial-step-desc">Your personal AI-powered gardening assistant that learns and grows with your garden.</p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(2)">Start Tour</button>
+                </div>
+                <div id="tutorialStep2" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🤖</div>
+                    <h2>I Learn From You</h2>
+                    <p class="tutorial-step-desc">Use <strong>/teach</strong> to tell me about your garden.</p>
+                    <div class="message-bubble tutorial-message-bubble">
+                        /teach I have 2 raised beds<br>
+                        /teach My soil is clay-heavy
+                    </div>
+                    <br>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(3)">Next</button>
+                </div>
+                <div id="tutorialStep3" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🛠️</div>
+                    <h2>Smart Tools</h2>
+                    <p class="tutorial-step-desc">
+                        <strong>Plants:</strong> Browse and add plants.<br>
+                        <strong>Calendar:</strong> Track watering and harvest.<br>
+                        <strong>Weather:</strong> Get local forecasts.
+                    </p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(4)">Next</button>
+                </div>
+                <div id="tutorialStep4" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🌍</div>
+                    <h2>Quick Setup</h2>
+                    <p class="tutorial-step-desc">Where is your garden located?</p>
+                    <input class="request-input tutorial-location-input" id="tutorialLocation" placeholder="e.g. London">
+                    <button class="submit-button" type="button" onclick="finishTutorial()">All Set!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" type="button" onclick="location.reload()">Chat</button>
+            <button class="tab-button" type="button" onclick="window.location.href='qr-code.html'">Contractor</button>
+            <button class="tab-button" type="button" onclick="window.location.href='index.html'">Plants</button>
+            <button class="tab-button" type="button" onclick="window.location.href='index.html#calendar'">Calendar</button>
+            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
+        </div>
+
+        <!-- Chat Content -->
+        <div id="chat" class="tab-content active">
+            <div class="chat-wrapper">
+                <!-- Sidebar -->
+                <aside class="chat-sidebar" id="chatSidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-title">History</div>
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()">×</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items populated by JS -->
+                    </div>
+                </aside>
+                <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+                <!-- Main Chat Area -->
+                <div class="chat-main-area">
+                    <div class="chat-container" id="chatContainer">
+                        <div style="padding: 0.5rem;">
+                            <button class="sidebar-toggle-btn" onclick="toggleSidebar()" style="background:#f0f0f0; border-radius:4px; padding:2px 8px;">☰ History</button>
+                        </div>
+                        <div class="welcome-message">
+                            <div class="welcome-icon">🌱</div>
+                            <h2 class="welcome-title">Welcome to Garden Buddy 4U</h2>
+                            <p class="welcome-text">
+                                I'll learn about your specific garden and help you tend it successfully. 
+                                Start by teaching me about your garden layout!
+                            </p>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
+                                <div class="action-icon">🛏️</div>
+                                <div class="action-text">Teach Layout</div>
+                            </div>
+                            <div class="quick-action" onclick="showPlantSelector()">
+                                <div class="action-icon">🌿</div>
+                                <div class="action-text">Add Plants</div>
+                            </div>
+                            <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
+                                <div class="action-icon">📅</div>
+                                <div class="action-text">Seasonal Tips</div>
+                            </div>
+                            <div class="quick-action" onclick="sendMessage('/stats')">
+                                <div class="action-icon">📊</div>
+                                <div class="action-text">View Stats</div>
+                            </div>
+                            <div class="quick-action" onclick="startDiagnosticWizard()">
+                                <div class="action-icon">🩺</div>
+                                <div class="action-text">Diagnose</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <div class="command-hints">
+                            <div class="command-hint" onclick="insertCommand('/teach ')">💡 /teach</div>
+                            <div class="command-hint" onclick="insertCommand('My plant is ')">🌿 Plant Issue</div>
+                            <div class="command-hint" onclick="insertCommand('When should I ')">📅 Timing</div>
+                            <div class="command-hint" onclick="insertCommand('/gist add ')">📝 /gist</div>
+                            <div class="command-hint" onclick="insertCommand('/wrong ')">✏️ /wrong</div>
+                            <div class="command-hint" onclick="sendMessage('/why')">/why</div>
+                            <div class="command-hint" onclick="sendMessage('/help')">/help</div>
+                            <div class="command-hint" onclick="sendMessage('/export')">💾 /export</div>
+                            <div class="command-hint" onclick="clearChatHistory()">🗑️ Clear</div>
+                        </div>
+                        <div class="input-wrapper">
+                            <textarea 
+                                class="input-field" 
+                                id="userInput" 
+                                placeholder="Tell me about your garden..."
+                                rows="1"
+                                onkeydown="handleKeyPress(event)"
+                            ></textarea>
+                            <label for="photoInput" class="visually-hidden">Upload Photo</label>
+                            <input type="file" id="photoInput" accept="image/*" class="hidden-file-input" onchange="handlePhotoUpload(this)" title="Upload Photo">
+                            <button class="mic-button" type="button" onclick="triggerPhotoUpload()" title="Upload Photo">📷</button>
+                            <button class="mic-button" type="button" id="micButton" onclick="toggleVoiceInput()" title="Voice Input">
+                                🎤
+                            </button>
+                            <button class="send-button" type="button" onclick="sendMessage()" id="sendButton">
+                                ➤
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrade Modal (Needed for Pro features in chat) -->
+        <div id="upgradeModal" class="modal upgrade-modal-hidden">
+          <div class="modal-content">
+            <button class="close-button" type="button" onclick="closeUpgradeModal()">×</button>
+            <h2>🌟 Upgrade to Pro</h2>
+            <p class="upgrade-modal-desc">Unlock unlimited plants and advanced features</p>
+            <div class="pro-features-grid">
+                <div class="pro-feature-item">🎤 <strong>Voice input</strong> - "Hey Garden Buddy 4U, when should I water?"</div>
+                <div class="pro-feature-item">📸 <strong>Photo diagnosis</strong> - Upload sick plant → AI identifies issue</div>
+                <div class="pro-feature-item">📊 <strong>Advanced analytics</strong> - Plant health trends, harvest predictions</div>
+                <div class="pro-feature-item">🔔 <strong>Smart notifications</strong> - "Water tomatoes today" push alerts</div>
+                <div class="pro-feature-item">📅 <strong>Unlimited calendar events</strong> - Free = 10, Pro = unlimited</div>
+                <div class="pro-feature-item">🌱 <strong>Unlimited plants</strong> - Free = 5, Pro = unlimited</div>
+                <div class="pro-feature-item">☁️ <strong>Cloud backup</strong> - Auto-sync across devices</div>
+                <div class="pro-feature-item">🎨 <strong>Custom themes</strong> - Personalize interface</div>
+                <div class="pro-feature-item">📈 <strong>Seasonal planning</strong> - AI suggests planting schedule</div>
+                <div class="pro-feature-item">💬 <strong>Priority support</strong> - Fast response times</div>
+            </div>
+            <div class="pricing-options">
+              <div class="pricing-card" onclick="selectPlan('monthly')">
+                <h3>Monthly</h3>
+                <div class="price">£2.99<span>/month</span></div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('monthly')">Choose Monthly</button>
+              </div>
+              <div class="pricing-card popular" onclick="selectPlan('yearly')">
+                <span class="popular-badge">Save 20%</span>
+                <h3>Yearly</h3>
+                <div class="price">£28.99<span>/year</span></div>
+                <div class="savings">Save £6.89/year</div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('yearly')">Choose Yearly</button>
+              </div>
+            </div>
+            <p class="upgrade-modal-note">📧 Clicking choose will open your email client to request access.</p>
+          </div>
+        </div>
+
+        <!-- Share Modal -->
+        <div id="shareModal" class="modal">
+            <div class="modal-content share-modal-content">
+                <span class="close-button" onclick="toggleShareModal()">&times;</span>
+                <h2>Share Garden Buddy 4U</h2>
+                <p class="share-modal-desc">Scan to share with a friend</p>
+                <div class="qr-share-container">
+                    <img id="shareQrCode" src="" alt="Share QR Code" class="share-qr-img">
+                    <div class="qr-logo-overlay">
+                        <img src="../image/logo.svg" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="qr-logo-overlay-text visually-hidden">🌱</span>
+                    </div>
+                </div>
+                <div class="share-modal-actions">
+                    <button class="submit-button" type="button" onclick="copyShareLink()">Copy Link</button>
+                    <button class="submit-button native-share-btn" type="button" onclick="shareNative()" id="nativeShareBtn">Share</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- API Configuration ---
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+            ? 'http://localhost:3000/api' 
+            : 'https://api.gardenbuddy.app';
+        let authToken = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
+        let currentUserId = null;
+        let currentUserEmail = null;
+        let isProUser = false;
+        let recentResponses = new Set();
+        let conversationContext = {
+            lastTopics: [],
+            questionsAsked: new Set(),
+            userMood: 'neutral',
+            lastPlantMentioned: null,
+            sessionStartTime: Date.now(),
+            consecutiveQuestions: 0,
+            lastResponseType: null,
+            // NEW: Language style tracking
+            languageProfile: {
+                formality: 'neutral', // casual, neutral, formal
+                vocabulary: [], // Words user frequently uses
+                sentenceLength: 'medium', // short, medium, long
+                usesEmojis: false,
+                usesSlang: false,
+                preferredGreeting: null,
+                technicalLevel: 'basic' // basic, intermediate, advanced
+            }
+        };
+
+        let gardenMemory = {
+            teachings: [],
+            corrections: [],
+            gists: [],
+            gardenLayout: { beds: [], sunPatterns: [], soilType: '', lastUpdate: null },
+            plants: [],
+            issues: [],
+            harvests: [],
+            version: '1.0.0',
+            calendar: [],
+            settings: { location: 'London', apiKey: '' },
+            chatHistory: []
+        };
+
+        let wizardState = { active: false, category: null, step: 0, answers: [] };
+        let knowledgeBase = { version: "1.0.0-fallback", categories: {}, diagnostic_questions: {} };
+        let plantDatabase = {};
+
+        function loadMemory() {
+            const saved = localStorage.getItem('gardenbuddy_memory');
+            if (saved) {
+                try {
+                    gardenMemory = JSON.parse(saved);
+                    if (!gardenMemory.calendar) gardenMemory.calendar = [];
+                    if (!gardenMemory.settings) gardenMemory.settings = { location: 'London', apiKey: '' };
+                    if (!gardenMemory.gists) gardenMemory.gists = [];
+                    if (!gardenMemory.chatHistory) gardenMemory.chatHistory = [];
+                    
+                    updateStatsDisplay();
+                    renderHistorySidebar();
+                    
+                    if (gardenMemory.chatHistory && gardenMemory.chatHistory.length > 0) {
+                        gardenMemory.chatHistory.forEach(msg => {
+                            addMessage(msg.type, msg.content, true);
+                        });
+                    }
+                } catch (e) { console.error('Failed to load memory:', e); }
+            }
+        }
+
+        async function loadKnowledgeBase() {
+            try {
+                const response = await fetch('https://gist.githubusercontent.com/JamesTheGiblet/a112d7f704ed1a2f1cb6595a51e6f5a8/raw/f308454349355b4567eaf2d4fea73c00af58c848/garden-buddy-ai-json');
+                const data = await response.json();
+                if (data && data.diagnostic_questions) knowledgeBase = data;
+            } catch (e) { console.error('Failed to load knowledge base:', e); }
+        }
+
+        function saveMemory() {
+            try {
+                localStorage.setItem('gardenbuddy_memory', JSON.stringify(gardenMemory));
+                updateStatsDisplay();
+            } catch (e) { console.error('Failed to save memory:', e); }
+        }
+
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                document.getElementById('settingLocation').value = gardenMemory.settings.location || '';
+                document.getElementById('settingApiKey').value = gardenMemory.settings.apiKey || '';
+            }
+        }
+
+        function saveSettings() {
+            const loc = document.getElementById('settingLocation').value;
+            const key = document.getElementById('settingApiKey').value;
+            gardenMemory.settings.location = loc;
+            gardenMemory.settings.apiKey = key;
+            saveMemory();
+            const userLocEl = document.getElementById('userLocation');
+            if (userLocEl) userLocEl.textContent = loc;
+            toggleSettingsModal();
+            addMessage('assistant', `Settings updated! Location set to ${loc}.`);
+        }
+
+        function clearChatHistory() {
+            if (confirm("Are you sure you want to clear your chat history?")) {
+                gardenMemory.chatHistory = [];
+                saveMemory();
+                const chatContainer = document.getElementById('chatContainer');
+                const messages = chatContainer.querySelectorAll('.message');
+                messages.forEach(msg => msg.remove());
+                if (!chatContainer.querySelector('.welcome-message')) {
+                    const welcomeDiv = document.createElement('div');
+                    welcomeDiv.className = 'welcome-message';
+                    welcomeDiv.innerHTML = `<div class="welcome-icon">🌱</div><h2 class="welcome-title">Welcome to Garden Buddy 4U</h2><p class="welcome-text">I'll learn about your specific garden and help you tend it successfully. Start by teaching me about your garden layout!</p>`;
+                    const quickActions = chatContainer.querySelector('.quick-actions');
+                    if (quickActions) chatContainer.insertBefore(welcomeDiv, quickActions);
+                    else chatContainer.prepend(welcomeDiv);
+                }
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) settingsModal.style.display = 'none';
+                renderHistorySidebar();
+            }
+        }
+
+        function exportChatHistory() {
+            if (!gardenMemory.chatHistory || gardenMemory.chatHistory.length === 0) {
+                alert("No chat history to export.");
+                return;
+            }
+            let chatText = "Garden Buddy 4U - Chat History\nExported on: " + new Date().toLocaleString() + "\n\n----------------------------------------\n\n";
+            gardenMemory.chatHistory.forEach(msg => {
+                const time = new Date(msg.timestamp).toLocaleString();
+                const sender = msg.type === 'user' ? 'You' : 'Garden Buddy';
+                let content = msg.content.replace(/<br\s*\/?>/gi, '\n').replace(/<\/?[^>]+(>|$)/g, "");
+                chatText += `[] :\n\n\n`;
+            });
+            const blob = new Blob([chatText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gardenbuddy-chat-history-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to clear all data? This will wipe your garden memory and settings.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function reportBug() { window.open('https://github.com/JamesTheGiblet/garden-buddy-AI/issues/new', '_blank'); }
+
+        function initTutorial() {
+            if (!localStorage.getItem('gardenbuddy_tutorial_complete')) {
+                document.getElementById('tutorialModal').style.display = 'flex';
+                showTutorialStep(1);
+            }
+        }
+
+        function showTutorialStep(step) {
+            document.querySelectorAll('.tutorial-step').forEach(el => el.style.display = 'none');
+            document.getElementById('tutorialStep' + step).style.display = 'block';
+        }
+
+        function nextTutorialStep(step) { showTutorialStep(step); }
+
+        function finishTutorial() {
+            const loc = document.getElementById('tutorialLocation').value;
+            if (loc) {
+                gardenMemory.settings.location = loc;
+                saveMemory();
+                document.getElementById('settingLocation').value = loc;
+                addMessage('assistant', `Great! I've set your location to .`);
+            }
+            localStorage.setItem('gardenbuddy_tutorial_complete', 'true');
+            document.getElementById('tutorialModal').style.display = 'none';
+        }
+        
+        function replayTutorial() {
+            const settings = document.getElementById('settingsModal');
+            if (settings) settings.style.display = 'none';
+            document.getElementById('tutorialModal').style.display = 'flex';
+            showTutorialStep(1);
+        }
+
+        function toggleProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        }
+
+        function handleProTab() {
+            if (isProUser) window.location.href = 'index.html#pro';
+            else showProLimitModal();
+        }
+
+        async function initializePlantDatabase() {
+            if (Object.keys(plantDatabase).length === 0) {
+                let loaded = false;
+                if (window.supabase) {
+                    try {
+                        const { data, error } = await window.supabase.from('plants').select('*');
+                        if (!error && data && data.length > 0) {
+                            data.forEach(p => {
+                                plantDatabase[p.name.toLowerCase()] = {
+                                    emoji: (p.metadata && p.metadata.emoji) ? p.metadata.emoji : '🌱',
+                                    type: p.type || 'vegetable',
+                                    sun: p.sun || 'Unknown',
+                                    water: p.water || 'Regular',
+                                    daysToHarvest: p.days_to_harvest || 0
+                                };
+                            });
+                            loaded = true;
+                        }
+                    } catch (err) { console.warn("Supabase plant fetch failed", err); }
+                }
+                if (!loaded) {
+                    plantDatabase = {
+                        'tomato': { emoji: '🍅', type: 'vegetable', sun: 'Full sun (6-8 hours)', water: '1-2 inches per week', daysToHarvest: 60 },
+                        'basil': { emoji: '🌿', type: 'herb', sun: 'Partial to full sun', water: 'Keep soil moist', daysToHarvest: 30 },
+                        'lettuce': { emoji: '🥬', type: 'vegetable', sun: 'Partial sun', water: 'Keep soil moist', daysToHarvest: 45 },
+                        'carrot': { emoji: '🥕', type: 'vegetable', sun: 'Full sun', water: '1 inch per week', daysToHarvest: 70 },
+                        'pepper': { emoji: '🫑', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 65 },
+                        'cucumber': { emoji: '🥒', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 55 },
+                        'zucchini': { emoji: '🥒', type: 'vegetable', sun: 'Full sun', water: '1-2 inches per week', daysToHarvest: 50 },
+                        'strawberry': { emoji: '🍓', type: 'fruit', sun: 'Full sun', water: '1 inch per week', daysToHarvest: 90 },
+                        'rosemary': { emoji: '🌿', type: 'herb', sun: 'Full sun', water: 'Let soil dry between', daysToHarvest: 90 },
+                        'mint': { emoji: '🌿', type: 'herb', sun: 'Partial sun', water: 'Keep soil moist', daysToHarvest: 30 },
+                        'sunflower': { emoji: '🌻', type: 'flower', sun: 'Full sun', water: 'Moderate', daysToHarvest: 80 },
+                        'lavender': { emoji: '🪻', type: 'herb', sun: 'Full sun', water: 'Drought tolerant', daysToHarvest: 120 }
+                    };
+                }
+            }
+        }
+
+        function showPlantSelector() {
+            const chatContainer = document.getElementById('chatContainer');
+            const selectorDiv = document.createElement('div');
+            selectorDiv.className = 'message assistant';
+            selectorDiv.innerHTML = `
+                <div class="message-avatar">🌱</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div style="margin-bottom: 0.5rem;">Select plants to add to your garden:</div>
+                        <div class="plant-cards">
+                            ${Object.entries(plantDatabase).slice(0, 6).map(([name, data]) => `
+                                <div class="plant-card" onclick="addPlantToGarden('')">
+                                    <div class="plant-emoji">${data.emoji}</div>
+                                    <div class="plant-name"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                            Or type "/teach I planted [plant name]" to add custom plants.
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(selectorDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function addPlantToGarden(plantName) {
+            const limit = isProUser ? Infinity : 5;
+            if (gardenMemory.plants.length >= limit) { showProLimitModal(); return; }
+            const lookupName = plantName.toLowerCase();
+            const data = plantDatabase[lookupName] || { emoji: '🌱', type: 'vegetable' };
+            const newPlant = { name: plantName, emoji: data.emoji, type: data.type, plantedDate: Date.now(), location: 'Unknown', notes: '' };
+            gardenMemory.plants.push(newPlant);
+            saveMemory();
+            if (window.supabase && authToken) {
+                try {
+                    if (!currentUserId) { const { data: { user } } = await window.supabase.auth.getUser(); if (user) currentUserId = user.id; }
+                    if (currentUserId) {
+                        const payload = { name: newPlant.name, type: newPlant.type, planted_at: new Date(newPlant.plantedDate).toISOString(), location: newPlant.location, notes: newPlant.notes, user_id: currentUserId, metadata: { emoji: newPlant.emoji } };
+                        await window.supabase.from('plants').insert([payload]);
+                    }
+                } catch (e) { console.error('Supabase plant sync failed', e); }
+            }
+            addMessage('assistant', `Added  to your garden! Use /teach to specify where it's planted and add more details.`);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('teachingsCount').textContent = gardenMemory.teachings.length;
+            document.getElementById('plantsCount').textContent = gardenMemory.plants.length;
+            if (gardenMemory.settings && gardenMemory.settings.location) document.getElementById('userLocation').textContent = gardenMemory.settings.location;
+        }
+
+        async function handleLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                if (window.supabaseAuth) await window.supabaseAuth.signOut();
+                localStorage.removeItem('gb_token');
+                sessionStorage.removeItem('gb_token');
+                localStorage.removeItem('guestMode');
+                authToken = null;
+                window.location.href = '../global/login/login.html';
+            }
+        }
+
+        function initGuestUI() { localStorage.setItem('gb_guest_id', 'guest_' + Math.floor(Math.random() * 10000)); }
+
+        async function initUserData(user) {
+            currentUserId = user.id;
+            currentUserEmail = user.email;
+            const name = user.user_metadata?.name || user.name || user.email;
+            if (name) document.getElementById('userName').innerText = name;
+            await checkProStatus(user.id);
+        }
+
+        async function checkProStatus(userId) {
+            if (!window.supabase) return;
+            try {
+                const { data } = await window.supabase.from('user_profiles').select('subscription_tier').eq('id', userId).maybeSingle();
+                if (data && data.subscription_tier === 'pro') {
+                    isProUser = true;
+                    document.getElementById('userSubscription').innerText = 'Pro Plan';
+                } else {
+                    isProUser = false;
+                    document.getElementById('userSubscription').innerText = 'Free Plan';
+                }
+            } catch (e) { console.error('Pro check failed', e); }
+        }
+
+        function addMessage(type, content, isRestoring = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            if (type === 'user' || isRestoring) {
+                const welcome = chatContainer.querySelector('.welcome-message');
+                if (welcome) welcome.remove();
+            }
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message `;
+            let commandBadge = '';
+            if (content.startsWith('/teach')) { commandBadge = '<div class="command-badge">📚 TEACHING</div>'; if (!isRestoring) processTeaching(content); }
+            else if (content.startsWith('/wrong')) { commandBadge = '<div class="command-badge">✏️ CORRECTION</div>'; if (!isRestoring) processCorrection(content); }
+            else if (content.startsWith('/why')) { commandBadge = '<div class="command-badge">🤔 WHY</div>'; if (!isRestoring) processWhy(content); }
+            else if (content.startsWith('/help') || content.startsWith('/stats') || content.startsWith('/export')) { commandBadge = '<div class="command-badge">ℹ️ COMMAND</div>'; }
+            messageDiv.innerHTML = `<div class="message-avatar">${type === 'user' ? '👤' : '🌱'}</div><div class="message-content"><div class="message-bubble">${formatMessage(content)}</div></div>`;
+            chatContainer.appendChild(messageDiv);
+            if (!isRestoring) {
+                if (!gardenMemory.chatHistory) gardenMemory.chatHistory = [];
+                gardenMemory.chatHistory.push({ type, content, timestamp: Date.now() });
+                if (gardenMemory.chatHistory.length > 50) gardenMemory.chatHistory.shift();
+                saveMemory();
+            }
+            if (type === 'user') renderHistorySidebar();
+            setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 100);
+        }
+
+        function formatMessage(content) {
+            let text = content.replace(/<text>/g, '').replace(/<\/text>/g, '');
+            const div = document.createElement('div'); div.textContent = text; text = div.innerHTML;
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong></strong>').replace(/\n/g, '<br>').replace(/•/g, '•');
+        }
+
+        async function processTeaching(content) {
+            const teaching = content.substring(7).trim();
+            if (teaching) {
+                gardenMemory.teachings.push({ text: teaching, timestamp: Date.now(), type: 'teaching' });
+                if (window.supabase && authToken) {
+                    try {
+                        if (!currentUserId) { const { data: { user } } = await window.supabase.auth.getUser(); if (user) currentUserId = user.id; }
+                        if (currentUserId) await window.supabase.from('teachings').insert([{ teaching_type: 'teach', content: teaching, created_at: new Date().toISOString(), user_id: currentUserId }]);
+                    } catch (e) { console.error('Supabase sync failed', e); }
+                }
+                const plantedMatch = teaching.match(/planted\s+(?:a\s+|an\s+|some\s+)?([a-zA-Z]+)/i);
+                if (plantedMatch && plantedMatch[1]) {
+                    let plantName = plantedMatch[1].toLowerCase();
+                    if (plantName.endsWith('es')) plantName = plantName.slice(0, -2);
+                    else if (plantName.endsWith('s')) plantName = plantName.slice(0, -1);
+                    const dbMatch = Object.keys(plantDatabase).find(k => k === plantName || k.includes(plantName));
+                    const finalName = dbMatch ? (dbMatch.charAt(0).toUpperCase() + dbMatch.slice(1)) : (plantName.charAt(0).toUpperCase() + plantName.slice(1));
+                    await addPlantToGarden(finalName);
+                }
+                if (teaching.toLowerCase().includes('bed') || teaching.toLowerCase().includes('raised')) gardenMemory.gardenLayout.lastUpdate = Date.now();
+                if (teaching.toLowerCase().includes('planted') || teaching.toLowerCase().includes('growing')) gardenMemory.gardenLayout.lastUpdate = Date.now();
+                saveMemory();
+            }
+        }
+
+        async function processCorrection(content) {
+            const correction = content.substring(6).trim();
+            if (correction) {
+                gardenMemory.corrections.push({ text: correction, timestamp: Date.now(), type: 'correction' });
+                saveMemory();
+                if (window.supabase && authToken) {
+                    try {
+                        if (!currentUserId) { const { data: { user } } = await window.supabase.auth.getUser(); if (user) currentUserId = user.id; }
+                        if (currentUserId) await window.supabase.from('teachings').insert([{ teaching_type: 'wrong', content: correction, created_at: new Date().toISOString(), user_id: currentUserId }]);
+                    } catch (e) { console.error('Supabase sync failed', e); }
+                }
+            }
+        }
+
+        async function processWhy(content) {
+            if (window.supabase && authToken) {
+                try {
+                    if (!currentUserId) { const { data: { user } } = await window.supabase.auth.getUser(); if (user) currentUserId = user.id; }
+                    if (currentUserId) await window.supabase.from('teachings').insert([{ teaching_type: 'why', content: content, created_at: new Date().toISOString(), user_id: currentUserId }]);
+                } catch (e) { console.error('Supabase sync failed', e); }
+            }
+        }
+
+        function startDiagnosticWizard() {
+            if (!knowledgeBase || !knowledgeBase.diagnostic_questions) { addMessage('assistant', "⚠️ Knowledge base is loading... please try again in a few seconds."); return; }
+            const categories = Object.keys(knowledgeBase.diagnostic_questions);
+            const buttons = categories.map(cat => `<button class="command-hint" onclick="selectWizardCategory('')" style="margin:0.25rem; border:1px solid var(--garden-green);">${cat.replace(/_/g, ' ').toUpperCase()}</button>`).join('');
+            addMessage('assistant', `🩺 **Diagnostic Wizard**\nI can help identify issues. What type of problem are you seeing?\n\n<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>`);
+        }
+
+        function selectWizardCategory(category) {
+            wizardState = { active: true, category: category, step: 0, answers: [] };
+            addMessage('user', `Diagnose ${category.replace(/_/g, ' ')}`);
+            const questions = knowledgeBase.diagnostic_questions[category];
+            setTimeout(() => { addMessage('assistant', `📋 **Question 1/${questions.length}:**\n${questions[0]}`); }, 600);
+        }
+
+        function handleWizardStep(userMessage) {
+            const questions = knowledgeBase.diagnostic_questions[wizardState.category];
+            wizardState.answers.push({ question: questions[wizardState.step], answer: userMessage });
+            wizardState.step++;
+            if (wizardState.step < questions.length) return `📋 **Question ${wizardState.step + 1}/${questions.length}:**\n${questions[wizardState.step]}`;
+            else {
+                const category = wizardState.category;
+                const answers = wizardState.answers;
+                gardenMemory.issues.push({ type: category, date: new Date().toISOString(), details: answers });
+                saveMemory();
+                wizardState = { active: false, category: null, step: 0, answers: [] };
+                let summary = answers.map(a => `• **Q:** ${a.question}\n  **A:** ${a.answer}`).join('\n\n');
+                return `✅ **Diagnostic Complete**\n\nHere's what I've recorded:\n\n\n\nI've saved this to your garden history. Based on these symptoms, check the **${category.replace(/_/g, ' ')}** section in the Knowledge Base or ask me specifically about potential causes like "pests" or "diseases".`;
+            }
+        }
+
+        function getNextConversationPrompt() {
+            const hasLayout = gardenMemory.teachings.some(t => /bed|container|ground|pot|balcony|greenhouse/i.test(t.text));
+            if (!hasLayout) return `To give you better advice, I need to picture your garden. Are you growing in **raised beds**, **containers**, or directly in the **ground**?`;
+            
+            const hasSun = gardenMemory.teachings.some(t => /sun|shade|light/i.test(t.text));
+            if (!hasSun) return `Sunlight determines what grows best. How much sun does your garden get? (e.g. "Full sun", "Morning sun only", "Mostly shade")`;
+            
+            if (gardenMemory.plants.length === 0) return `I know about your layout, but what are you growing? You can tell me like "I planted tomatoes" or use the **Plants** tab to add them.`;
+            
+            const prompts = [
+                "I'm learning more about your garden! Is there anything specific you're worried about right now, like pests or watering?",
+                "What's the best thing happening in your garden this week?",
+                "Are you planning any new additions to the garden soon?",
+                "How are your plants handling the current weather?"
+            ];
+            return prompts[Math.floor(Math.random() * prompts.length)];
+        }
+
+        // Enhanced mood detection
+        function detectUserMood(message) {
+            const excited = /!{2,}|amazing|awesome|love|excited|great|wonderful|fantastic/i.test(message);
+            const frustrated = /ugh|annoying|dying|help|worried|concerned|problem|issue|wrong/i.test(message);
+            const curious = /\?|how|what|when|where|why|which/i.test(message);
+            
+            if (excited) return 'excited';
+            if (frustrated) return 'concerned';
+            if (curious) return 'curious';
+            return 'neutral';
+        }
+
+        // Natural language parser for implicit teachings
+        function parseNaturalTeaching(message) {
+            const patterns = [
+                { 
+                    regex: /(?:i have|i've got|there (?:is|are))\s+(\d+)\s+([a-z\s]+)/i,
+                    extract: (m) => `User has ${m[1]} ${m[2]}`,
+                    category: 'layout'
+                },
+                { 
+                    regex: /(?:my|the)\s+([a-z]+)\s+(?:is|are)\s+([a-z\s]+)/i,
+                    extract: (m) => `User's ${m[1]} is ${m[2]}`,
+                    category: 'condition'
+                },
+                { 
+                    regex: /(?:gets?|receives?)\s+(\d+)\s*(?:hours?|hrs?)\s+(?:of\s+)?sun/i,
+                    extract: (m) => `Garden gets ${m[1]} hours of sunlight`,
+                    category: 'sun'
+                },
+                { 
+                    regex: /planted?\s+(?:some\s+)?([a-z]+)\s+(?:in|on)\s+([a-z\s]+)/i,
+                    extract: (m) => {
+                        conversationContext.lastPlantMentioned = m[1];
+                        return `Planted ${m[1]} in ${m[2]}`;
+                    },
+                    category: 'planting'
+                },
+                {
+                    regex: /(?:watering?|water)\s+(?:every|once)\s+([a-z\s]+)/i,
+                    extract: (m) => `Watering schedule: ${m[1]}`,
+                    category: 'watering'
+                }
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern.regex);
+                if (match) {
+                    const extracted = pattern.extract(match);
+                    gardenMemory.teachings.push({
+                        text: extracted,
+                        timestamp: Date.now(),
+                        type: 'auto-parsed',
+                        category: pattern.category
+                    });
+                    saveMemory();
+                    
+                    // Update context
+                    conversationContext.lastTopics.push(pattern.category);
+                    if (conversationContext.lastTopics.length > 5) {
+                        conversationContext.lastTopics.shift();
+                    }
+                    
+                    return { success: true, category: pattern.category };
+                }
+            }
+            return { success: false };
+        }
+
+        // Smart follow-up generator
+        function getSmartFollowUp() {
+            const recentTopics = conversationContext.lastTopics.slice(-3);
+            
+            // Don't ask consecutive questions
+            if (conversationContext.consecutiveQuestions >= 2) {
+                conversationContext.consecutiveQuestions = 0;
+                return null;
+            }
+            
+            // Progressive questioning based on what we know
+            const hasLayout = gardenMemory.teachings.some(t => /bed|container|ground|pot/i.test(t.text));
+            const hasSun = gardenMemory.teachings.some(t => /sun|shade|light/i.test(t.text));
+            const hasSoil = gardenMemory.teachings.some(t => /soil|compost|clay|sandy/i.test(t.text));
+            const hasWatering = gardenMemory.teachings.some(t => /water|irrigation|drip/i.test(t.text));
+            
+            // Don't repeat recent topics
+            if (!hasLayout && !recentTopics.includes('layout')) {
+                conversationContext.consecutiveQuestions++;
+                return "By the way, are you growing in raised beds, containers, or in the ground?";
+            }
+            
+            if (!hasSun && !recentTopics.includes('sun') && hasLayout) {
+                conversationContext.consecutiveQuestions++;
+                return "Quick question - how much sunlight does your garden get daily?";
+            }
+            
+            if (!hasSoil && !recentTopics.includes('soil') && hasLayout && hasSun) {
+                conversationContext.consecutiveQuestions++;
+                return "What's your soil like? Clay-heavy, sandy, or pretty balanced?";
+            }
+            
+            // Reference their plants naturally
+            if (gardenMemory.plants.length > 0 && !recentTopics.includes('plants')) {
+                const randomPlant = gardenMemory.plants[Math.floor(Math.random() * gardenMemory.plants.length)];
+                conversationContext.lastPlantMentioned = randomPlant.name;
+                conversationContext.consecutiveQuestions++;
+                return `How's your ${randomPlant.emoji} ${randomPlant.name} doing lately?`;
+            }
+            
+            return null;
+        }
+
+        // Personality-based acknowledgments
+        function getPersonalizedAck(mood) {
+            const profile = conversationContext.languageProfile;
+            
+            const acknowledgments = {
+                excited: {
+                    casual: ["That's awesome! 🎉", "Yes! Love it! ✨", "You're crushing it! 💪", "Garden goals! 🏆"],
+                    formal: ["That is excellent! 🎉", "Wonderful! ✨", "You are doing remarkably well! 💪", "Outstanding progress! 🏆"]
+                },
+                concerned: {
+                    casual: ["I hear you, let's fix this 🤝", "Don't worry, we got this 💚", "I'm here to help! 🌱"],
+                    formal: ["I understand. Let us resolve this together 🤝", "Please do not worry. We shall address this 💚", "I am here to assist you 🌱"]
+                },
+                curious: {
+                    casual: ["Great question! 💡", "Ooh, good one! 🤔", "Love that you're asking! 📚"],
+                    formal: ["Excellent question! 💡", "That is a very good inquiry! 🤔", "I appreciate your curiosity! 📚"]
+                },
+                neutral: {
+                    casual: ["Got it! 👍", "Perfect! ✓", "Cool, noted! 📝"],
+                    formal: ["Understood! 👍", "Very well! ✓", "Noted! 📝"]
+                }
+            };
+            
+            const style = profile.formality === 'formal' ? 'formal' : 'casual';
+            // Fallback to neutral casual if mood/style combo missing
+            const pool = (acknowledgments[mood] && acknowledgments[mood][style]) || acknowledgments.neutral[style];
+            
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        // Add Conversational Memory References
+        function getMemoryReference() {
+            if (Math.random() > 0.85) { // 15% chance
+                const pastTeachings = gardenMemory.teachings.slice(-10);
+                const pastPlants = gardenMemory.plants.slice(-5);
+                
+                if (pastPlants.length > 0 && Math.random() > 0.5) {
+                    const plant = pastPlants[Math.floor(Math.random() * pastPlants.length)];
+                    const daysAgo = Math.floor((Date.now() - plant.plantedDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysAgo > 7) {
+                        return `\n\nBy the way, it's been ${daysAgo} days since you planted your ${plant.emoji} ${plant.name}. How's it doing?`;
+                    }
+                }
+                
+                if (pastTeachings.length > 3) {
+                    const teaching = pastTeachings[Math.floor(Math.random() * pastTeachings.length)];
+                    const daysAgo = Math.floor((Date.now() - teaching.timestamp) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysAgo > 3 && daysAgo < 30) {
+                        return `\n\nRemembering what you told me about ${teaching.text.toLowerCase()}. Still accurate?`;
+                    }
+                }
+            }
+            
+            return '';
+        }
+
+        // Add Seasonal Context Awareness
+        function getSeasonalContext() {
+            const now = new Date();
+            const month = now.getMonth(); // 0-11
+            
+            const seasons = {
+                winter: { months: [11, 0, 1], tips: ["Planning is key in winter!", "Great time to prep beds!", "Seed catalogs are your friend!"] },
+                spring: { months: [2, 3, 4], tips: ["Prime planting season!", "Watch for late frosts!", "Time to get growing!"] },
+                summer: { months: [5, 6, 7], tips: ["Keep watering consistent!", "Harvest season is here!", "Watch for pests in the heat!"] },
+                fall: { months: [8, 9, 10], tips: ["Great for cool-season crops!", "Time to mulch!", "Harvest and preserve!"] }
+            };
+            
+            for (const [season, data] of Object.entries(seasons)) {
+                if (data.months.includes(month)) {
+                    return data.tips[Math.floor(Math.random() * data.tips.length)];
+                }
+            }
+            
+            return '';
+        }
+
+        function getVariedResponse(category) {
+            const library = {
+                water: [
+                    "💧 Watering is an art! It depends on your soil and plants. How often are you currently watering?",
+                    "🚿 Deep watering less often beats frequent shallow watering! How's your routine?",
+                    "💧 The finger test works great - stick your finger 2 inches in. Dry? Time to water!",
+                    "🌧️ If it rained recently, your plants might be good! Check the soil first.",
+                    "💧 Consistency is key. Morning watering is best - less evaporation!"
+                ],
+                sun: [
+                    "☀️ Sunlight is pure plant energy! Most veggies need 6-8 hours. Know your sun spots?",
+                    "🌞 Full sun, partial shade, or somewhere in between?",
+                    "☀️ Watch your garden through the day - shadows move more than you'd think!",
+                    "🌤️ Even leafy greens love some sun, though they tolerate shade better than fruiting plants."
+                ],
+                soil: [
+                    "🌱 Healthy soil = happy plants! Ever added compost?",
+                    "🪱 Good soil is alive! Got worms? That's a great sign!",
+                    "🌱 Sandy or clay-heavy? Each has pros and cons.",
+                    "🍂 Mulch is magic for moisture retention!"
+                ],
+                pest: [
+                    "🐛 Pests happen! Holes in leaves, sticky residue, or visible bugs?",
+                    "🐜 Let's ID them first. Aphids? Slugs? Something else?",
+                    "🐌 Describe what you're seeing and we'll tackle it together!",
+                    "🐞 Remember, not all bugs are bad! Ladybugs and bees are garden heroes."
+                ],
+                harvest: [
+                    "🌾 Harvest time is the best reward! When did you plant?",
+                    "🧺 Getting close? Look for the signs - color, size, firmness!",
+                    "🥕 From garden to plate! What's almost ready?",
+                    "🍅 Homegrown flavor is unbeatable!"
+                ],
+                default: [
+                    "🌱 I'm listening! What's on your mind?",
+                    "🌿 Tell me more about what's happening in your garden.",
+                    "🍃 I'm learning so much! What else?",
+                    "🌼 Your garden sounds interesting! Keep going."
+                ]
+            };
+
+            const options = library[category] || library.default;
+            const available = options.filter(r => !recentResponses.has(r));
+            const pool = available.length > 0 ? available : options;
+            let response = pool[Math.floor(Math.random() * pool.length)];
+            
+            // Track usage
+            recentResponses.add(response);
+            if (recentResponses.size > 20) {
+                const first = recentResponses.values().next().value;
+                recentResponses.delete(first);
+            }
+
+            // Context-aware additions (30% chance)
+            if (Math.random() < 0.3) {
+                // Reference previous plant mention
+                if (conversationContext.lastPlantMentioned && category !== 'default') {
+                    response += `\n\nYour ${conversationContext.lastPlantMentioned}s might appreciate attention to this too!`;
+                }
+                
+                // Time-based context
+                const hoursSinceStart = (Date.now() - conversationContext.sessionStartTime) / (1000 * 60 * 60);
+                if (hoursSinceStart > 24 && gardenMemory.plants.length > 0) {
+                    response += `\n\nWelcome back! Anything new in the garden since we last talked?`;
+                }
+            }
+
+            // Add memory reference at the end
+            const memoryRef = getMemoryReference();
+            response += memoryRef;
+
+            // Add seasonal tip 10% of the time
+            if (Math.random() < 0.1) {
+                const seasonalTip = getSeasonalContext();
+                if (seasonalTip) {
+                    response += `\n\n🍂 ${seasonalTip}`;
+                }
+            }
+
+            return response;
+        }
+
+        // Enhanced plant detection
+        function detectPlantMentions(message) {
+            const lowerMsg = message.toLowerCase();
+            const detectedPlants = [];
+            
+            // Check against known plants
+            for (const [plantName, data] of Object.entries(plantDatabase)) {
+                // Check plural and singular
+                const variants = [
+                    plantName,
+                    plantName + 's',
+                    plantName + 'es',
+                    plantName.slice(0, -1) // remove trailing 's'
+                ];
+                
+                for (const variant of variants) {
+                    if (lowerMsg.includes(variant)) {
+                        detectedPlants.push(plantName);
+                        conversationContext.lastPlantMentioned = plantName;
+                        break;
+                    }
+                }
+            }
+            
+            return detectedPlants;
+        }
+
+        // Conversational State Tracking
+        function updateConversationFlow(message, responseType) {
+            if (!conversationContext.flowPattern) {
+                conversationContext.flowPattern = [];
+            }
+            
+            conversationContext.flowPattern.push({
+                userMood: conversationContext.userMood,
+                responseType: responseType,
+                timestamp: Date.now()
+            });
+            
+            // Keep last 10
+            if (conversationContext.flowPattern.length > 10) {
+                conversationContext.flowPattern.shift();
+            }
+            
+            // Detect if user is in "chatty" mode
+            const recentFlow = conversationContext.flowPattern.slice(-5);
+            const chattiness = recentFlow.filter(f => 
+                f.userMood !== 'neutral' || 
+                f.responseType === 'advice'
+            ).length;
+            
+            conversationContext.isChatty = chattiness >= 3;
+        }
+
+        // Analyze user's language style
+        function analyzeUserLanguage(message) {
+            const profile = conversationContext.languageProfile;
+            
+            // Detect formality
+            const formalIndicators = /please|thank you|would you|could you|appreciate|kindly/i;
+            const casualIndicators = /hey|yeah|yep|nope|gonna|wanna|cool|awesome/i;
+            
+            if (formalIndicators.test(message)) {
+                profile.formality = 'formal';
+            } else if (casualIndicators.test(message)) {
+                profile.formality = 'casual';
+            }
+            
+            // Track vocabulary
+            const words = message.toLowerCase().match(/\b\w+\b/g) || [];
+            words.forEach(word => {
+                if (word.length > 4 && !['that', 'this', 'have', 'with', 'from'].includes(word)) {
+                    profile.vocabulary.push(word);
+                    if (profile.vocabulary.length > 50) profile.vocabulary.shift();
+                }
+            });
+            
+            // Detect sentence length preference
+            const sentenceCount = message.split(/[.!?]+/).filter(s => s.trim()).length;
+            const avgLength = message.length / Math.max(sentenceCount, 1);
+            
+            if (avgLength < 30) profile.sentenceLength = 'short';
+            else if (avgLength > 80) profile.sentenceLength = 'long';
+            else profile.sentenceLength = 'medium';
+            
+            // Detect emoji usage
+            if (/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/u.test(message)) {
+                profile.usesEmojis = true;
+            }
+            
+            // Detect slang/colloquialisms
+            const slangPatterns = /gonna|wanna|kinda|sorta|dunno|ain't|y'all/i;
+            if (slangPatterns.test(message)) {
+                profile.usesSlang = true;
+            }
+            
+            // Detect technical level
+            const technicalTerms = /photosynthesis|nitrogen|ph level|micronutrients|propagation|dormancy|companion planting/i;
+            if (technicalTerms.test(message)) {
+                profile.technicalLevel = 'advanced';
+            }
+            
+            // Detect greeting style
+            if (/^(hi|hey|hello|yo|sup|howdy)/i.test(message)) {
+                profile.preferredGreeting = message.match(/^(hi|hey|hello|yo|sup|howdy)/i)[0].toLowerCase();
+            }
+
+            // Detect regional variations
+            if (/colour|fertiliser|organise|analyse|theatre/i.test(message)) {
+                profile.region = 'UK';
+            } else if (/color|fertilizer|organize|analyze|theater|fall season/i.test(message)) {
+                profile.region = 'US';
+            }
+        }
+
+        // Mirror user's language style in responses
+        function adaptResponseToUserStyle(response) {
+            const profile = conversationContext.languageProfile;
+            
+            // Adjust formality
+            if (profile.formality === 'casual') {
+                response = response
+                    .replace(/I would/g, "I'd")
+                    .replace(/You would/g, "You'd")
+                    .replace(/cannot/g, "can't")
+                    .replace(/do not/g, "don't")
+                    .replace(/Let me/g, "Let me")
+                    .replace(/That is/g, "That's")
+                    .replace(/It is/g, "It's");
+            } else if (profile.formality === 'formal') {
+                response = response
+                    .replace(/can't/g, "cannot")
+                    .replace(/don't/g, "do not")
+                    .replace(/won't/g, "will not")
+                    .replace(/it's/gi, "it is")
+                    .replace(/that's/gi, "that is");
+            }
+            
+            // Match sentence length
+            if (profile.sentenceLength === 'short') {
+                // Break long sentences into shorter ones
+                response = response.replace(/,\s*and\s*/g, '. ');
+            }
+            
+            // Adjust emoji usage
+            if (!profile.usesEmojis) {
+                // Reduce emoji usage
+                const emojiCount = (response.match(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/gu) || []).length;
+                if (emojiCount > 2) {
+                    // Keep only first 2 emojis
+                    let count = 0;
+                    response = response.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/gu, (match) => {
+                        count++;
+                        return count <= 2 ? match : '';
+                    });
+                }
+            }
+            
+            // Mirror user's vocabulary
+            if (profile.vocabulary.length > 10) {
+                const userWords = [...new Set(profile.vocabulary)];
+                if (userWords.includes('veggie') || userWords.includes('veggies')) {
+                    response = response.replace(/vegetables?/gi, 'veggies');
+                }
+                if (userWords.filter(w => w.includes('water')).length > 3) {
+                    response = response.replace(/irrigation/gi, 'watering');
+                }
+            }
+            
+            // Match slang usage
+            if (profile.usesSlang) {
+                response = response
+                    .replace(/going to/g, "gonna")
+                    .replace(/want to/g, "wanna")
+                    .replace(/kind of/g, "kinda");
+            }
+            
+            // Adjust technical level
+            if (profile.technicalLevel === 'basic') {
+                response = response
+                    .replace(/photosynthesis/gi, 'how plants make food from sunlight')
+                    .replace(/nitrogen/gi, 'nutrients')
+                    .replace(/propagation/gi, 'growing new plants');
+            }
+
+            // Apply regional variations
+            if (profile.region === 'UK') {
+                response = response.replace(/color/gi, 'colour').replace(/fertilizer/gi, 'fertiliser').replace(/\bfall\b/gi, 'autumn').replace(/zucchini/gi, 'courgette').replace(/eggplant/gi, 'aubergine');
+            }
+            
+            return response;
+        }
+
+        // Apply regional variations to response
+        function applyRegionalVariations(response) {
+            const profile = conversationContext.languageProfile;
+            
+            if (profile.region === 'UK') {
+                response = response
+                    .replace(/color/gi, 'colour')
+                    .replace(/fertilizer/gi, 'fertiliser')
+                    .replace(/\bfall\b/gi, 'autumn')
+                    .replace(/zucchini/gi, 'courgette')
+                    .replace(/eggplant/gi, 'aubergine');
+            }
+            
+            return response;
+        }
+
+        function generateLogicResponse(message) {
+            if (wizardState.active) return handleWizardStep(message);
+            
+            const lowerMessage = message.toLowerCase();
+            const userMood = detectUserMood(message);
+            conversationContext.userMood = userMood;
+            
+            // Try auto-parsing first
+            const parsed = parseNaturalTeaching(message);
+            if (parsed.success) {
+                const ack = getPersonalizedAck(userMood);
+                const followUp = getSmartFollowUp();
+                conversationContext.lastResponseType = 'teaching';
+                
+                if (followUp) {
+                    return `${ack} I've noted that down.\n\n${followUp}`;
+                } else {
+                    return `${ack} That helps me understand your garden better!`;
+                }
+            }
+
+            // Knowledge Base
+            const kbResponse = searchKnowledgeBase(lowerMessage);
+            if (kbResponse) {
+                conversationContext.lastResponseType = 'knowledge';
+                conversationContext.consecutiveQuestions = 0;
+                return kbResponse;
+            }
+
+            // Commands
+            if (message.startsWith('/teach ')) { 
+                const teaching = message.substring(7).trim(); 
+                conversationContext.lastResponseType = 'teaching';
+                const ack = getPersonalizedAck('neutral');
+                return `${ack}\n\n"${teaching}"\n\nWhat else should I know?`;
+            }
+            
+            if (message.startsWith('/gist add ')) {
+                const content = message.substring(10).trim();
+                if (content) {
+                    if (!gardenMemory.gists) gardenMemory.gists = [];
+                    gardenMemory.gists.push({ content, timestamp: Date.now() });
+                    saveMemory();
+                    return `📝 Saved! "${content}"`;
+                }
+                return "Usage: /gist add [your note]";
+            }
+            
+            if (message.startsWith('/wrong')) {
+                const correction = message.substring(6).trim();
+                if (correction) {
+                    conversationContext.lastResponseType = 'correction';
+                    return `✓ Correction noted: "${correction}"\n\nThanks for keeping me accurate!`;
+                }
+                return "Usage: /wrong [what was incorrect]";
+            }
+            
+            if (message.startsWith('/weather')) {
+                const city = gardenMemory.settings.location || 'London';
+                const apiKey = gardenMemory.settings.apiKey;
+                if (!apiKey) return "Set your OpenWeatherMap API Key in Settings (⚙️) to get weather updates!";
+                
+                fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.cod !== 200) throw new Error(data.message);
+                        const weatherMsg = `🌦️ **${data.name} Weather:**\n• ${data.weather[0].description}\n• ${data.main.temp}°C\n• Humidity: ${data.main.humidity}%\n\nGood ${data.main.humidity > 70 ? 'for leafy greens!' : 'weather for most veggies!'}`;
+                        addMessage('assistant', weatherMsg);
+                    })
+                    .catch(e => addMessage('assistant', `⚠️ Weather error: ${e.message}`));
+                return "Checking the forecast...";
+            }
+            
+            if (message === '/why') {
+                conversationContext.lastResponseType = 'command';
+                return `🤔 **My reasoning:**\n\nI combine what you've taught me about your garden with general best practices. The more you share, the better my advice gets!\n\nYou've taught me ${gardenMemory.teachings.length} things so far.`;
+            }
+            
+            if (message === '/help') return `🌱 **Commands:**\n\n/teach - Teach me something\n/gist add - Save a note\n/wrong - Correct me\n/why - Explain reasoning\n/stats - Garden stats\n/export - Export data\n\nOr just chat naturally!`;
+            
+            if (message === '/stats') {
+                conversationContext.lastResponseType = 'command';
+                const teachings = gardenMemory.teachings.length;
+                const plants = gardenMemory.plants.length;
+                const daysActive = Math.floor((Date.now() - (gardenMemory.teachings[0]?.timestamp || Date.now())) / (1000 * 60 * 60 * 24));
+                
+                let plantList = '';
+                if (plants > 0) {
+                    plantList = '\n\n**Your Garden:**\n';
+                    gardenMemory.plants.forEach(p => {
+                        const age = Math.floor((Date.now() - p.plantedDate) / (1000 * 60 * 60 * 24));
+                        plantList += `• ${p.emoji} ${p.name} (${age} days old)\n`;
+                    });
+                }
+                
+                // Generate insight
+                let insight = '';
+                if (teachings > 10) {
+                    insight = '\n\n💡 **Insight:** You\'re building a great knowledge base! Your garden must be thriving.';
+                } else if (plants > teachings) {
+                    insight = '\n\n💡 **Tip:** The more you teach me about your setup, the better advice I can give!';
+                } else if (daysActive > 30) {
+                    insight = `\n\n💡 **Milestone:** You've been gardening with me for ${daysActive} days!`;
+                }
+                
+                return `📊 **Garden Stats:**\n• ${teachings} teachings learned\n• ${plants} plants tracked\n• ${daysActive} days active${plantList}${insight}\n\nKeep growing! 🌱`;
+            }
+            
+            if (message === '/export') {
+                if (!authToken && !isProUser) {
+                    return "⚠️ **Guest Limitation**\n\nExporting requires a free account to protect your data.";
+                }
+                const dataStr = JSON.stringify(gardenMemory, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                const link = document.createElement('a');
+                link.href = dataUri;
+                link.download = `gardenbuddy-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return `💾 Exported! Your garden data is safe.`;
+            }
+
+            // Detect plant mentions
+            const mentionedPlants = detectPlantMentions(message);
+            if (mentionedPlants.length > 0) {
+                const plant = mentionedPlants[0];
+                const plantData = plantDatabase[plant];
+                
+                if (plantData && lowerMessage.match(/how|when|should|help|problem|issue/i)) {
+                    // User asking about a specific plant
+                    conversationContext.lastPlantMentioned = plant;
+                    
+                    const responses = [
+                        `${plantData.emoji} Ah, ${plant}s! They need ${plantData.sun.toLowerCase()} and ${plantData.water.toLowerCase()}. What specific help do you need?`,
+                        `${plantData.emoji} ${plant.charAt(0).toUpperCase() + plant.slice(1)}s are great! What's happening with yours?`,
+                        `${plantData.emoji} I love ${plant}s! Are you having trouble, or just checking in?`
+                    ];
+                    
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+            }
+
+            // Contextual keyword matching with varied responses
+            conversationContext.lastResponseType = 'advice';
+            conversationContext.consecutiveQuestions = 0;
+            
+            if (lowerMessage.includes('water')) return getVariedResponse('water');
+            if (/sun|shade|light/i.test(lowerMessage)) return getVariedResponse('sun');
+            if (/soil|dirt|compost/i.test(lowerMessage)) return getVariedResponse('soil');
+            if (/pest|bug|insect|aphid|slug/i.test(lowerMessage)) return getVariedResponse('pest');
+            if (/harvest|pick|ripe|ready/i.test(lowerMessage)) return getVariedResponse('harvest');
+            
+            // Fallback with smart follow-up
+            if (gardenMemory.teachings.length === 0 && gardenMemory.plants.length === 0) {
+                return `🌱 Welcome! I'm here to help your garden thrive.\n\n${getNextConversationPrompt()}`;
+            }
+            
+            const followUp = getSmartFollowUp();
+            if (followUp) {
+                return getVariedResponse('default') + `\n\n${followUp}`;
+            }
+            
+            return getVariedResponse('default');
+        }
+
+        function generateResponse(message) {
+            // Step 1: Analyze user's language
+            analyzeUserLanguage(message);
+            
+            // Step 2: Generate base response
+            let response = generateLogicResponse(message);
+            
+            // Step 3: Adapt to user's style
+            if (typeof response === 'string') {
+                response = adaptResponseToUserStyle(response);
+                response = applyRegionalVariations(response);
+            }
+            
+            // Step 4: Update flow tracking
+            updateConversationFlow(message, conversationContext.lastResponseType);
+            
+            // Step 5: Add chatty elements if appropriate
+            if (conversationContext.isChatty && Math.random() < 0.3 && typeof response === 'string') {
+                const profile = conversationContext.languageProfile;
+                const chattyAddons = profile.formality === 'casual' 
+                    ? [
+                        "\n\nGardening's all about patience!",
+                        "\n\nLoving your garden journey!",
+                        "\n\nYour plants are lucky!",
+                        "\n\nKeep up the awesome work!"
+                    ]
+                    : [
+                        "\n\nGardening requires patience and care.",
+                        "\n\nI appreciate learning about your garden.",
+                        "\n\nYour attention to detail is commendable.",
+                        "\n\nContinue with your excellent work."
+                    ];
+                
+                response += chattyAddons[Math.floor(Math.random() * chattyAddons.length)];
+            }
+            
+            return response;
+        }
+
+        function searchKnowledgeBase(query) {
+            if (!knowledgeBase || !knowledgeBase.categories) return null;
+            const cats = knowledgeBase.categories;
+            if (query.includes('lawn') || query.includes('grass')) { const lawn = cats.lawn_care; if (!lawn) return null; if (query.includes('mow')) return `🚜 **Mowing Guide:**\nCool Season: ${lawn.mowing_guidelines.cool_season}\nWarm Season: ${lawn.mowing_guidelines.warm_season}`; if (query.includes('water')) return `💧 **Watering:** ${lawn.watering_guidelines.general}`; return `🌱 **Lawn Care:**\nSpring: ${lawn.seasonal_tasks.spring.join(', ')}\nSummer: ${lawn.seasonal_tasks.summer.join(', ')}`; }
+            if (query.includes('tomato')) { const t = cats.plants?.common_vegetables?.tomato; if (t && t.care_advice) return `🍅 **Tomato Care:**\n• Water: ${t.care_advice.watering}\n• Feed: ${t.care_advice.fertilizing}\n• Problems: ${t.care_advice.problems}`; }
+            if (query.includes('pest') || query.includes('aphid') || query.includes('slug')) { const pests = cats.plants?.plant_health?.pests; if (pests) { if (query.includes('aphid')) return `🐜 **Aphids:** ${pests.aphids}`; if (query.includes('slug')) return `🐌 **Slugs:** ${pests.slugs}`; return `🐛 **Pest Control:** Check for specific pests like aphids or slugs.`; } }
+            return null;
+        }
+
+        function showTyping() {
+            const chatContainer = document.getElementById('chatContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `<div class="message-avatar">🌱</div><div class="message-content"><div class="message-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() { const typing = document.getElementById('typingIndicator'); if (typing) typing.remove(); }
+
+        let guestInteractionCount = parseInt(localStorage.getItem('gb_guest_interactions') || '0');
+        const GUEST_LIMIT = 15;
+
+        function sendMessage(predefined = null) {
+            const input = document.getElementById('userInput');
+            const message = predefined || input.value.trim();
+            if (!message) return;
+            if (!authToken && !isProUser) {
+                guestInteractionCount++;
+                localStorage.setItem('gb_guest_interactions', guestInteractionCount);
+                if (guestInteractionCount > GUEST_LIMIT) return addMessage('assistant', `⚠️ **Usage Limit Reached**\n\nYou've reached the limit of free guest interactions. To continue saving your garden data and getting AI advice, please create a free account.\n\n<button class="submit-button" onclick="window.location.href='../global/login/register.html'">Create Free Account</button>`);
+            }
+            addMessage('user', message);
+            if (!predefined) { input.value = ''; input.style.height = 'auto'; }
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            showTyping();
+            setTimeout(() => { hideTyping(); const response = generateResponse(message); addMessage('assistant', response); sendButton.disabled = false; if (!predefined) input.focus(); }, 800 + Math.random() * 400);
+        }
+
+        function insertCommand(command) {
+            const input = document.getElementById('userInput');
+            input.value = command;
+            input.focus();
+            input.setSelectionRange(command.length, command.length);
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        }
+
+        function handleKeyPress(event) { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }
+
+        const textarea = document.getElementById('userInput');
+        textarea.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        document.addEventListener('touchstart', function(event) { if (event.touches.length > 1) event.preventDefault(); }, { passive: false });
+
+        let recognition;
+        function initVoiceInput() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                recognition.onstart = function() { const btn = document.getElementById('micButton'); const input = document.getElementById('userInput'); if (btn) btn.classList.add('recording'); if (input) input.placeholder = "Listening..."; };
+                recognition.onend = function() { const btn = document.getElementById('micButton'); const input = document.getElementById('userInput'); if (btn) btn.classList.remove('recording'); if (input) input.placeholder = "Tell me about your garden..."; };
+                recognition.onresult = function(event) { const transcript = event.results[0][0].transcript; const input = document.getElementById('userInput'); if (input) { input.value = transcript; input.focus(); input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; } };
+                recognition.onerror = function(event) { console.error('Speech recognition error', event.error); const btn = document.getElementById('micButton'); if (btn) btn.classList.remove('recording'); };
+            } else { const btn = document.getElementById('micButton'); if (btn) btn.style.display = 'none'; }
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) { alert("Voice input is not supported in this browser."); return; }
+            if (!isProUser) { showProLimitModal(); return; }
+            const btn = document.getElementById('micButton');
+            if (btn.classList.contains('recording')) recognition.stop(); else recognition.start();
+        }
+
+        function triggerPhotoUpload() { document.getElementById('photoInput').click(); }
+        function handlePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgHtml = `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid var(--border-color);">`;
+                    addMessage('user', `Uploaded a photo:<br>`);
+                    setTimeout(() => {
+                        if (isProUser) addMessage('assistant', `📸 **Pro Analysis:**\nI've analyzed your photo. It looks like your plant is healthy, but keep an eye on soil moisture consistency.`);
+                        else { addMessage('assistant', `I see you've uploaded a photo! 📸\n\n**Note:** Advanced AI visual diagnosis is a **Pro Feature**.\n\nI can't analyze this specific image yet, but I can help you diagnose issues through conversation.`); setTimeout(() => toggleProModal(), 1500); }
+                    }, 1000);
+                };
+                reader.readAsDataURL(file);
+                input.value = '';
+            }
+        }
+
+        function closeUpgradeModal() { document.getElementById('upgradeModal').style.display = 'none'; }
+        function selectPlan(plan) { console.log('Selected plan:', plan); }
+        function handleUpgrade(plan) {
+            const email = currentUserEmail || prompt("Please enter your email address for the pro account:");
+            if (!email) return;
+            const subject = `Garden Buddy 4U Pro Upgrade Request - ${plan.toUpperCase()}`;
+            const body = `I would like to upgrade to the  plan.\n\nUser ID: ${currentUserId || 'Guest'}\nEmail: \n\nPlease send me payment instructions.`;
+            window.location.href = `mailto:gibletscreations@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            closeUpgradeModal();
+        }
+        function toggleShareModal() {
+            const modal = document.getElementById('shareModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                const url = window.location.href;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&ecc=H&margin=0`;
+                document.getElementById('shareQrCode').src = qrUrl;
+                const nativeBtn = document.getElementById('nativeShareBtn');
+                if (navigator.share) nativeBtn.style.display = 'inline-block'; else nativeBtn.style.display = 'none';
+            }
+        }
+        function copyShareLink() { navigator.clipboard.writeText(window.location.href).then(() => { alert('Link copied to clipboard!'); }); }
+        function shareNative() { if (navigator.share) navigator.share({ title: 'Garden Buddy 4U', text: 'Check out this AI garden assistant!', url: window.location.href }).catch(console.error); }
+
+        // Sidebar Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('chatSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function renderHistorySidebar() {
+            const list = document.getElementById('historyList');
+            if (!list) return;
+            list.innerHTML = '';
+            
+            if (!gardenMemory.chatHistory || gardenMemory.chatHistory.length === 0) {
+                list.innerHTML = '<div style="padding:1rem; color:#999; font-size:0.9rem; text-align:center;">No history yet</div>';
+                return;
+            }
+            
+            // Group by date
+            const groups = {};
+            gardenMemory.chatHistory.forEach(msg => {
+                if (msg.type === 'user') {
+                    const date = new Date(msg.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    if (!groups[date]) groups[date] = [];
+                    groups[date].push(msg);
+                }
+            });
+            
+            Object.keys(groups).reverse().forEach(date => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'history-group';
+                groupDiv.innerHTML = `<div class="history-date">${date}</div>`;
+                
+                groups[date].reverse().forEach(msg => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.textContent = msg.content.substring(0, 40) + (msg.content.length > 40 ? '...' : '');
+                    item.onclick = () => {
+                        // In a real app, this might scroll to message or load session
+                        // For now, just close sidebar on mobile
+                        if (window.innerWidth <= 768) toggleSidebar();
+                    };
+                    groupDiv.appendChild(item);
+                });
+                list.appendChild(groupDiv);
+            });
+        }
+
+        window.addEventListener('load', async () => {
+            const token = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
+            const guest = localStorage.getItem('guestMode');
+            if (!token && !guest) { window.location.href = '../global/login/login.html'; return; }
+            loadMemory();
+            initializePlantDatabase();
+            loadKnowledgeBase();
+            if (window.supabase && token) {
+                const { data: { session } } = await window.supabaseAuth.getSession();
+                if (session) {
+                    authToken = session.access_token;
+                    if (localStorage.getItem('gb_token')) localStorage.setItem('gb_token', authToken); else sessionStorage.setItem('gb_token', authToken);
+                    await initUserData(session.user);
+                } else {
+                    localStorage.removeItem('gb_token'); sessionStorage.removeItem('gb_token');
+                    if (!guest) { window.location.href = '../global/login/login.html'; return; }
+                }
+                window.supabaseAuth.onAuthChange((event, session) => {
+                    if (event === 'SIGNED_OUT') { localStorage.removeItem('gb_token'); sessionStorage.removeItem('gb_token'); if (!localStorage.getItem('guestMode')) window.location.href = '../global/login/login.html'; }
+                    else if (event === 'TOKEN_REFRESHED' && session) { const newToken = session.access_token; if (localStorage.getItem('gb_token')) localStorage.setItem('gb_token', newToken); else sessionStorage.setItem('gb_token', newToken); }
+                });
+            } else if (guest) initGuestUI();
+            initVoiceInput();
+            initTutorial();
+            renderHistorySidebar();
+            setTimeout(() => { document.getElementById('userInput').focus(); }, 100);
+            window.addEventListener('orientationchange', () => { setTimeout(() => { const chatContainer = document.getElementById('chatContainer'); chatContainer.scrollTop = chatContainer.scrollHeight; }, 300); });
+            setTimeout(() => {
+                if (gardenMemory.teachings.length === 0) {
+                    const chatContainer = document.getElementById('chatContainer');
+                    const tip = document.createElement('div');
+                    tip.className = 'message assistant';
+                    
+                    const welcomeMsgs = [
+                        "🌱 **Getting Started?** Just tell me about your garden naturally - no commands needed! Try: 'I have two raised beds in my backyard.'",
+                        "💡 **Pro Tip:** I learn from everything you share! The more you tell me, the smarter my advice gets.",
+                        "🌿 **New here?** Start by describing your garden space, then we'll build your plant family together!"
+                    ];
+                    
+                    const msg = welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)];
+                    
+                    tip.innerHTML = `<div class="message-avatar">💡</div><div class="message-content"><div class="message-bubble">${formatMessage(msg)}</div></div>`;
+                    chatContainer.appendChild(tip);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            }, 2000);
+        });
+        window.addEventListener('beforeunload', saveMemory);
+        window.onclick = function(event) {
+            const modal = document.getElementById('profileModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const upgradeModal = document.getElementById('upgradeModal');
+            const shareModal = document.getElementById('shareModal');
+            if (event.target === modal) modal.style.display = 'none';
+            if (event.target === settingsModal) settingsModal.style.display = 'none';
+            if (event.target === upgradeModal) upgradeModal.style.display = 'none';
+            if (event.target === shareModal) shareModal.style.display = 'none';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+    <script>console.log('✅ Supabase initialized from client.');</script>
+</body>
+</html>
+            if (!email) return;
+            const subject = `Garden Buddy 4U Pro Upgrade Request - ${plan.toUpperCase()}`;
+            const body = `I would like to upgrade to the  plan.\n\nUser ID: ${currentUserId || 'Guest'}\nEmail: \n\nPlease send me payment instructions.`;
+            window.location.href = `mailto:gibletscreations@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            closeUpgradeModal();
+        }
+        function toggleShareModal() {
+            const modal = document.getElementById('shareModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                const url = window.location.href;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&ecc=H&margin=0`;
+                document.getElementById('shareQrCode').src = qrUrl;
+                const nativeBtn = document.getElementById('nativeShareBtn');
+                if (navigator.share) nativeBtn.style.display = 'inline-block'; else nativeBtn.style.display = 'none';
+            }
+        }
+        function copyShareLink() { navigator.clipboard.writeText(window.location.href).then(() => { alert('Link copied to clipboard!'); }); }
+        function shareNative() { if (navigator.share) navigator.share({ title: 'Garden Buddy 4U', text: 'Check out this AI garden assistant!', url: window.location.href }).catch(console.error); }
+
+        // Sidebar Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('chatSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function renderHistorySidebar() {
+            const list = document.getElementById('historyList');
+            if (!list) return;
+            list.innerHTML = '';
+            
+            if (!gardenMemory.chatHistory || gardenMemory.chatHistory.length === 0) {
+                list.innerHTML = '<div style="padding:1rem; color:#999; font-size:0.9rem; text-align:center;">No history yet</div>';
+                return;
+            }
+            
+            // Group by date
+            const groups = {};
+            gardenMemory.chatHistory.forEach(msg => {
+                if (msg.type === 'user') {
+                    const date = new Date(msg.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    if (!groups[date]) groups[date] = [];
+                    groups[date].push(msg);
+                }
+            });
+            
+            Object.keys(groups).reverse().forEach(date => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'history-group';
+                groupDiv.innerHTML = `<div class="history-date">${date}</div>`;
+                
+                groups[date].reverse().forEach(msg => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.textContent = msg.content.substring(0, 40) + (msg.content.length > 40 ? '...' : '');
+                    item.onclick = () => {
+                        // In a real app, this might scroll to message or load session
+                        // For now, just close sidebar on mobile
+                        if (window.innerWidth <= 768) toggleSidebar();
+                    };
+                    groupDiv.appendChild(item);
+                });
+                list.appendChild(groupDiv);
+            });
+        }
+
+        window.addEventListener('load', async () => {
+            const token = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
+            const guest = localStorage.getItem('guestMode');
+            if (!token && !guest) { window.location.href = '../global/login/login.html'; return; }
+            loadMemory();
+            initializePlantDatabase();
+            loadKnowledgeBase();
+            if (window.supabase && token) {
+                const { data: { session } } = await window.supabaseAuth.getSession();
+                if (session) {
+                    authToken = session.access_token;
+                    if (localStorage.getItem('gb_token')) localStorage.setItem('gb_token', authToken); else sessionStorage.setItem('gb_token', authToken);
+                    await initUserData(session.user);
+                } else {
+                    localStorage.removeItem('gb_token'); sessionStorage.removeItem('gb_token');
+                    if (!guest) { window.location.href = '../global/login/login.html'; return; }
+                }
+                window.supabaseAuth.onAuthChange((event, session) => {
+                    if (event === 'SIGNED_OUT') { localStorage.removeItem('gb_token'); sessionStorage.removeItem('gb_token'); if (!localStorage.getItem('guestMode')) window.location.href = '../global/login/login.html'; }
+                    else if (event === 'TOKEN_REFRESHED' && session) { const newToken = session.access_token; if (localStorage.getItem('gb_token')) localStorage.setItem('gb_token', newToken); else sessionStorage.setItem('gb_token', newToken); }
+                });
+            } else if (guest) initGuestUI();
+            initVoiceInput();
+            initTutorial();
+            renderHistorySidebar();
+            setTimeout(() => { document.getElementById('userInput').focus(); }, 100);
+            window.addEventListener('orientationchange', () => { setTimeout(() => { const chatContainer = document.getElementById('chatContainer'); chatContainer.scrollTop = chatContainer.scrollHeight; }, 300); });
+            setTimeout(() => {
+                if (gardenMemory.teachings.length === 0) {
+                    const chatContainer = document.getElementById('chatContainer');
+                    const tip = document.createElement('div');
+                    tip.className = 'message assistant';
+                    tip.innerHTML = `<div class="message-avatar">💡</div><div class="message-content"><div class="message-bubble"><strong>Pro Tip:</strong> Start by teaching me about your garden layout with /teach, or tap a quick action above!</div></div>`;
+                    chatContainer.appendChild(tip);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            }, 2000);
+        });
+        window.addEventListener('beforeunload', saveMemory);
+        window.onclick = function(event) {
+            const modal = document.getElementById('profileModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const upgradeModal = document.getElementById('upgradeModal');
+            const shareModal = document.getElementById('shareModal');
+            if (event.target === modal) modal.style.display = 'none';
+            if (event.target === settingsModal) settingsModal.style.display = 'none';
+            if (event.target === upgradeModal) upgradeModal.style.display = 'none';
+            if (event.target === shareModal) shareModal.style.display = 'none';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+    <script>console.log('✅ Supabase initialized from client.');</script>
+</body>
+</html>
