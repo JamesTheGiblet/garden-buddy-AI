@@ -8,8 +8,8 @@
     return;
   }
 
-  const SUPABASE_URL = window.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+  const SUPABASE_URL = window.SUPABASE_URL || "https://mpodufbvckfxafgnazyv.supabase.co";
+  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wb2R1ZmJ2Y2tmeGFmZ25henl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTcyMDQsImV4cCI6MjA4NDk5MzIwNH0.yGJYd4I2Il_S5qedpBpujz-tPUjw-tD1HVH7TgwQZUA";
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error('❌ Supabase keys are missing! Please check config.js is loaded correctly.');
