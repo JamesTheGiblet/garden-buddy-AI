@@ -144,6 +144,36 @@
         .message.user .message-bubble {
             color: #ffffff;
         }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0.5rem;
+            }
+            .header-title {
+                font-size: 1.1rem;
+            }
+            .header-subtitle {
+                display: none;
+            }
+            .input-field {
+                font-size: 16px; /* Prevent iOS zoom */
+            }
+            .quick-actions {
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-bottom: 5px;
+            }
+            .quick-action {
+                min-width: 100px;
+                flex-shrink: 0;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>

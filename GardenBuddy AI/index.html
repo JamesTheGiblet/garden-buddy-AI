@@ -22,6 +22,42 @@
         .external-link-primary {
             color: var(--garden-primary);
         }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0.5rem;
+            }
+            .header-title {
+                font-size: 1.1rem;
+            }
+            .header-subtitle {
+                display: none;
+            }
+            .avatar svg {
+                width: 40px;
+                height: 40px;
+            }
+            .tabs {
+                overflow-x: auto;
+                justify-content: flex-start;
+                -webkit-overflow-scrolling: touch;
+            }
+            .tab-button {
+                padding: 10px 15px;
+                flex-shrink: 0;
+            }
+            .plant-cards {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.75rem;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 1rem;
+            }
+            .request-input { font-size: 16px; } /* Prevent iOS zoom */
+        }
     </style>
 </head>
 <body>

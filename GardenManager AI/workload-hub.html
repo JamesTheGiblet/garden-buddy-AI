@@ -352,7 +352,13 @@
 
         @media (max-width: 900px) {
             .dashboard-layout { grid-template-columns: 1fr; }
-            .side-panel { display: none; }
+            .side-panel { 
+                display: block; 
+                order: 2;
+                border-right: none;
+                border-top: 1px solid #e0e6e0;
+            }
+            .work-feed { order: 1; }
         }
     </style>
 </head>
