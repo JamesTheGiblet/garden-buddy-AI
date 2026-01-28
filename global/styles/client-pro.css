@@ -1,15 +1,5 @@
 @import 'client-variables.css';
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-secondary);
-    margin: 0;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
 .features-container {
     max-width: 600px;
     width: 100%;
@@ -17,6 +7,7 @@ body {
     padding: 2rem;
     border-radius: 1rem;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin: 0 auto;
 }
 h1 {
     color: var(--garden-green);
