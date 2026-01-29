@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro - Garden Buddy 4U</title>
+    <title>Calendar - Garden Buddy 4U</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
@@ -47,8 +47,36 @@
         </header>
 
         <!-- Modals -->
-        <div id="profileModal" class="modal"></div>
-        <div id="settingsModal" class="modal"></div>
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-number" id="teachingsCount">0</div><div class="stat-label">Teachings</div></div>
+                    <div class="stat-card"><div class="stat-number" id="plantsCount">0</div><div class="stat-label">Plants</div></div>
+                </div>
+                <button class="submit-button share-btn" type="button" onclick="toggleShareModal()">Share with a Friend</button>
+                <button class="submit-button logout-btn" type="button" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">OpenWeatherMap API Key</label>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+        </div>
         <div id="upgradeModal" class="modal"></div>
         <div id="shareModal" class="modal"></div>
 
@@ -56,64 +84,35 @@
         <div class="tabs">
             <button class="tab-button" type="button" onclick="window.location.href='chat.html'">Chat</button>
             <button class="tab-button" type="button" onclick="window.location.href='qr-code.html'">Contractor</button>
-            <button class="tab-button" type="button" onclick="window.location.href='index.html'">Plants</button>
-            <button class="tab-button" type="button" onclick="window.location.href='calendar.html'">Calendar</button>
-            <button class="tab-button active" type="button" onclick="location.reload()">Pro ⭐</button>
+            <button class="tab-button" type="button" onclick="window.location.href='plants.html'">Plants</button>
+            <button class="tab-button active" type="button" onclick="location.reload()">Calendar</button>
+            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
         </div>
 
-        <!-- Pro Features Content -->
-        <div id="pro" class="tab-content active">
-            <div class="features-container">
-                <h1>🌟 Garden Buddy 4U Pro</h1>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📸</div>
-                    <div class="feature-content">
-                        <h3>AI Photo Diagnosis</h3>
-                        <p>Upload photos of sick plants and let our advanced AI identify pests, diseases, and nutrient deficiencies instantly.</p>
-                    </div>
+        <!-- Calendar Content -->
+        <div id="calendar" class="tab-content active">
+            <div class="calendar-tab-container">
+                <h3>Garden Calendar</h3>
+                <div class="request-form calendar-form-spacing">
+                    <label for="calEventInput" class="visually-hidden">Event Name</label>
+                    <input class="request-input" id="calEventInput" placeholder="Event (e.g. Water Tomatoes)" title="Event Name" />
+                    <label for="calDateInput" class="visually-hidden">Event Date</label>
+                    <input class="request-input" type="date" id="calDateInput" placeholder="Select date" title="Event Date" />
+                    <button class="submit-button" type="button" onclick="addCalendarEventUI()">Add Event</button>
                 </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🎤</div>
-                    <div class="feature-content">
-                        <h3>Voice Commands</h3>
-                        <p>Talk to your garden assistant naturally. Just say "Hey Garden Buddy 4U, when should I water my tomatoes?"</p>
-                    </div>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-content">
-                        <h3>Advanced Analytics</h3>
-                        <p>Track plant health trends, harvest yields, and get data-driven insights to optimize your garden's productivity.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🌱</div>
-                    <div class="feature-content">
-                        <h3>Unlimited Plants</h3>
-                        <p>Remove the 5-plant limit. Track every single vegetable, herb, flower, and tree in your garden without restrictions.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">☁️</div>
-                    <div class="feature-content">
-                        <h3>Cloud Sync & Backup</h3>
-                        <p>Never lose your garden data. Automatically sync across all your devices and keep your garden history safe in the cloud.</p>
-                    </div>
-                </div>
-
-                <button class="submit-button back-btn mt-2" onclick="window.location.href='index.html'">Back to Garden</button>
+                <div id="calendarList" class="calendar-list"></div>
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../config.js"></script>
     <script src="../supabase-client.js"></script>
     <script src="../global/js/buddy-app.js"></script>
+    <script>
+        // Initialize calendar on load
+        window.addEventListener('load', () => {
+            if (typeof renderCalendar === 'function') renderCalendar();
+        });
+    </script>
 </body>
 </html>

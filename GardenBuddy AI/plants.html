@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants - Garden Buddy 4U</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <link rel="stylesheet" href="../global/styles/buddy-app.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">Garden Buddy 4U</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- Modals -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-number" id="teachingsCount">0</div><div class="stat-label">Teachings</div></div>
+                    <div class="stat-card"><div class="stat-number" id="plantsCount">0</div><div class="stat-label">Plants</div></div>
+                </div>
+                <button class="submit-button share-btn" type="button" onclick="toggleShareModal()">Share with a Friend</button>
+                <button class="submit-button logout-btn" type="button" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">OpenWeatherMap API Key</label>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+        <div id="upgradeModal" class="modal"></div>
+        <div id="shareModal" class="modal"></div>
+        
+        <!-- Add Plant Modal -->
+        <div id="addPlantModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleAddPlantModal()">&times;</span>
+                <h2>Add Custom Plant</h2>
+                <div class="request-form">
+                    <label class="settings-label" for="emojiPicker">Choose Icon</label>
+                    <div class="emoji-picker" id="emojiPicker"></div>
+                    <input type="hidden" id="newPlantEmoji" value="🌱">
+                    <label class="settings-label" for="newPlantName">Plant Name *</label>
+                    <input class="request-input" id="newPlantName" placeholder="e.g. Purple Basil" required />
+                    <label class="settings-label" for="newPlantType">Plant Type</label>
+                    <select class="request-input" id="newPlantType">
+                        <option value="vegetable">Vegetable</option>
+                        <option value="herb">Herb</option>
+                        <option value="fruit">Fruit</option>
+                        <option value="flower">Flower</option>
+                        <option value="tree">Tree</option>
+                        <option value="shrub">Shrub</option>
+                    </select>
+                    <label class="settings-label" for="newPlantSun">Sun Requirements</label>
+                    <select class="request-input" id="newPlantSun">
+                        <option value="Full sun">Full sun</option>
+                        <option value="Partial sun">Partial sun</option>
+                        <option value="Shade">Shade</option>
+                    </select>
+                    <label class="settings-label" for="newPlantWater">Water Requirements</label>
+                    <input class="request-input" id="newPlantWater" placeholder="e.g. Keep moist" />
+                    <button class="submit-button" type="button" onclick="saveNewPlant()">Add to Garden</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button" type="button" onclick="window.location.href='chat.html'">Chat</button>
+            <button class="tab-button" type="button" onclick="window.location.href='qr-code.html'">Contractor</button>
+            <button class="tab-button active" type="button" onclick="location.reload()">Plants</button>
+            <button class="tab-button" type="button" onclick="window.location.href='calendar.html'">Calendar</button>
+            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
+        </div>
+
+        <!-- Plants Content -->
+        <div id="plants" class="tab-content active">
+            <div class="plants-tab-content">
+                <h3>Common Garden Plants</h3>
+                <p class="plants-tab-desc">Tap a plant to learn more or add it to your garden.</p>
+                <button class="submit-button add-custom-plant-btn" type="button" onclick="toggleAddPlantModal()">+ Add Custom Plant</button>
+                <input class="request-input plants-tab-search" id="plantSearch" placeholder="Search plants..." oninput="filterPlants()" />
+                <div class="plant-cards" id="plantDatabase"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+    <script src="../global/js/buddy-app.js"></script>
+</body>
+</html>

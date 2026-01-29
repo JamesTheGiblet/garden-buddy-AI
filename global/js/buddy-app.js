@@ -539,7 +539,7 @@ function renderCalendar() {
 
     events.forEach((evt, index) => {
         const div = document.createElement('div');
-        div.className = 'plant-card calendar-event-card';
+        div.className = 'plant-card calendar-event-card'; // Reusing plant-card for base style, calendar-event-card for layout
         div.innerHTML = `
             <div>
                 <div class="event-title">${evt.event}</div>
