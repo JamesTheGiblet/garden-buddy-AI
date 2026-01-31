@@ -6,7 +6,7 @@ let plantDatabase = {};
 let knowledgeLoader = null;
 
 async function loadKnowledgeBase() {
-    const GIST_URL = 'https://gist.github.com/87ddb1148c0a52842572b56f562e2b50.git';
+    const GIST_URL = 'https://gist.githubusercontent.com/JamesTheGiblet/87ddb1148c0a52842572b56f562e2b50/raw';
     
     if (typeof GardenKnowledgeLoader !== 'undefined') {
         try {
