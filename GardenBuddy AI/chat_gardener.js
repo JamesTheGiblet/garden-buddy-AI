@@ -351,7 +351,7 @@ async function generateLogicResponse(message) {
 function searchKnowledgeBase(query) {
     // Try knowledge loader first
     if (knowledgeLoader) {
-        const results = knowledgeLoader.searchKnowledge(query, 3);
+        const results = knowledgeLoader.searchKnowledge(query, 5);
         if (results.length > 0) {
             const topEntry = results[0];
 

@@ -109,11 +109,17 @@ class GardenKnowledgeLoader {
                 : `${entry.quick_answer} ${entry.category} ${JSON.stringify(entry.details || {})}`.toLowerCase();
 
             searchTerms.forEach(term => {
-                // Topic match is weighted heavily
-                if (topic === term) score += 10;
-                else if (topic.includes(term)) score += 5;
-                // Content match
-                else if (content.includes(term)) score += 1;
+                // Handle basic pluralization for better matching
+                let checkTerms = [term];
+                if (term.endsWith('es')) checkTerms.push(term.slice(0, -2));
+                else if (term.endsWith('s') && term.length > 3) checkTerms.push(term.slice(0, -1));
+
+                // Check all variations (original + singular)
+                checkTerms.forEach(t => {
+                    if (topic === t) score += 10;
+                    else if (topic.includes(t)) score += 5;
+                    else if (content.includes(t)) score += 1;
+                });
             });
             
             return score;
