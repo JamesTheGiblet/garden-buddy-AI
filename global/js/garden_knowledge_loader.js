@@ -89,32 +89,49 @@ class GardenKnowledgeLoader {
             return [];
         }
 
-        const searchTerms = query.toLowerCase().split(' ');
+        // Stop words to ignore in search
+        const stopWords = ['when', 'should', 'i', 'how', 'do', 'what', 'is', 'a', 'the', 'in', 'on', 'to', 'for', 'my', 'can', 'get', 'does', 'of', 'and'];
+        
+        const searchTerms = query.toLowerCase()
+            .replace(/[?.,!]/g, '') // Remove punctuation
+            .split(/\s+/)
+            .filter(t => t.length > 1 && !stopWords.includes(t));
+
+        if (searchTerms.length === 0) return [];
+
         const results = [];
+
+        const calculateScore = (entry, isUserTaught) => {
+            let score = 0;
+            const topic = entry.topic.toLowerCase();
+            const content = isUserTaught 
+                ? `${entry.question} ${entry.answer} ${entry.category}`.toLowerCase()
+                : `${entry.quick_answer} ${entry.category} ${JSON.stringify(entry.details || {})}`.toLowerCase();
+
+            searchTerms.forEach(term => {
+                // Topic match is weighted heavily
+                if (topic === term) score += 10;
+                else if (topic.includes(term)) score += 5;
+                // Content match
+                else if (content.includes(term)) score += 1;
+            });
+            
+            return score;
+        };
 
         // Search user-taught knowledge first (higher priority)
         this.combinedKnowledge.userTaught.forEach(entry => {
-            const searchText = `${entry.topic} ${entry.question} ${entry.answer} ${entry.category}`.toLowerCase();
-            const matches = searchTerms.filter(term => searchText.includes(term)).length;
-            if (matches > 0) {
-                results.push({
-                    ...entry,
-                    source: 'user-taught',
-                    relevance: matches / searchTerms.length
-                });
+            const score = calculateScore(entry, true);
+            if (score >= 2) { // Minimum threshold
+                results.push({ ...entry, source: 'user-taught', relevance: score });
             }
         });
 
         // Search baseline knowledge
         this.combinedKnowledge.baseline.forEach(entry => {
-            const searchText = `${entry.topic} ${entry.quick_answer} ${entry.category} ${JSON.stringify(entry.details)}`.toLowerCase();
-            const matches = searchTerms.filter(term => searchText.includes(term)).length;
-            if (matches > 0) {
-                results.push({
-                    ...entry,
-                    source: 'baseline',
-                    relevance: matches / searchTerms.length
-                });
+            const score = calculateScore(entry, false);
+            if (score >= 2) { // Minimum threshold
+                results.push({ ...entry, source: 'baseline', relevance: score });
             }
         });
 

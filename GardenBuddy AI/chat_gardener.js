@@ -351,36 +351,6 @@ async function generateLogicResponse(message) {
 function searchKnowledgeBase(query) {
     // Try knowledge loader first
     if (knowledgeLoader) {
-        // Try knowledge loader first with EXACT topic matching
-        if (knowledgeLoader.combinedKnowledge) {
-            const lowerQuery = query.toLowerCase();
-            
-            // STEP 1: Try exact topic match first
-            let exactMatch = knowledgeLoader.combinedKnowledge.baseline.find(entry => 
-                entry.topic.toLowerCase() === lowerQuery ||
-                entry.topic.toLowerCase().includes(lowerQuery) ||
-                lowerQuery.includes(entry.topic.toLowerCase())
-            );
-            
-            // STEP 2: If exact match found, return it
-            if (exactMatch) {
-                let response = `📚 **Garden Buddy Knowledge:** ${exactMatch.topic}\n\n${exactMatch.quick_answer}`;
-                
-                if (exactMatch.details && Object.keys(exactMatch.details).length > 0) {
-                    response += '\n\n**More Details:**';
-                    const detailKeys = Object.keys(exactMatch.details).slice(0, 3);
-                    detailKeys.forEach(key => {
-                        const value = exactMatch.details[key];
-                        if (typeof value === 'string' && value.length < 200) {
-                            response += `\n• ${key}: ${value}`;
-                        }
-                    });
-                }
-                
-                return response;
-            }
-        }
-
         const results = knowledgeLoader.searchKnowledge(query, 3);
         if (results.length > 0) {
             const entry = results[0];
