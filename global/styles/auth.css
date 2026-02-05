@@ -1,0 +1,192 @@
+@import 'variables.css';
+
+body {
+    font-family: var(--font-body);
+    background: var(--morning-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    color: var(--earth-dark);
+}
+
+.auth-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(45, 80, 22, 0.1);
+    text-align: center;
+}
+
+.logo {
+    height: 4rem;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-family: var(--font-display);
+    color: var(--garden-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+}
+
+.auth-subtitle {
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.auth-input, .auth-select {
+    width: 100%;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.auth-input:focus, .auth-select:focus {
+    outline: none;
+    border-color: var(--lawn-green);
+}
+
+.auth-label {
+    display: block;
+    text-align: left;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background: var(--garden-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.auth-btn:hover {
+    background: var(--lawn-green);
+    transform: translateY(-2px);
+}
+
+.auth-toggle-btn {
+    background: transparent;
+    color: var(--garden-primary);
+    border: 2px solid var(--garden-primary);
+    margin-top: 1rem;
+}
+
+.auth-toggle-btn:hover {
+    background: rgba(107, 145, 70, 0.1);
+    color: var(--garden-primary);
+}
+
+.auth-error {
+    color: var(--warning-amber);
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    display: none;
+    background: rgba(212, 160, 23, 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.nav-home {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    text-decoration: none;
+    color: var(--garden-primary);
+    font-weight: 600;
+}
+
+.guest-link, .back-link {
+    margin-top: 1.5rem;
+    display: block;
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.guest-link:hover, .back-link:hover {
+    text-decoration: underline;
+    color: var(--garden-primary);
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    color: var(--garden-primary);
+    text-decoration: underline;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.remember-me input {
+    width: auto;
+    margin: 0 0.5rem 0 0;
+    cursor: pointer;
+}
+
+.email-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.spinner {
+    animation: spin 1.5s linear infinite;
+    height: 1.2em;
+    width: 1.2em;
+    vertical-align: text-bottom;
+    margin-right: 0.5rem;
+}
+
+.loading {
+    margin-top: 2rem;
+    color: var(--garden-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.loading .spinner {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: 0;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

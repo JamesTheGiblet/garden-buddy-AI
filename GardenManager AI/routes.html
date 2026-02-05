@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --garden-primary: #2E7D32;
+            --garden-secondary: #1B5E20;
+            --garden-accent: #43A047;
+            --morning-light: #F8FAF8;
+            --text-main: #1A241A;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --bg: #F0F4F0;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--morning-light); margin: 0; color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Nav & Header */
+        .nav-rail { width: 70px; background: var(--garden-primary); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px; color: white; }
+        .nav-icon { cursor: pointer; font-size: 1.5rem; opacity: 0.7; transition: 0.3s; text-decoration: none; color: white; }
+        .nav-icon:hover, .nav-icon.active { opacity: 1; transform: scale(1.1); }
+        
+        .command-bar { background: white; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e6e0; }
+        .command-left { display: flex; align-items: center; gap: 1rem; }
+        .back-link { text-decoration: none; font-size: 1.2rem; color: var(--garden-primary); }
+        .command-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--garden-secondary); }
+
+        /* Layout */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Route Specific Layout */
+        .route-sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: var(--shadow);
+        }
+        
+        .stops-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .stop-card {
+            background: var(--morning-light);
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .stop-number {
+            background: var(--garden-primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .stop-info h4 { margin: 0 0 0.25rem 0; font-size: 1rem; }
+        .stop-info p { margin: 0; font-size: 0.85rem; color: #666; }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+        /* Added from inline styles */
+        .centered-loading {
+            text-align: center;
+            color: #888;
+            margin-top: 2rem;
+        }
+        #routeStats {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+        .stop-address {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .btn { width: 100%; padding: 0.8rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; background: var(--garden-primary); color: white; }
+        .btn:hover { background: var(--garden-secondary); }
+
+        #map { flex: 1; height: 100%; background: #e5e3df; }
+
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .route-sidebar { width: 100%; height: 40%; order: 2; }
+            #map { height: 60%; order: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <header class="command-bar">
+        <div class="command-left">
+            <a href="index.html" class="back-link">🏡</a>
+            <h1>Route Planner</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="nav-rail">
+            <a href="workload-hub.html" class="nav-icon" title="Schedule">📅</a>
+            <a href="routes.html" class="nav-icon active" title="Routes">🗺️</a>
+            <a href="plants.html" class="nav-icon" title="Plant ID">🌿</a>
+            <a href="finances.html" class="nav-icon" title="Finances">💰</a>
+            <a href="settings.html" class="nav-icon" title="Settings">⚙️</a>
+        </nav>
+
+        <aside class="route-sidebar">
+            <div class="stops-list" id="stopsList">
+                <div class="centered-loading">Loading today's route...</div>
+            </div>
+            <div class="sidebar-footer">
+                <div id="routeStats">
+                    <span>Distance: -- km</span>
+                    <span>Est. Time: -- min</span>
+                </div>
+                <button class="btn" type="button" onclick="optimizeRoute()">🚀 Optimize Route</button>
+            </div>
+        </aside>
+
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let map = null;
+    let currentJobs = [];
+    let routeLayer = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return window.location.href = '../global/login/login_contractor.html';
+
+        initMap();
+        loadTodaysJobs(session.user.id);
+    });
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false }).setView([51.505, -0.09], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Try to locate user
+        map.locate({setView: true, maxZoom: 13});
+        map.on('locationfound', (e) => {
+            L.circle(e.latlng, {radius: e.accuracy/2, color: '#2E7D32'}).addTo(map);
+            L.marker(e.latlng).addTo(map).bindPopup("You are here");
+        });
+    }
+
+    async function loadTodaysJobs(userId) {
+        // For demo purposes, we'll fetch all pending jobs if none exist for today
+        // In production, filter by date: .eq('scheduled_date', new Date().toISOString().split('T')[0])
+        
+        const { data: jobs, error } = await supabaseClient
+            .from('jobs')
+            .select('*, pairings(client_name, address, latitude, longitude)')
+            .eq('contractor_id', userId)
+            .neq('status', 'completed')
+            .order('scheduled_time', { ascending: true });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        // Filter for jobs with valid coordinates
+        currentJobs = jobs.filter(j => j.pairings && j.pairings.latitude && j.pairings.longitude);
+        
+        renderStops(currentJobs);
+        plotMarkers(currentJobs);
+    }
+
+    function renderStops(jobs) {
+        const container = document.getElementById('stopsList');
+        if (jobs.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#888;">No jobs with locations found.</p>';
+            return;
+        }
+
+        container.innerHTML = jobs.map((job, index) => `
+            <div class="stop-card">
+                <div class="stop-number">${index + 1}</div>
+                <div class="stop-info">
+                    <h4>${job.pairings.client_name}</h4>
+                    <p>${job.service}</p>
+                    <p class="stop-address">${job.pairings.address}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function plotMarkers(jobs) {
+        // Clear existing markers if any (except user location)
+        // For simplicity in this demo, we just add new ones
+        
+        const group = new LHb();
+        const bounds = L.latLngBounds();
+
+        jobs.forEach((job, index) => {
+            const lat = job.pairings.latitude;
+            const lng = job.pairings.longitude;
+            const marker = L.marker([lat, lng])
+                .bindPopup(`<b>${index + 1}. ${job.pairings.client_name}</b><br>${job.service}`)
+                .addTo(map);
+            bounds.extend([lat, lng]);
+        });
+
+        if (jobs.length > 0) map.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+    function optimizeRoute() {
+        if (currentJobs.length < 2) return alert("Need at least 2 stops to optimize.");
+
+        // Simple Nearest Neighbor Sort
+        // Start from first job (or user location if available)
+        const optimized = [currentJobs[0]];
+        const unvisited = currentJobs.slice(1);
+
+        while (unvisited.length > 0) {
+            const last = optimized[optimized.length - 1];
+            let nearestIdx = 0;
+            let minDist = Infinity;
+
+            unvisited.forEach((job, idx) => {
+                const d = Math.hypot(job.pairings.latitude - last.pairings.latitude, job.pairings.longitude - last.pairings.longitude);
+                if (d < minDist) {
+                    minDist = d;
+                    nearestIdx = idx;
+                }
+            });
+
+            optimized.push(unvisited[nearestIdx]);
+            unvisited.splice(nearestIdx, 1);
+        }
+
+        currentJobs = optimized;
+        renderStops(currentJobs);
+        
+        // Draw polyline
+        if (routeLayer) map.removeLayer(routeLayer);
+        const latlngs = currentJobs.map(j => [j.pairings.latitude, j.pairings.longitude]);
+        routeLayer = L.polyline(latlngs, {color: '#2E7D32', weight: 4, opacity: 0.8}).addTo(map);
+        
+        // Update stats (mock calculation)
+        const totalDist = (latlngs.length * 3.5).toFixed(1); // Mock distance
+        document.getElementById('routeStats').innerHTML = `<span>Distance: ~${totalDist} km</span><span>Est. Time: ~${Math.round(totalDist * 2)} min</span>`;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Job - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <link rel="stylesheet" href="../global/styles/manager-job.css">
+</head>
+<body>
+    <header class="header">
+        <a href="workload-hub.html" class="back-btn">← Back</a>
+        <h1>Create New Job</h1>
+    </header>
+
+    <div class="content">
+        <form id="jobForm" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label class="form-label" for="clientSelect">Client</label>
+                <select id="clientSelect" class="form-select" required aria-label="Client">
+                    <option value="">Select a client...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Service Type</label>
+                <input type="text" id="serviceInput" class="form-input" placeholder="e.g. Lawn Mowing" required list="serviceSuggestions">
+                <datalist id="serviceSuggestions">
+                    <option value="Lawn Mowing">
+                    <option value="Hedge Trimming">
+                    <option value="Weeding">
+                    <option value="Garden Cleanup">
+                    <option value="Planting">
+                    <option value="Fertilizing">
+                </datalist>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="dateInput" class="form-input" required placeholder="Select date" title="Select date">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" id="timeInput" class="form-input" required placeholder="Select time" title="Select time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Price (£)</label>
+                <input type="number" id="priceInput" class="form-input" placeholder="0.00" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea id="notesInput" class="form-textarea" rows="3" placeholder="Gate code, specific instructions..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label label-flex">
+                    <input type="checkbox" id="urgentInput">
+                    Mark as Urgent
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">Schedule Job</button>
+        </form>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                loadClients();
+                
+                // Set default date to today
+                document.getElementById('dateInput').valueAsDate = new Date();
+            } else {
+                window.location.href = '../global/login/login.html';
+            }
+        });
+
+        async function loadClients() {
+            try {
+                const { data: pairings, error } = await supabaseClient
+                    .from('pairings')
+                    .select('id, client_name, garden_details')
+                    .eq('contractor_id', currentUser.id)
+                    .order('client_name');
+
+                if (error) throw error;
+
+                const select = document.getElementById('clientSelect');
+                
+                if (pairings.length === 0) {
+                    const option = document.createElement('option');
+                    option.text = "No clients found (Scan a client first)";
+                    option.disabled = true;
+                    select.add(option);
+                    return;
+                }
+
+                pairings.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id; // This is the pairing_id
+                    option.text = `${client.client_name} (${client.garden_details || 'Home'})`;
+                    select.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading clients:', error);
+                if (error.code === '42703') {
+                    alert('Database Error: The "client_name" column is missing in your Supabase "pairings" table. Please run the SQL migration.');
+                } else {
+                    alert('Failed to load clients list: ' + error.message);
+                }
+            }
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const clientSelect = document.getElementById('clientSelect');
+            if (!clientSelect.value) {
+                alert('Please select a client');
+                return;
+            }
+
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'flex';
+
+            const jobData = {
+                contractor_id: currentUser.id,
+                pairing_id: clientSelect.value, // Link to the specific client pairing
+                service: document.getElementById('serviceInput').value,
+                scheduled_date: document.getElementById('dateInput').value,
+                scheduled_time: document.getElementById('timeInput').value,
+                price: parseFloat(document.getElementById('priceInput').value) || 0,
+                notes: document.getElementById('notesInput').value,
+                urgent: document.getElementById('urgentInput').checked,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('jobs')
+                    .insert(jobData);
+
+                if (error) throw error;
+
+                alert('✅ Job scheduled successfully!');
+                window.location.href = 'workload-hub.html';
+            } catch (error) {
+                console.error('Error creating job:', error);
+                alert('Failed to create job: ' + error.message);
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

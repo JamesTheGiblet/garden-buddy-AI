@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Intelligence - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <style>
+        :root {
+            --garden-primary: #2E7D32;
+            --garden-secondary: #1B5E20;
+            --garden-accent: #43A047;
+            --morning-light: #F8FAF8;
+            --text-main: #1A241A;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --bg: #F0F4F0;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--morning-light); margin: 0; color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Nav & Header */
+        .nav-rail { width: 70px; background: var(--garden-primary); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px; color: white; }
+        .nav-icon { cursor: pointer; font-size: 1.5rem; opacity: 0.7; transition: 0.3s; text-decoration: none; color: white; }
+        .nav-icon:hover, .nav-icon.active { opacity: 1; transform: scale(1.1); }
+        
+        .command-bar { background: white; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e6e0; }
+        .command-left { display: flex; align-items: center; gap: 1rem; }
+        .back-link { text-decoration: none; font-size: 1.2rem; color: var(--garden-primary); }
+        .command-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--garden-secondary); }
+
+        /* Layout */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .content-area { flex: 1; padding: 2rem; overflow-y: auto; background: var(--bg); }
+        
+        /* Plant Cards */
+        .plant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .plant-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; border-top: 4px solid var(--garden-accent); }
+        .plant-emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+        .plant-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .plant-meta { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+        
+        /* Controls */
+        .controls { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .search-input { flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .action-btn { background: var(--garden-primary); color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        .action-btn:hover { background: var(--garden-secondary); }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 5% auto; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; }
+        #cameraPreview { width: 100%; border-radius: 8px; margin: 1rem 0; }
+        .plant-loading {
+            grid-column: 1/-1;
+            text-align: center;
+            color: #888;
+        }
+        .camera-modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .action-btn.cancel {
+            background: #ccc;
+            color: #333;
+        }
+        .plant-not-found {
+            grid-column: 1/-1;
+            text-align: center;
+        }
+        .plant-notes {
+            font-size: 0.85rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <header class="command-bar">
+        <div class="command-left">
+            <a href="index.html" class="back-link">🏡</a>
+            <h1>Plant Intelligence</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="nav-rail">
+            <a href="workload-hub.html" class="nav-icon" title="Schedule">📅</a>
+            <a href="routes.html" class="nav-icon" title="Routes">🗺️</a>
+            <a href="plants.html" class="nav-icon active" title="Plant ID">🌿</a>
+            <div class="nav-icon" title="Finances">💰</div>
+            <a href="index.html" class="nav-icon" title="Settings">⚙️</a>
+        </nav>
+
+        <section class="content-area">
+            <div class="controls">
+                <input type="text" class="search-input" placeholder="Search plant database..." onkeyup="filterPlants(this.value)">
+                <button class="action-btn" onclick="openCamera()">📸 Identify</button>
+                <button class="action-btn" onclick="window.location.href='add-plant.html'">+ Add New</button>
+            </div>
+
+            <div id="plantGrid" class="plant-grid">
+                <div class="plant-loading">Loading database...</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="cameraModal" class="modal">
+    <div class="modal-content">
+        <h2>📸 AI Plant Identifier</h2>
+        <video id="cameraPreview" autoplay></video>
+        <div class="camera-modal-actions">
+            <button class="action-btn" type="button" onclick="captureAndIdentify()">Analyze</button>
+            <button class="action-btn cancel" type="button" onclick="closeCamera()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let allPlants = [];
+    let stream = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return window.location.href = '../global/login/login_contractor.html';
+
+        const { data } = await supabaseClient.from('plants').select('*').order('name');
+        if (data) {
+            allPlants = data;
+            renderPlants(allPlants);
+        }
+    });
+
+    function renderPlants(plants) {
+        const grid = document.getElementById('plantGrid');
+        grid.innerHTML = plants.length ? plants.map(p => `
+            <div class="plant-card">
+                <div class="plant-emoji">${p.metadata?.emoji || '🌿'}</div>
+                <div class="plant-name">${p.name}</div>
+                <div class="plant-meta">${p.type || 'Plant'}</div>
+                <div style="font-size: 0.85rem; color: #555;">${p.notes || ''}</div>
+            </div>
+        `).join('') : '<p style="grid-column: 1/-1; text-align: center;">No plants found.</p>';
+    }
+
+    function filterPlants(q) { renderPlants(allPlants.filter(p => p.name.toLowerCase().includes(q.toLowerCase()))); }
+    async function openCamera() { document.getElementById('cameraModal').style.display = 'block'; try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); document.getElementById('cameraPreview').srcObject = stream; } catch(e) { alert("Camera error"); closeCamera(); } }
+    function closeCamera() { document.getElementById('cameraModal').style.display = 'none'; if(stream) stream.getTracks().forEach(t => t.stop()); }
+    function captureAndIdentify() { alert("🤖 AI Analysis:\n\nLikely match: Monstera Deliciosa (98%)\n\nCare: Needs bright, indirect light."); closeCamera(); }
+</script>
+</body>
+</html>

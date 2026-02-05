@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <style>
+        :root {
+            --garden-primary: #2E7D32;
+            --garden-secondary: #1B5E20;
+            --garden-accent: #43A047;
+            --morning-light: #F8FAF8;
+            --text-main: #1A241A;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --bg: #F0F4F0;
+            --danger: #D32F2F;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--morning-light); margin: 0; color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Nav & Header */
+        .nav-rail { width: 70px; background: var(--garden-primary); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px; color: white; }
+        .nav-icon { cursor: pointer; font-size: 1.5rem; opacity: 0.7; transition: 0.3s; text-decoration: none; color: white; }
+        .nav-icon:hover, .nav-icon.active { opacity: 1; transform: scale(1.1); }
+        
+        .command-bar { background: white; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e6e0; }
+        .command-left { display: flex; align-items: center; gap: 1rem; }
+        .back-link { text-decoration: none; font-size: 1.2rem; color: var(--garden-primary); }
+        .command-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--garden-secondary); }
+
+        /* Layout */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .content-area { flex: 1; padding: 2rem; overflow-y: auto; background: var(--bg); }
+        
+        /* Settings Forms */
+        .settings-container { max-width: 600px; margin: 0 auto; }
+        .settings-card { background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow); }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--garden-secondary); border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; }
+        .form-input:focus { border-color: var(--garden-primary); outline: none; }
+        .form-note { font-size: 0.8rem; color: #888; margin-top: 0.25rem; }
+
+        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--garden-primary); color: white; width: 100%; }
+        .btn-danger { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; width: 100%; }
+        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+
+        .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .profile-avatar { width: 60px; height: 60px; background: var(--garden-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; }
+        /* Custom styles moved from inline */
+        .display-name {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .display-email {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .danger-title {
+            color: var(--danger);
+        }
+        .danger-note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <header class="command-bar">
+        <div class="command-left">
+            <a href="index.html" class="back-link">🏡</a>
+            <h1>System Settings</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="nav-rail">
+            <a href="workload-hub.html" class="nav-icon" title="Schedule">📅</a>
+            <a href="routes.html" class="nav-icon" title="Routes">🗺️</a>
+            <a href="plants.html" class="nav-icon" title="Plant ID">🌿</a>
+            <a href="finances.html" class="nav-icon" title="Finances">💰</a>
+            <a href="settings.html" class="nav-icon active" title="Settings">⚙️</a>
+        </nav>
+
+        <section class="content-area">
+            <div class="settings-container">
+                
+                <!-- Profile Section -->
+                <div class="settings-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">👤</div>
+                        <div>
+                            <h2 class="display-name" id="displayName">Loading...</h2>
+                            <span class="display-email" id="displayEmail">...</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="handleLogout()">Sign Out</button>
+                </div>
+
+                <!-- App Configuration -->
+                <div class="settings-card">
+                    <div class="card-title">Application Preferences</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Default Location (City)</label>
+                        <input type="text" id="settingLocation" class="form-input" placeholder="e.g. London">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">OpenWeatherMap API Key</label>
+                        <input type="password" id="settingApiKey" class="form-input" placeholder="Paste API Key">
+                        <div class="form-note">Required for weather forecasts. Stored locally on device.</div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+                </div>
+
+                <!-- Data Management -->
+                <div class="settings-card">
+                    <div class="card-title danger-title">Danger Zone</div>
+                    <p class="danger-note">
+                        Clearing local data will remove cached settings and preferences. Your cloud data (jobs, clients) will remain safe in Supabase.
+                    </p>
+                    <button type="button" class="btn btn-danger" onclick="clearLocalData()">Clear Local Cache</button>
+                </div>
+
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return window.location.href = '../global/login/login_contractor.html';
+
+        const user = session.user;
+        document.getElementById('displayName').textContent = user.user_metadata?.business_name || 'Contractor';
+        document.getElementById('displayEmail').textContent = user.email;
+
+        loadSettings();
+    });
+
+    function loadSettings() {
+        const mem = JSON.parse(localStorage.getItem('gardenmanager_memory') || '{}');
+        if (mem.settings) {
+            document.getElementById('settingLocation').value = mem.settings.location || '';
+            document.getElementById('settingApiKey').value = mem.settings.apiKey || '';
+        }
+    }
+
+    function saveSettings() {
+        const location = document.getElementById('settingLocation').value;
+        const apiKey = document.getElementById('settingApiKey').value;
+
+        const mem = JSON.parse(localStorage.getItem('gardenmanager_memory') || '{}');
+        mem.settings = { ...mem.settings, location, apiKey };
+        
+        localStorage.setItem('gardenmanager_memory', JSON.stringify(mem));
+        alert('✅ Settings saved successfully!');
+    }
+
+    function clearLocalData() {
+        if(confirm("Are you sure? This will reset your local preferences.")) {
+            localStorage.removeItem('gardenmanager_memory');
+            alert('Local data cleared.');
+            location.reload();
+        }
+    }
+
+    async function handleLogout() {
+        await supabaseClient.auth.signOut();
+        localStorage.removeItem('gb_token');
+        window.location.href = '../global/login/login_contractor.html';
+    }
+</script>
+</body>
+</html>

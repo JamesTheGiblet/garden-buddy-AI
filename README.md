@@ -1,408 +1,99 @@
-# GardenBuddy 🌱
+# 🌱 GardenBuddy Ecosystem
 
-[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/gibletscreations/gardenbuddy)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+**The complete platform for garden management, connecting professional contractors with home gardeners.**
 
-**Your Personal AI-Powered Gardening Assistant**
+This repository contains the source code for the entire GardenBuddy ecosystem, which consists of two distinct but integrated applications:
 
-GardenBuddy is a comprehensive gardening intelligence platform that combines AI conversation with practical tools for garden management. It learns about your specific garden setup, tracks plants, provides weather-based lawn care advice, and helps you maintain a gardening calendar—all in one beautiful interface.
+1. **[GardenBuddy AI](./GardenBuddy%20AI)** - The free companion app for home gardeners (Clients).
+2. **[GardenManager Pro](./GardenManager%20AI)** - The business management platform for professional gardeners (Contractors).
 
-## 🌟 Features
+---
 
-### 🤖 **AI Garden Intelligence**
-- **Conversational Learning**: Teach the AI about your garden through natural conversation
-- **Memory System**: Remembers your garden layout, plants, and preferences across sessions
-- **Proactive Advice**: Offers personalized suggestions based on your specific setup
-- **Command System**: `/teach`, `/wrong`, `/why`, `/help`, and more for easy interaction
+## 🏗️ The Ecosystem
 
-### 📅 **Smart Calendar & Scheduling**
-- **Interactive Calendar**: Visual monthly view with all your gardening tasks
-- **Event Management**: Add watering, fertilizing, pruning, and harvest events
-- **Task Reminders**: Never miss important garden maintenance activities
-- **Progress Tracking**: Monitor plant growth and garden milestones
+The GardenBuddy ecosystem solves the communication and management gap between garden contractors and their clients.
 
-### 🌿 **Advanced Plant Tracking**
-- **Plant Database**: Detailed information on 12+ common garden plants
-- **Growth Monitoring**: Track planting dates, growth stages, and harvest timelines
-- **Watering Schedule**: Automated reminders based on plant needs
-- **Health Status**: Monitor plant health with visual indicators
+| **For Home Gardeners** | **For Contractors** |
+| :--- | :--- |
+| **GardenBuddy AI** 🌻 | **GardenManager Pro** 🚜 |
+| A personal AI gardening assistant that helps track plants, provides weather advice, and maintains a garden calendar. | A professional business tool to manage clients, schedule jobs, track payments, and eliminate admin chaos. |
+| [View Client App](./GardenBuddy%20AI) | [View Contractor App](./GardenManager%20AI) |
 
-### ⛅ **Weather Integration**
-- **Real-time Weather**: Current conditions and 3-day forecasts
-- **Lawn Care Advice**: Weather-based recommendations for lawn maintenance
-- **Growing Conditions**: Understand how weather affects your plants
-- **Location-based**: Customizable for your specific region
+### 🤝 How They Connect
 
-### 🌱 **Lawn Care Management**
-- **Mowing Schedule**: Track lawn cutting frequency and timing
-- **Seasonal Advice**: Best practices for each season
-- **Task Management**: Complete lawn care to-do list
-- **Health Monitoring**: Lawn condition tracking
+The two apps work together via a simple **QR Code Pairing** system:
 
-## 🚀 Quick Start
+1. **Contractor** generates a QR code in *Garden Buddy 4U Pro*.
+2. **Client** scans it using *Garden Buddy 4U AI*.
+3. **Connected!** The contractor can now push job schedules, updates, and invoices directly to the client's app.
 
-### Browser Version (Simplest)
-1. Download the `gardenbuddy.html` file
-2. Open it in any modern browser (Chrome, Firefox, Safari, Edge)
-3. Start chatting immediately - no setup required!
+---
 
-### Local Development
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/gardenbuddy.git
-cd gardenbuddy
+## 🚀 Quick Links
 
-# Serve with Python (or any static server)
-python -m http.server 8000
+- **Live Landing Page:** [garden-buddy-ai.netlify.app](https://garden-buddy-ai.netlify.app)
+- **GardenBuddy AI (Client) Demo:** [Launch App](https://garden-buddy-ai.netlify.app/GardenBuddy%20AI/)
+- **GardenManager Pro (Contractor) Demo:** [Launch App](https://garden-buddy-ai.netlify.app/GardenManager%20AI/)
 
-# Open in browser
-# Visit http://localhost:8000
+---
+
+## 📂 Project Structure
+
+```text
+garden-buddy-AI/
+├── Garden Buddy 4U AI/       # Client Application (PWA)
+│   ├── index.html        # Main App Entry
+│   ├── sw.js             # Service Worker
+│   └── README.md         # Client App Documentation
+│
+├── Garden Buddy 4U Pro/     # Contractor Application (PWA)
+│   ├── index.html        # Dashboard Entry
+│   ├── scan.html         # QR Scanner
+│   └── README.md         # Contractor App Documentation
+│
+├── gardener.html         # Landing Page for Gardeners
+├── landing_page.html     # Main Landing Page
+└── config.js             # Shared Configuration
 ```
 
-### Docker (Advanced)
-```bash
-# Build and run
-docker build -t gardenbuddy .
-docker run -p 8080:80 gardenbuddy
-```
+## 🛠️ Tech Stack
 
-## 📋 System Requirements
+- **Frontend:** Vanilla HTML5, CSS3, JavaScript (ES6+)
+- **Architecture:** Progressive Web Apps (PWA)
+- **Backend:** Supabase (PostgreSQL, Auth, Realtime)
+- **Hosting:** Netlify / Static Hosting
+- **APIs:** OpenWeatherMap, Supabase JS Client
 
-- **Browser**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
-- **Storage**: 5MB+ for local data persistence
-- **Internet**: Required for weather features (optional for core functionality)
-- **Screen**: Responsive design works on mobile, tablet, and desktop
+## 📦 Installation & Development
 
-## 🎯 Core Commands
+To run the entire ecosystem locally:
 
-| Command | Example | Description |
-|---------|---------|-------------|
-| **`/teach`** | `/teach I have two raised beds` | Teach GardenBuddy about your garden |
-| **`/plant`** | `/plant I planted tomatoes yesterday` | Add new plants to your garden |
-| **`/water`** | `/water all plants` | Mark plants as watered |
-| **`/weather`** | `/weather today` | Get current weather conditions |
-| **`/calendar`** | `/calendar add water tomorrow` | Manage garden calendar |
-| **`/why`** | `/why` | Get explanations for advice |
-| **`/help`** | `/help` | Show all available commands |
-| **`/stats`** | `/stats` | View garden statistics |
-| **`/export`** | `/export` | Download your garden data |
+1. **Clone the repository:**
 
-## 🏗️ Architecture
+    ```bash
+    git clone https://github.com/gibletscreations/gardenbuddy.git
+    cd gardenbuddy
+    ```
 
-```mermaid
-graph TD
-    A[User Interface] --> B[Chat System]
-    A --> C[Calendar]
-    A --> D[Plant Tracker]
-    A --> E[Weather Widget]
-    
-    B --> F[AI Memory System]
-    C --> F
-    D --> F
-    
-    E --> G[Weather API]
-    F --> H[Local Storage]
-    
-    style A fill:#2D5016,color:#fff
-    style F fill:#7CB342,color:#fff
-```
+2. **Serve the root directory:**
+    You can use any static file server (e.g., Python, Node `http-server`, or VS Code Live Server).
 
-### Key Components:
-- **Frontend**: Pure HTML/CSS/JavaScript (no frameworks)
-- **Storage**: LocalStorage for persistence (offline-first)
-- **Weather**: OpenWeatherMap API integration
-- **AI Engine**: Rule-based + pattern matching intelligence
-- **UI Framework**: Custom CSS with responsive design
+    ```bash
+    # Using Python
+    python -m http.server 8000
+    ```
 
-## 📁 File Structure
-
-```
-gardenbuddy/
-├── gardenbuddy.html          # Main application file
-├── README.md                 # This documentation
-├── LICENSE                   # MIT License
-├── CONTRIBUTING.md          # Contribution guidelines
-├── CODE_OF_CONDUCT.md       # Community standards
-├── screenshots/             # Application screenshots
-│   ├── desktop.png
-│   ├── mobile.png
-│   └── tablet.png
-└── examples/
-    └── garden-export.json   # Sample data export
-```
-
-## 🌐 API Integration
-
-### Weather API Setup
-1. Get a free API key from [OpenWeatherMap](https://openweathermap.org/api)
-2. Replace `YOUR_API_KEY` in the code with your actual key
-3. Enable location services for accurate weather data
-
-### Custom API Integration
-The code is modular and can easily integrate with:
-- Plant databases (like USDA or RHS)
-- IoT sensors for soil moisture
-- Gardening APIs for pest identification
-- Calendar services (Google Calendar, iCal)
-
-## 📱 Mobile Features
-
-- **Touch-Optimized**: Large touch targets and swipe-friendly interface
-- **Offline Support**: Full functionality without internet
-- **PWA Ready**: Install as a Progressive Web App
-- **Dark Mode**: Automatic theme switching based on system preference
-- **Safe Area**: Support for modern phone notches and gestures
-
-## 🔧 Configuration
-
-### Location Settings
-```javascript
-// Default location (London)
-gardenMemory.location = {
-    city: 'London',
-    country: 'GB',
-    lat: 51.5074,
-    lon: -0.1278
-};
-
-// Update via UI or command
-// Type: "Set my location to New York"
-```
-
-### Temperature Units
-- Automatic based on location
-- Manual override available in settings
-- Supports °C and °F
-
-### Data Management
-- **Auto-save**: Every interaction is saved automatically
-- **Export**: Download your garden data as JSON
-- **Import**: Coming soon - restore from backup
-- **Clear Data**: Delete browser storage to reset
-
-## 🚨 Error Handling
-
-The application includes robust error handling for:
-- **Network issues**: Graceful degradation when offline
-- **Storage limits**: Automatic data compression
-- **API failures**: Fallback to cached data
-- **Invalid input**: User-friendly error messages
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-- [ ] Chat interface responds correctly
-- [ ] Plant tracking updates in real-time
-- [ ] Calendar events persist after refresh
-- [ ] Weather widget updates with location change
-- [ ] Mobile responsiveness on various screen sizes
-- [ ] Dark mode switching works
-- [ ] Data export/import functions
-
-### Automated Testing (Planned)
-```bash
-# Future test suite
-npm test                # Run unit tests
-npm run test:e2e       # End-to-end tests
-npm run test:access    # Accessibility tests
-```
-
-## 🔄 Development Workflow
-
-1. **Fork** the repository
-2. **Clone** your fork
-3. **Create** a feature branch
-4. **Make** your changes
-5. **Test** thoroughly
-6. **Commit** with descriptive messages
-7. **Push** to your fork
-8. **Create** a Pull Request
-
-## 📈 Performance
-
-- **Initial Load**: < 100KB (uncompressed)
-- **Memory Usage**: < 50MB typical
-- **Response Time**: < 500ms for AI responses
-- **Storage**: ~5MB per garden profile
-- **Battery Impact**: Minimal (no background processes)
-
-## 🌍 Browser Compatibility
-
-| Feature | Chrome | Firefox | Safari | Edge |
-|---------|--------|---------|--------|------|
-| Basic Chat | ✅ 80+ | ✅ 75+ | ✅ 13+ | ✅ 80+ |
-| Local Storage | ✅ | ✅ | ✅ | ✅ |
-| Weather API | ✅ | ✅ | ✅ | ✅ |
-| PWA Install | ✅ | ✅ | ✅ | ✅ |
-| Dark Mode | ✅ | ✅ | ✅ | ✅ |
-
-## 🛡️ Security & Privacy
-
-- **No Registration Required**: Use immediately
-- **Local Storage**: Your data stays on your device
-- **No Tracking**: No analytics or data collection
-- **Open Source**: Transparent codebase
-- **HTTPS Ready**: Works with secure connections
-
-## 🔮 Roadmap
-
-### Phase 1 (Complete) ✅
-- [x] Core chat interface with AI memory
-- [x] Plant tracking system
-- [x] Basic calendar functionality
-- [x] Weather integration
-- [x] Mobile-responsive design
-
-### Phase 2 (In Development) 🔄
-- [ ] Photo upload for plant diagnosis
-- [ ] Voice input support
-- [ ] Community sharing features
-- [ ] Advanced plant disease detection
-- [ ] Integration with smart garden sensors
-
-### Phase 3 (Planned) 📅
-- [ ] Multi-language support
-- [ ] Companion planting suggestions
-- [ ] Pest identification from photos
-- [ ] 3D garden planning tool
-- [ ] API for third-party integrations
-
-### Phase 4 (Future) 🚀
-- [ ] AR garden overlay
-- [ ] Drone integration for large gardens
-- [ ] Blockchain-based seed tracking
-- [ ] AI-powered yield prediction
-- [ ] Marketplace for garden products
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-1. **Report Bugs**: Use the [issue tracker](https://github.com/yourusername/gardenbuddy/issues)
-2. **Request Features**: Suggest new features via issues
-3. **Submit PRs**: Follow our coding standards
-4. **Improve Docs**: Help make documentation better
-
-### Development Setup
-```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/gardenbuddy.git
-
-# 2. Create a feature branch
-git checkout -b feature/your-feature
-
-# 3. Make your changes
-# ... edit files ...
-
-# 4. Test your changes
-# Open gardenbuddy.html in browser
-
-# 5. Commit and push
-git add .
-git commit -m "Add: your feature description"
-git push origin feature/your-feature
-
-# 6. Create Pull Request
-```
-
-### Code Style
-- **HTML**: Semantic tags, ARIA labels
-- **CSS**: BEM-like naming, CSS variables
-- **JavaScript**: ES6+, async/await, descriptive names
-- **Comments**: JSDoc for functions, inline for complex logic
-
-## 📊 Analytics & Metrics
-
-### Key Performance Indicators
-- **User Retention**: Days between sessions
-- **Garden Complexity**: Average plants per garden
-- **Task Completion**: Calendar event completion rate
-- **Weather Accuracy**: Forecast vs actual conditions
-
-### Success Metrics
-- 95%+ uptime for weather features
-- < 1 second response time for chat
-- 100% offline functionality for core features
-- 4.5+ star rating in app stores (future)
-
-## 🎨 Design Philosophy
-
-- **Gardening First**: All features serve gardening needs
-- **Simplicity**: Clean interface, no unnecessary complexity
-- **Personalization**: Adapts to each gardener's unique setup
-- **Accessibility**: Works for all gardeners, regardless of ability
-- **Sustainability**: Encourages eco-friendly practices
-
-## 📚 Learning Resources
-
-### For New Gardeners
-- Built-in plant care guides
-- Seasonal planting calendars
-- Pest and disease identification
-- Soil preparation tutorials
-
-### For Developers
-- [API Documentation](docs/api.md)
-- [Architecture Overview](docs/architecture.md)
-- [Deployment Guide](docs/deployment.md)
-- [Testing Guide](docs/testing.md)
-
-## 📞 Support
-
-### Community Support
-- [GitHub Discussions](https://github.com/yourusername/gardenbuddy/discussions)
-- [Discord Community](https://discord.gg/gardenbuddy) (Coming soon)
-- [Twitter Updates](https://twitter.com/gardenbuddyapp)
-
-### Professional Support
-- **Enterprise Plans**: Custom deployments for garden centers
-- **White Label**: Branded versions for businesses
-- **Consulting**: Garden tech integration services
-- **Training**: Workshops for garden organizations
+3. **Access the apps:**
+    - Landing Page: `http://localhost:8000/`
+    - Client App: `http://localhost:8000/GardenBuddy%20AI/`
+    - Contractor App: `http://localhost:8000/GardenManager%20AI/`
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-### Commercial Use
-- Free for personal use
-- Attribution required for modifications
-- Commercial licensing available for businesses
-- No warranty provided
-
-## 🙏 Acknowledgments
-
-- **OpenWeatherMap** for weather data
-- **PlantNet** for plant database inspiration
-- **The gardening community** for feedback and testing
-- **All contributors** who make GardenBuddy better
-
-## 📣 Stay Connected
-
-- **Website**: [gardenbuddy.app](https://gardenbuddy.app)
-- **GitHub**: [github.com/yourusername/gardenbuddy](https://github.com/yourusername/gardenbuddy)
-- **Twitter**: [@gardenbuddyapp](https://twitter.com/gardenbuddyapp)
-- **Newsletter**: Monthly gardening tips and updates
+This project is licensed under the **MIT License**. See the LICENSE file for details.
 
 ---
 
-<div align="center">
-  <h3>🌱 Happy Gardening! 🌱</h3>
-  <p>Made with ❤️ by gardeners, for gardeners</p>
-  
-  <p>
-    <a href="https://github.com/yourusername/gardenbuddy/stargazers">
-      <img src="https://img.shields.io/github/stars/yourusername/gardenbuddy?style=social" alt="GitHub stars">
-    </a>
-    <a href="https://github.com/yourusername/gardenbuddy/forks">
-      <img src="https://img.shields.io/github/forks/yourusername/gardenbuddy?style=social" alt="GitHub forks">
-    </a>
-    <a href="https://github.com/yourusername/gardenbuddy/issues">
-      <img src="https://img.shields.io/github/issues/yourusername/gardenbuddy" alt="GitHub issues">
-    </a>
-  </p>
-</div>
-
----
-
-*GardenBuddy is part of the [BuddAI v2.0](https://buddai.example.com) ecosystem, bringing AI to everyday tasks.*
+<p align="center">
+  <strong>Built with 💚 by <a href="https://giblets.uk">Giblets Creations</a></strong>
+</p>

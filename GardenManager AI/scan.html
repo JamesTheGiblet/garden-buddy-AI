@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Client - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="../config.js"></script>
+    <link rel="stylesheet" href="../global/styles/manager-scan.css">
+</head>
+<body>
+    <header class="header">
+        <a href="workload-hub.html" class="back-btn">← Back</a>
+        <h1>Scan Client QR</h1>
+    </header>
+
+    <div class="content">
+        <div id="reader" class="scanner-frame"></div>
+        
+        <p class="instruction">Align the client's QR code within the frame to connect.</p>
+
+        <div id="scanResult" class="scan-result"></div>
+
+        <!-- Manual Entry Option -->
+        <button id="manualEntryBtn" class="cancel-btn manual-entry-btn" type="button" onclick="toggleManualEntry()">
+            Enter Code Manually
+        </button>
+
+        <!-- Manual Entry Form -->
+        <div id="manualEntryForm" class="manual-entry-form">
+            <div class="manual-entry-inner">
+                <h3 class="manual-entry-title">Manual Connection</h3>
+                
+                <div class="manual-entry-field">
+                    <label class="manual-entry-label">Client ID</label>
+                    <input type="text" id="manualClientId" placeholder="Paste ID here..." class="manual-entry-input">
+                </div>
+
+                <div class="manual-entry-field">
+                    <label class="manual-entry-label">Client Name</label>
+                    <input type="text" id="manualClientName" placeholder="e.g. Smith Family" class="manual-entry-input">
+                </div>
+
+                <button onclick="handleManualConnect(this)" class="connect-btn" type="button">Connect</button>
+                <button onclick="toggleManualEntry()" class="cancel-btn" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let html5QrcodeScanner = null;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                startScanner();
+            } else {
+                window.location.href = '../global/login/login.html';
+            }
+        });
+
+        function startScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                /* verbose= */ false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (decodedText.startsWith('gardenbuddy4u://connect/')) {
+                const clientId = decodedText.split('gardenbuddy4u://connect/')[1];
+                html5QrcodeScanner.clear();
+                
+                const scanResult = document.getElementById('scanResult');
+                scanResult.style.display = 'block';
+                
+                scanResult.innerHTML = `
+                    <h3 class="qr-detected-title">✅ QR Code Detected!</h3>
+                    <p>Client ID: <span class="qr-client-id">${clientId.substring(0,8)}...</span></p>
+                    <div class="qr-client-name-field">
+                        <label class="qr-client-name-label">Client Name:</label>
+                        <input type="text" id="newClientName" value="New Client" class="qr-client-name-input">
+                    </div>
+                    <div class="qr-action-btns">
+                        <button onclick="confirmConnection('${clientId}')" class="connect-btn" type="button">
+                            Connect Now
+                        </button>
+                        <button onclick="window.location.reload()" class="cancel-btn" type="button">
+                            Scan Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually better to ignore and keep scanning.
+        }
+
+        function confirmConnection(clientId) {
+            const name = document.getElementById('newClientName').value || "New Client";
+            connectToClient(clientId, name);
+        }
+
+        function toggleManualEntry() {
+            const form = document.getElementById('manualEntryForm');
+            const btn = document.getElementById('manualEntryBtn');
+            const reader = document.getElementById('reader');
+            const instruction = document.querySelector('.instruction');
+
+            if (form.style.display === 'none') {
+                // Show Manual
+                form.style.display = 'block';
+                btn.style.display = 'none';
+                reader.style.display = 'none';
+                instruction.style.display = 'none';
+                if (html5QrcodeScanner) {
+                    try { html5QrcodeScanner.clear(); } catch(e) {}
+                }
+            } else {
+                // Show Scanner (Reload to reset cleanly)
+                window.location.reload();
+            }
+        }
+
+        function handleManualConnect(btnElement) {
+            const clientId = document.getElementById('manualClientId').value.trim();
+            const clientName = document.getElementById('manualClientName').value.trim();
+
+            if (!clientId || !clientName) {
+                alert("Please enter both Client ID and Name.");
+                return;
+            }
+            connectToClient(clientId, clientName, btnElement);
+        }
+
+        async function connectToClient(clientId, clientName, btnElement = null) {
+            const btn = btnElement || document.querySelector('.connect-btn');
+            btn.textContent = "Connecting...";
+            btn.disabled = true;
+
+            try {
+                // Create pairing in Supabase
+                const { data, error } = await supabaseClient
+                    .from('pairings')
+                    .insert({
+                        contractor_id: currentUser.id,
+                        client_device_id: clientId,
+                        client_name: clientName,
+                        status: 'active',
+                        paired_at: new Date().toISOString()
+                    });
+
+                if (error) throw error;
+
+                alert(`✅ Successfully connected to ${clientName}!`);
+                window.location.href = 'workload-hub.html';
+            } catch (error) {
+                console.error('Connection error:', error);
+                alert('Failed to connect to client. Please try again.');
+                btn.textContent = "Connect Now";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

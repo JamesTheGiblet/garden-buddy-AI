@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contractor - Garden Buddy 4U</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <link rel="stylesheet" href="../global/styles/client-qr.css">
+    <link rel="stylesheet" href="../global/styles/buddy-app.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">Garden Buddy 4U</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- User Details Modal -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="teachingsCount">0</div>
+                        <div class="stat-label">Teachings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="plantsCount">0</div>
+                        <div class="stat-label">Plants</div>
+                    </div>
+                </div>
+                <button class="submit-button share-btn" type="button" onclick="toggleShareModal()">Share with a Friend</button>
+                <button class="submit-button logout-btn" type="button" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">
+                        OpenWeatherMap API Key
+                        <span class="info-icon" tabindex="0">?
+                            <span class="info-tooltip">
+                                This data is saved locally. <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-white">Get a free API key here</a>.
+                            </span>
+                        </span>
+                    </label>
+                    <div class="api-key-info">
+                        Don't have a key? <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-primary">Sign up for free</a> to get weather updates.
+                    </div>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button" type="button" onclick="window.location.href='chat.html'">Chat</button>
+            <button class="tab-button active" type="button" onclick="location.reload()">Contractor</button>
+            <button class="tab-button" type="button" onclick="window.location.href='plants.html'">Plants</button>
+            <button class="tab-button" type="button" onclick="window.location.href='calendar.html'">Calendar</button>
+            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
+        </div>
+
+        <!-- Contractor Tab Content -->
+        <div id="contractor" class="tab-content active">
+            <div class="content-area">
+                <div id="not-paired-view">
+                    <div class="pairing-card">
+                        <h3>Pair with a Professional</h3>
+                        <p class="contractor-pair-desc">This feature is exclusively for connecting with your <strong>Pro Gardener</strong>. Show this code to them to sync your garden data.</p>
+                        <div class="qr-display" id="pairing-qr">Loading QR...</div>
+                        <p>Your ID: <span id="clientIdDisplay" class="contractor-pair-id">...</span></p>
+                    </div>
+                </div>
+
+                <div id="paired-view">
+                    <div class="pairing-card">
+                        <h3 id="contractorDisplayName">GreenThumb Services</h3>
+                        <p class="contractor-connected">● Connected</p>
+                        <hr class="contractor-hr">
+                        <textarea class="request-input" id="requestMessage" placeholder="Describe your request (e.g., 'Need lawn mowing next week')..."></textarea>
+                        <button class="submit-button" type="button" onclick="sendContractorRequest()">Request Visit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Modals needed for header buttons -->
+        <div id="upgradeModal" class="modal upgrade-modal-hidden">
+          <div class="modal-content">
+            <button class="close-button" type="button" onclick="closeUpgradeModal()">×</button>
+            <h2>🌟 Upgrade to Pro</h2>
+            <p class="upgrade-modal-desc">Unlock unlimited plants and advanced features</p>
+            <div class="pro-features-grid">
+                <div class="pro-feature-item">🎤 <strong>Voice input</strong></div>
+                <div class="pro-feature-item">📸 <strong>Photo diagnosis</strong></div>
+                <div class="pro-feature-item">📊 <strong>Advanced analytics</strong></div>
+                <div class="pro-feature-item">🌱 <strong>Unlimited plants</strong></div>
+                <div class="pro-feature-item">☁️ <strong>Cloud backup</strong></div>
+            </div>
+            <div class="pricing-options">
+              <div class="pricing-card" onclick="selectPlan('monthly')">
+                <h3>Monthly</h3>
+                <div class="price">£2.99<span>/month</span></div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('monthly')">Choose Monthly</button>
+              </div>
+              <div class="pricing-card popular" onclick="selectPlan('yearly')">
+                <span class="popular-badge">Save 20%</span>
+                <h3>Yearly</h3>
+                <div class="price">£28.99<span>/year</span></div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('yearly')">Choose Yearly</button>
+              </div>
+            </div>
+            <p class="upgrade-modal-note">📧 Clicking choose will open your email client to request access.</p>
+          </div>
+        </div>
+        <div id="shareModal" class="modal"></div>
+    </div>
+
+    <script>
+        // --- Start of Merged Script from chat.html ---
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+            ? 'http://localhost:3000/api' 
+            : 'https://api.gardenbuddy.app';
+        let authToken = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
+        let currentUserId = null;
+        let currentUserEmail = null;
+        let isProUser = false;
+
+        let gardenMemory = {
+            teachings: [],
+            plants: [],
+            settings: { location: 'London', apiKey: '' },
+            chatHistory: []
+        };
+
+        function loadMemory() {
+            const saved = localStorage.getItem('gardenbuddy_memory');
+            if (saved) {
+                try {
+                    gardenMemory = JSON.parse(saved);
+                    if (!gardenMemory.settings) gardenMemory.settings = { location: 'London', apiKey: '' };
+                    updateStatsDisplay();
+                } catch (e) { console.error('Failed to load memory:', e); }
+            }
+        }
+
+        function saveMemory() {
+            try {
+                localStorage.setItem('gardenbuddy_memory', JSON.stringify(gardenMemory));
+                updateStatsDisplay();
+            } catch (e) { console.error('Failed to save memory:', e); }
+        }
+
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') {
+                document.getElementById('settingLocation').value = gardenMemory.settings.location || '';
+                document.getElementById('settingApiKey').value = gardenMemory.settings.apiKey || '';
+            }
+        }
+
+        function saveSettings() {
+            const loc = document.getElementById('settingLocation').value;
+            const key = document.getElementById('settingApiKey').value;
+            gardenMemory.settings.location = loc;
+            gardenMemory.settings.apiKey = key;
+            saveMemory();
+            const userLocEl = document.getElementById('userLocation');
+            if (userLocEl) userLocEl.textContent = loc;
+            toggleSettingsModal();
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to clear all data? This will wipe your garden memory and settings.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function toggleProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = (modal.style.display === 'flex' || modal.style.display === 'block') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        }
+
+        function handleProTab() {
+            if (isProUser) window.location.href = 'index.html#pro';
+            else showProLimitModal();
+        }
+
+        function updateStatsDisplay() {
+            const teachingsEl = document.getElementById('teachingsCount');
+            const plantsEl = document.getElementById('plantsCount');
+            const locationEl = document.getElementById('userLocation');
+            if(teachingsEl) teachingsEl.textContent = gardenMemory.teachings.length;
+            if(plantsEl) plantsEl.textContent = gardenMemory.plants.length;
+            if(locationEl && gardenMemory.settings && gardenMemory.settings.location) {
+                locationEl.textContent = gardenMemory.settings.location;
+            }
+        }
+
+        async function handleLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                if (window.supabaseAuth) await window.supabaseAuth.signOut();
+                localStorage.removeItem('gb_token');
+                sessionStorage.removeItem('gb_token');
+                localStorage.removeItem('guestMode');
+                authToken = null;
+                window.location.href = '../global/login/login.html';
+            }
+        }
+
+        function initGuestUI() {
+            let guestId = localStorage.getItem('gb_guest_id');
+            if (!guestId) {
+                guestId = 'guest_' + Math.floor(Math.random() * 10000);
+                localStorage.setItem('gb_guest_id', guestId);
+            }
+            // This function now also handles the QR page logic
+            const clientIdDisplay = document.getElementById('clientIdDisplay');
+            const pairingQr = document.getElementById('pairing-qr');
+            if (clientIdDisplay) clientIdDisplay.innerText = guestId;
+            if (pairingQr) pairingQr.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy4u://connect/${guestId}" alt="Pairing QR">`;
+        }
+
+        async function initUserData(user) {
+            currentUserId = user.id;
+            currentUserEmail = user.email;
+            const name = user.user_metadata?.name || user.name || user.email;
+            const userNameEl = document.getElementById('userName');
+            if (userNameEl && name) userNameEl.innerText = name;
+            
+            await checkProStatus(user.id);
+
+            // This function now also handles the QR page logic
+            const clientIdDisplay = document.getElementById('clientIdDisplay');
+            const pairingQr = document.getElementById('pairing-qr');
+            if(clientIdDisplay) clientIdDisplay.innerText = user.id.substring(0, 8);
+            if(pairingQr) pairingQr.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=gardenbuddy4u://connect/${user.id}" alt="Pairing QR">`;
+
+            const contractorId = user.user_metadata?.contractorId;
+            const contractorName = user.user_metadata?.contractorName;
+
+            if (contractorId) {
+                const notPairedView = document.getElementById('not-paired-view');
+                const pairedView = document.getElementById('paired-view');
+                const contractorDisplayName = document.getElementById('contractorDisplayName');
+                if(notPairedView) notPairedView.style.display = 'none';
+                if(pairedView) pairedView.style.display = 'block';
+                if(contractorDisplayName) contractorDisplayName.innerText = contractorName || 'Your Gardener';
+            }
+        }
+
+        async function checkProStatus(userId) {
+            if (!window.supabase) return;
+            try {
+                const { data } = await window.supabase.from('user_profiles').select('subscription_tier').eq('id', userId).maybeSingle();
+                const userSubscriptionEl = document.getElementById('userSubscription');
+                if (data && data.subscription_tier === 'pro') {
+                    isProUser = true;
+                    if(userSubscriptionEl) userSubscriptionEl.innerText = 'Pro Plan';
+                } else {
+                    isProUser = false;
+                    if(userSubscriptionEl) userSubscriptionEl.innerText = 'Free Plan';
+                }
+            } catch (e) { console.error('Pro check failed', e); }
+        }
+
+        function showProLimitModal() {
+            const modal = document.getElementById('upgradeModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.remove('upgrade-modal-hidden');
+            }
+        }
+
+        // Dummy functions that are called but not defined in qr-code.html
+        function toggleShareModal() { alert("Share modal placeholder"); }
+
+        // --- End of Merged Script ---
+
+        function closeUpgradeModal() { document.getElementById('upgradeModal').style.display = 'none'; }
+        function selectPlan(plan) { console.log('Selected plan:', plan); }
+        function handleUpgrade(plan) {
+            const email = currentUserEmail || prompt("Please enter your email address for the pro account:");
+            if (!email) return;
+            const subject = `Garden Buddy 4U Pro Upgrade Request - ${plan.toUpperCase()}`;
+            const body = `I would like to upgrade to the ${plan} plan.\n\nUser ID: ${currentUserId || 'Guest'}\nEmail: ${email}\n\nPlease send me payment instructions.`;
+            window.location.href = `mailto:gibletscreations@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            closeUpgradeModal();
+        }
+
+        // --- Original qr-code.html script logic ---
+        async function sendContractorRequest() {
+            if (!authToken) {
+                alert("Please sign in to contact your gardener.");
+                return;
+            }
+            const message = document.getElementById('requestMessage').value;
+            if (!message.trim()) {
+                alert("Please enter a message.");
+                return;
+            }
+            const btn = document.querySelector('.submit-button');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            try {
+                // This needs to be updated to use the full API path
+                const res = await fetch(`${API_BASE_URL}/requests`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type: 'visit_request', note: message })
+                });
+                if (res.ok) {
+                    alert("Request sent to your gardener!");
+                    document.getElementById('requestMessage').value = '';
+                } else {
+                    throw new Error("API not reachable");
+                }
+            } catch (e) {
+                setTimeout(() => {
+                    alert("Request sent! (Demo Mode)");
+                    document.getElementById('requestMessage').value = '';
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                }, 1000);
+            }
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+        window.sendContractorRequest = sendContractorRequest;
+
+        window.addEventListener('load', async () => {
+            const token = localStorage.getItem('gb_token') || sessionStorage.getItem('gb_token');
+            const guest = localStorage.getItem('guestMode');
+            
+            if (!token && !guest) {
+                window.location.href = '../global/login/login.html';
+                return;
+            }
+
+            loadMemory();
+            
+            if (window.supabase && token) {
+                const { data: { session } } = await window.supabaseAuth.getSession();
+                if (session) {
+                    authToken = session.access_token;
+                    if (localStorage.getItem('gb_token')) {
+                        localStorage.setItem('gb_token', authToken);
+                    } else {
+                        sessionStorage.setItem('gb_token', authToken);
+                    }
+                    await initUserData(session.user);
+                } else {
+                    localStorage.removeItem('gb_token');
+                    sessionStorage.removeItem('gb_token');
+                    if (!guest) {
+                        window.location.href = '../global/login/login.html';
+                        return;
+                    }
+                }
+            } else if (guest) {
+                initGuestUI();
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('profileModal');
+            const settingsModal = document.getElementById('settingsModal');
+            if (event.target === modal) modal.style.display = 'none';
+            if (event.target === settingsModal) settingsModal.style.display = 'none';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+</body>
+</html>

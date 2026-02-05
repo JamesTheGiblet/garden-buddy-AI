@@ -1,8 +1,15 @@
-const CACHE_NAME = 'gardenbuddy-v1';
+const CACHE_NAME = 'gardenbuddy-v5';
 const ASSETS = [
     './',
     './index.html',
-    './manifest.json'
+    './manifest.webmanifest',
+    './chat_main.js',
+    './chat_social.js',
+    './chat_gardener.js',
+    '../global/js/garden_knowledge_loader.js',
+    '../image/logo.svg',
+    '../config.js',
+    '../supabase-client.js'
 ];
 
 // Install event - cache assets
@@ -33,7 +40,16 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                return response || fetch(event.request);
+                return response || fetch(event.request).catch(() => {
+                    // Fallback for offline/network errors
+                    if (event.request.url.includes('/api/')) {
+                        return new Response(JSON.stringify({ error: 'Network error' }), {
+                            status: 503,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    }
+                    return new Response('Network error', { status: 408 });
+                });
             })
     );
 });

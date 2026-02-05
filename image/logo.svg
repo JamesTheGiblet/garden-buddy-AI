@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7CB342" />
+            <stop offset="100%" stop-color="#2D5016" />
+        </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+        <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+            <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+        <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+        <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+    </circle>
+</svg>

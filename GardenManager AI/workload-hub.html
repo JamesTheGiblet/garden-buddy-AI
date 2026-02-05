@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workload Hub - Garden Buddy 4U Pro</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        :root {
+            --garden-primary: #2E7D32;
+            --garden-secondary: #1B5E20;
+            --garden-accent: #43A047;
+            --morning-light: #F8FAF8;
+            --text-main: #1A241A;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --danger: #D32F2F;
+            --warning: #FF9800;
+            --info: #0288D1;
+            --bg: #F0F4F0;
+            --card: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--morning-light); margin: 0; color: var(--text-main); height: 100vh; overflow: hidden; }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .nav-rail { 
+            width: 70px; 
+            background: var(--garden-primary); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px 0; 
+            gap: 25px; 
+            color: white; 
+        }
+        .nav-icon { 
+            cursor: pointer; 
+            font-size: 1.5rem; 
+            opacity: 0.7; 
+            transition: 0.3s; 
+            text-decoration: none; 
+            color: white; 
+        }
+        .nav-icon:hover, .nav-icon.active { opacity: 1; transform: scale(1.1); }
+
+        .command-bar {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e6e0;
+            z-index: 1000;
+        }
+
+        .command-left { display: flex; align-items: center; gap: 1rem; }
+        .back-link { text-decoration: none; font-size: 1.2rem; color: var(--garden-primary); }
+        .command-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--garden-secondary); }
+
+        .revenue-pill {
+            background: var(--garden-primary);
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            text-align: right;
+        }
+        .revenue-pill .label { font-size: 0.7rem; display: block; opacity: 0.9; text-transform: uppercase; }
+        .revenue-pill .value { font-size: 1.1rem; font-weight: 700; }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .side-panel {
+            background: #fff;
+            border-right: 1px solid #e0e6e0;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .utility-card {
+            background: var(--morning-light);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #eef2ee;
+        }
+
+        .weather-main { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+        .big-icon { font-size: 2.5rem; }
+        .temp-val { font-size: 1.5rem; font-weight: 800; display: block; }
+        .weather-alert { 
+            font-size: 0.8rem; 
+            padding: 0.5rem; 
+            border-radius: 6px; 
+            margin-top: 0.5rem;
+            background: #fff3e0; 
+            color: #e65100; 
+            border-left: 3px solid #ff9800;
+        }
+
+        #map { height: 180px; border-radius: 8px; margin-top: 0.5rem; }
+
+        .side-panel h3 { font-size: 0.9rem; text-transform: uppercase; color: #666; margin-top: 0; }
+        .input-stack { display: flex; flex-direction: column; gap: 0.75rem; }
+        .slim-input {
+            width: 100%; 
+            padding: 0.6rem; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 0.9rem;
+        }
+        .primary-btn {
+            background: var(--garden-primary); 
+            color: white; 
+            border: none; 
+            padding: 0.75rem;
+            border-radius: 6px; 
+            font-weight: 600; 
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: var(--garden-secondary); }
+
+        .work-feed {
+            display: flex;
+            flex-direction: column;
+            background: #f4f7f4;
+            overflow: hidden;
+        }
+
+        .feed-header {
+            background: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e6e0;
+        }
+
+        .view-tabs { display: flex; background: #eee; border-radius: 8px; padding: 2px; }
+        .tab-btn {
+            border: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 6px; 
+            cursor: pointer;
+            background: transparent; 
+            font-weight: 600; 
+            color: #666;
+        }
+        .tab-btn.active { 
+            background: white; 
+            color: var(--garden-primary); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        .cards-container {
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border-left: 5px solid #ccc;
+            transition: transform 0.2s;
+        }
+        .job-card:hover { transform: translateY(-2px); }
+        .job-card.high { border-left-color: #f44336; }
+        .job-card.medium { border-left-color: #ff9800; }
+        .job-card.low { border-left-color: #2196f3; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem; }
+        .card-body h4 { margin: 0 0 0.25rem 0; font-size: 1.1rem; }
+        .card-meta { font-size: 0.85rem; color: #666; display: flex; gap: 1rem; margin-bottom: 0.5rem; }
+        .tag { 
+            padding: 3px 10px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+        }
+        .tag-job { background: #e8f5e9; color: #2e7d32; }
+        .tag-task { background: #e3f2fd; color: #1976d2; }
+
+        .btn-group { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 15px; 
+            flex-wrap: wrap; 
+        }
+        
+        .tool-btn { 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: 1px solid #ddd; 
+            background: white; 
+            font-size: 0.8rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+        }
+        .tool-btn:hover { background: #f5f5f5; }
+        .tool-btn.primary { background: var(--garden-primary); color: white; border: none; }
+        .tool-btn.primary:hover { background: var(--garden-secondary); }
+
+        .fab-menu { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        .fab { 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 50%; 
+            background: var(--garden-primary); 
+            color: white; 
+            border: none; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            cursor: pointer; 
+            font-size: 1.5rem; 
+        }
+        .fab:hover { background: var(--garden-secondary); }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h2 { margin: 0; }
+        .close-btn {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .close-btn:hover { color: #000; }
+
+        /* Camera Modal */
+        #cameraPreview {
+            width: 100%;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .camera-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* Equipment Alert */
+        .equipment-alert {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            height: 1px; 
+            width: 1px;
+            overflow: hidden;
+            clip: rect(1px, 1px, 1px, 1px);
+            white-space: nowrap;
+        }
+
+        /* Route optimization */
+        .route-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-box {
+            background: var(--morning-light);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--garden-primary);
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Plant tips */
+        .plant-tip-card {
+            background: #f1f8e9;
+            border-left: 4px solid var(--garden-accent);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .side-panel { 
+                display: block; 
+                order: 2;
+                border-right: none;
+                border-top: 1px solid #e0e6e0;
+            }
+            .work-feed { order: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <header class="command-bar">
+        <div class="command-left">
+            <a href="index.html" class="back-link">🏡</a>
+            <div>
+                <h1>Workload Hub</h1>
+                <small id="dateDisplay">Tuesday, 27 Jan 2026</small>
+            </div>
+        </div>
+        <div class="revenue-pill">
+            <span class="label">Weekly Est.</span>
+            <span class="value" id="statRevenue">£0</span>
+        </div>
+    </header>
+
+    <div class="main-flex">
+        <nav class="nav-rail">
+            <a href="workload-hub.html" class="nav-icon active" title="Schedule">📅</a>
+            <a href="routes.html" class="nav-icon" title="Routes">🗺️</a>
+            <a href="plants.html" class="nav-icon" title="Plant ID">🌿</a>
+            <a href="finances.html" class="nav-icon" title="Finances">💰</a>
+            <a href="settings.html" class="nav-icon" title="Settings">⚙️</a>
+        </nav>
+
+        <main class="dashboard-layout">
+            <aside class="side-panel">
+                <div class="utility-card">
+                    <h3>Weather Outlook</h3>
+                    <div class="weather-main">
+                        <span id="weatherIcon" class="big-icon">⛅</span>
+                        <div>
+                            <span id="weatherTemp" class="temp-val">8°C</span>
+                            <span id="weatherDesc">Partly Cloudy</span>
+                        </div>
+                    </div>
+                    <div id="weatherAlerts"></div>
+                </div>
+
+                <div class="utility-card">
+                    <h3>Equipment Status</h3>
+                    <div id="equipmentAlerts">
+                        <p class="equipment-status-text">All equipment operational</p>
+                    </div>
+                </div>
+
+                <div class="utility-card">
+                    <h3>Job Locations</h3>
+                    <div id="map"></div>
+                    <button class="primary-btn optimize-route-btn" type="button" onclick="optimizeRoute()">
+                        🚀 Optimize Route
+                    </button>
+                    <div id="routeStats" class="route-stats route-stats-hidden"></div>
+                </div>
+
+                <div class="utility-card">
+                    <h3>Quick Add Task</h3>
+                    <div class="input-stack">
+                        <label for="calEventInput" class="visually-hidden">Task description</label>
+                        <input type="text" id="calEventInput" placeholder="Task description..." class="slim-input">
+                        <label for="calDateInput" class="visually-hidden">Task date</label>
+                        <input type="date" id="calDateInput" class="slim-input">
+                        <label for="calPriorityInput" class="visually-hidden">Priority</label>
+                        <select id="calPriorityInput" class="slim-input">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                        <button class="primary-btn" type="button" onclick="addEvent()">Add to Schedule</button>
+                    </div>
+                </div>
+
+                <div class="utility-card">
+                    <h3>Plant Care Intel (January)</h3>
+                    <div id="plantTips"></div>
+                </div>
+            </aside>
+
+            <section class="work-feed">
+                <div class="feed-header">
+                    <div class="view-tabs">
+                        <button class="tab-btn active" type="button" onclick="switchView('feed')">Feed</button>
+                        <button class="tab-btn" type="button" onclick="switchView('calendar')">Calendar</button>
+                        <button class="tab-btn" type="button" onclick="switchView('completed')">Completed</button>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Search jobs..." class="slim-input search-input" onkeyup="searchItems(this.value)">
+                </div>
+
+                <div id="calendarList" class="cards-container">
+                    <div class="loading-schedule-text">Loading your schedule...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div id="cameraModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📸 Photo Documentation</h2>
+            <button class="close-btn" type="button" onclick="closeCameraModal()">&times;</button>
+        </div>
+        <video id="cameraPreview" autoplay></video>
+        <canvas id="photoCanvas" class="photo-canvas-hidden"></canvas>
+        <div class="camera-controls">
+            <button class="primary-btn" type="button" onclick="capturePhoto()">📷 Capture</button>
+            <button class="tool-btn" type="button" onclick="closeCameraModal()">Cancel</button>
+        </div>
+        <div id="capturedPhotos" class="captured-photos"></div>
+    </div>
+</div>
+
+<!-- Route Optimization Modal -->
+<div id="routeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>🗺️ Optimized Route</h2>
+            <button class="close-btn" type="button" onclick="closeRouteModal()">&times;</button>
+        </div>
+        <div id="routeDetails"></div>
+    </div>
+</div>
+
+<!-- Invoice Preview Modal -->
+<div id="invoiceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>💰 Invoice Preview</h2>
+            <button class="close-btn" type="button" onclick="closeInvoiceModal()">&times;</button>
+        </div>
+        <div id="invoicePreview"></div>
+        <div class="invoice-btn-group">
+            <button class="primary-btn invoice-btn" type="button" onclick="sendInvoice()">📧 Send to Client</button>
+            <button class="tool-btn invoice-btn" type="button" onclick="downloadInvoicePDF()">⬇️ Download PDF</button>
+        </div>
+    </div>
+</div>
+
+<div class="fab-menu">
+    <button class="fab" type="button" title="Snap Photo" onclick="openCameraModal()">📸</button>
+    <button class="fab" type="button" title="Quick Add" onclick="showQuickAdd()">+</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+    let allItems = [];
+    let dailyJobs = [];
+    let map = null;
+    let currentStream = null;
+    let currentJobIdForPhoto = null;
+    let equipment = [];
+
+    // Plant care database - seasonal tips
+    const plantCareDatabase = {
+        january: {
+            prune: ['Wisteria', 'Apple Trees', 'Pear Trees', 'Roses'],
+            plant: ['Bare-root hedging', 'Garlic', 'Shallots'],
+            avoid: ['Tender plants', 'Newly planted trees in frost'],
+            tips: [
+                { plant: 'Wisteria', tip: 'Cut back side shoots to 2-3 buds from main branch' },
+                { plant: 'Apple', tip: 'Remove crossing branches and create open center' },
+                { plant: 'Rose', tip: 'Prune hybrid teas to 6 inches, remove dead wood' }
+            ]
+        },
+        february: {
+            prune: ['Roses', 'Clematis Group 3', 'Summer-flowering shrubs'],
+            plant: ['Sweet peas', 'Broad beans', 'Onion sets'],
+            avoid: ['Frost-tender bedding'],
+            tips: [
+                { plant: 'Clematis', tip: 'Hard prune Group 3 to 12 inches from ground' },
+                { plant: 'Hydrangea', tip: 'Remove dead flower heads, cut to first buds' }
+            ]
+        },
+        march: {
+            prune: ['Evergreen hedges', 'Grasses'],
+            plant: ['Hardy annuals', 'Summer bulbs', 'Vegetable seeds'],
+            avoid: ['Planting in waterlogged soil'],
+            tips: [
+                { plant: 'Lawn', tip: 'First cut of season - set mower high' },
+                { plant: 'Box', tip: 'Trim hedges before new growth starts' }
+            ]
+        }
+    };
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            currentUser = session.user;
+            updateDateDisplay();
+            loadWeather();
+            initMap();
+            loadEquipment();
+            loadData();
+            updatePlantTips();
+        } else {
+            window.location.href = '../global/login/login_contractor.html';
+        }
+    });
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false }).setView([51.505, -0.09], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        map.locate({setView: true, maxZoom: 13});
+        map.on('locationfound', (e) => {
+            L.circle(e.latlng, {
+                radius: e.accuracy/2, 
+                color: '#2E7D32'
+            }).addTo(map);
+        });
+    }
+
+    async function loadEquipment() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('equipment')
+                .select('*')
+                .eq('user_id', currentUser.id);
+            
+            if (!error && data) {
+                equipment = data;
+                checkEquipmentAlerts();
+            }
+        } catch (err) {
+            console.error('Equipment load error:', err);
+        }
+    }
+
+    function checkEquipmentAlerts() {
+        const alertsDiv = document.getElementById('equipmentAlerts');
+        const alerts = equipment.filter(e => 
+            e.hours_used >= (e.last_service_hours + e.service_interval)
+        );
+        
+        if (alerts.length > 0) {
+            alertsDiv.innerHTML = alerts.map(e => `
+                <div class="equipment-alert">
+                    <strong>⚠️ ${e.name}</strong><br>
+                    <small>Service due - ${e.hours_used - (e.last_service_hours + e.service_interval)} hours overdue</small>
+                </div>
+            `).join('');
+        } else {
+            alertsDiv.innerHTML = '<p style="color: #666; font-size: 0.85rem;">✅ All equipment operational</p>';
+        }
+    }
+
+    async function loadData() {
+        try {
+            const [eventsRes, jobsRes] = await Promise.all([
+                supabaseClient
+                    .from('events')
+                    .select('*')
+                    .eq('user_id', currentUser.id),
+                supabaseClient
+                    .from('jobs')
+                    .select('*, pairings(client_name, address, phone, email, latitude, longitude)')
+                    .eq('contractor_id', currentUser.id)
+                    .order('scheduled_date', { ascending: true })
+            ]);
+
+            if (jobsRes.error) throw jobsRes.error;
+            if (eventsRes.error) throw eventsRes.error;
+
+            const tasks = (eventsRes.data || []).map(e => ({ 
+                ...e, 
+                type: 'task', 
+                date: e.event_date,
+                title: e.title 
+            }));
+
+            const jobsArr = (jobsRes.data || []).map(j => ({
+                ...j,
+                type: 'job',
+                title: j.service,
+                date: j.scheduled_date,
+                client: j.pairings?.client_name || 'Direct Client',
+                address: j.pairings?.address || 'No Address',
+                phone: j.pairings?.phone || '',
+                email: j.pairings?.email || '',
+                latitude: j.pairings?.latitude || null,
+                longitude: j.pairings?.longitude || null,
+                priority: j.urgent ? 'high' : 'medium',
+                price: j.price || 0,
+                plants: []
+            }));
+
+            dailyJobs = jobsArr;
+            allItems = [...tasks, ...jobsArr].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            switchView('feed');
+            updateStats(jobsArr);
+            plotJobLocations(jobsArr);
+        } catch (err) {
+            console.error('Load data error:', err);
+            alert('Error loading schedule. Please refresh the page.');
+        }
+    }
+
+    function plotJobLocations(jobs) {
+        if (!map) return;
+        
+        jobs.forEach(job => {
+            if (job.latitude && job.longitude) {
+                L.marker([job.latitude, job.longitude])
+                    .bindPopup(`<strong>${job.client}</strong><br>${job.title}<br>£${job.price}`)
+                    .addTo(map);
+            }
+        });
+    }
+
+    function switchView(view) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.toLowerCase() === view) {
+                btn.classList.add('active');
+            }
+        });
+        
+        let filtered = [];
+        if (view === 'completed') {
+            filtered = allItems.filter(i => i.status === 'completed');
+        } else {
+            filtered = allItems.filter(i => i.status !== 'completed');
+        }
+        renderFeed(filtered);
+    }
+
+    function renderFeed(items) {
+        const container = document.getElementById('calendarList');
+        container.innerHTML = items.length ? '' : '<p style="text-align: center; color: #888; margin-top: 2rem;">No tasks scheduled.</p>';
+        
+        items.forEach(item => {
+            const dateObj = new Date(item.date);
+            const card = document.createElement('div');
+            card.className = `job-card ${item.priority || 'medium'}`;
+            
+            const plantTips = getPlantTipsForJob(item);
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-meta">
+                        <span class="tag tag-${item.type}">${item.type}</span>
+                        <span>📅 ${dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                        ${item.price ? `<span style="color: var(--garden-primary); font-weight: bold;">£${item.price}</span>` : ''}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>${item.title}</h4>
+                    ${item.client ? `<p style="font-size: 0.9rem; color: #555; margin: 0.25rem 0;"><strong>${item.client}</strong></p>` : ''}
+                    ${item.address ? `<p style="font-size: 0.85rem; color: #777; margin: 0;">📍 ${item.address}</p>` : ''}
+                    ${plantTips ? `<div class="plant-tip-card"><strong>🌿 Plant Tip:</strong> ${plantTips}</div>` : ''}
+                </div>
+                <div class="btn-group">
+                    ${item.phone ? `<button class="tool-btn" type="button" onclick="window.open('tel:${item.phone}')">📞 Call</button>` : ''}
+                    ${item.address ? `<button class="tool-btn" type="button" onclick="navigateTo('${item.address}')">🧭 Navigate</button>` : ''}
+                    <button class="tool-btn" type="button" onclick="openPlantLibrary('${item.title}')">🌿 Plant Guide</button>
+                    <button class="tool-btn" type="button" onclick="openCameraModal('${item.id}')">📸 Photos</button>
+                    ${item.status !== 'completed' ? `<button class="tool-btn primary" type="button" onclick="completeJob('${item.id}')">✅ Finish & Invoice</button>` : ''}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function getPlantTipsForJob(job) {
+        const month = new Date().toLocaleDateString('en-GB', { month: 'long' }).toLowerCase();
+        const seasonalTips = plantCareDatabase[month];
+        
+        if (!seasonalTips) return null;
+        
+        for (const tip of seasonalTips.tips) {
+            if (job.title.toLowerCase().includes(tip.plant.toLowerCase())) {
+                return tip.tip;
+            }
+        }
+        return null;
+    }
+
+    function updatePlantTips() {
+        const month = new Date().toLocaleDateString('en-GB', { month: 'long' }).toLowerCase();
+        const tips = plantCareDatabase[month];
+        const tipsDiv = document.getElementById('plantTips');
+        
+        if (tips) {
+            tipsDiv.innerHTML = `
+                <div class="plant-tip-card">
+                    <strong>💡 This Month:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.85rem;">
+                        <li><strong>Prune:</strong> ${tips.prune.join(', ')}</li>
+                        <li><strong>Plant:</strong> ${tips.plant.join(', ')}</li>
+                        <li><strong>Avoid:</strong> ${tips.avoid.join(', ')}</li>
+                    </ul>
+                </div>
+            `;
+        }
+    }
+
+    function updateStats(jobs) {
+        const activeJobs = jobs.filter(j => j.status !== 'completed');
+        const revenue = activeJobs.reduce((sum, j) => sum + (j.price || 0), 0);
+        document.getElementById('statRevenue').textContent = `£${revenue}`;
+    }
+
+    async function loadWeather() {
+        try {
+            const mem = JSON.parse(localStorage.getItem('gardenmanager_memory') || '{}');
+            if (mem.settings && mem.settings.apiKey) {
+                const { apiKey, location } = mem.settings;
+                const city = location || 'London';
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+                const data = await res.json();
+                
+                if (data.main) {
+                    document.getElementById('weatherTemp').textContent = `${Math.round(data.main.temp)}°C`;
+                    document.getElementById('weatherDesc').textContent = data.weather[0].description;
+                    const main = data.weather[0].main.toLowerCase();
+                    const icon = main.includes('rain') ? '🌧️' : main.includes('cloud') ? '☁️' : main.includes('clear') ? '☀️' : '⛅';
+                    document.getElementById('weatherIcon').textContent = icon;
+                    checkWeatherAutomation(data.weather[0].main);
+                }
+            } else {
+                document.getElementById('weatherDesc').textContent = "No API Key (Check Settings)";
+            }
+        } catch (e) { 
+            console.error("Weather load error", e); 
+        }
+    }
+
+    function checkWeatherAutomation(condition) {
+        const alertsDiv = document.getElementById('weatherAlerts');
+        
+        if (condition.includes("Rain") || condition.includes("Drizzle")) {
+            alertsDiv.innerHTML = `
+                <div class="weather-alert">
+                    <strong>⚠️ Rain Detected</strong><br>
+                    <small>Consider rescheduling outdoor jobs</small>
+                    <button class="tool-btn" type="button" onclick="sendRainTexts()" style="width: 100%; margin-top: 0.5rem; border-color: #f44336; color: #f44336;">
+                        📲 Text All Clients to Reschedule
+                    </button>
+                </div>
+            `;
+        } else {
+            alertsDiv.innerHTML = `
+                <div style="background: #e8f5e9; border-left: 4px solid #43A047; padding: 0.75rem; border-radius: 6px; font-size: 0.85rem;">
+                    ✅ Good conditions for outdoor work
+                </div>
+            `;
+        }
+    }
+
+    async function sendRainTexts() {
+        const today = new Date().toDateString();
+        const todaysJobs = dailyJobs.filter(j => 
+            new Date(j.date).toDateString() === today && j.phone
+        );
+        
+        if (todaysJobs.length === 0) {
+            alert('No jobs with phone numbers scheduled for today');
+            return;
+        }
+        
+        if (!confirm(`Send rain reschedule SMS to ${todaysJobs.length} clients?`)) return;
+        
+        const message = "Hi! Due to heavy rain, I'll need to reschedule today's garden work. I'll contact you shortly with a new date. Thanks for understanding!";
+        
+        // This would integrate with Twilio or similar SMS API
+        // For demo purposes, we'll simulate
+        alert(`Would send SMS to:\n${todaysJobs.map(j => `${j.client}: ${j.phone}`).join('\n')}\n\nMessage: ${message}`);
+        
+        // Real implementation:
+        /*
+        for (const job of todaysJobs) {
+            await fetch('https://api.twilio.com/2010-04-01/Accounts/YOUR_SID/Messages.json', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Basic ' + btoa('YOUR_SID:YOUR_TOKEN'),
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    To: job.phone,
+                    From: 'YOUR_TWILIO_NUMBER',
+                    Body: message
+                })
+            });
+        }
+        */
+    }
+
+    // Route Optimization using Nearest Neighbor TSP
+    function optimizeRoute() {
+        const today = new Date().toDateString();
+        const todaysJobs = dailyJobs.filter(j => 
+            new Date(j.date).toDateString() === today && j.latitude && j.longitude
+        );
+        
+        if (todaysJobs.length < 2) {
+            alert('Need at least 2 jobs with locations to optimize route');
+            return;
+        }
+        
+        // Get user's current location
+        navigator.geolocation.getCurrentPosition(position => {
+            const start = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            
+            const optimized = nearestNeighborTSP(start, todaysJobs);
+            displayOptimizedRoute(optimized);
+        }, () => {
+            // Fallback to first job location
+            const optimized = nearestNeighborTSP(
+                { lat: todaysJobs[0].latitude, lng: todaysJobs[0].longitude },
+                todaysJobs
+            );
+            displayOptimizedRoute(optimized);
+        });
+    }
+
+    function nearestNeighborTSP(start, jobs) {
+        const unvisited = [...jobs];
+        const route = [];
+        let current = start;
+        let totalDistance = 0;
+        
+        while (unvisited.length > 0) {
+            let nearest = null;
+            let minDist = Infinity;
+            let nearestIndex = -1;
+            
+            unvisited.forEach((job, idx) => {
+                const dist = calculateDistance(
+                    current.lat, current.lng,
+                    job.latitude, job.longitude
+                );
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = job;
+                    nearestIndex = idx;
+                }
+            });
+            
+            route.push(nearest);
+            totalDistance += minDist;
+            current = { lat: nearest.latitude, lng: nearest.longitude };
+            unvisited.splice(nearestIndex, 1);
+        }
+        
+        return { route, totalDistance };
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function displayOptimizedRoute(result) {
+        const statsDiv = document.getElementById('routeStats');
+        const fuelCost = (result.totalDistance * 0.15).toFixed(2); // Assume £0.15/km
+        const timeEstimate = Math.round(result.totalDistance / 40 * 60); // 40km/h average, in minutes
+        
+        statsDiv.innerHTML = `
+            <div class="stat-box">
+                <div class="stat-value">${result.totalDistance.toFixed(1)}km</div>
+                <div class="stat-label">Total Distance</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">£${fuelCost}</div>
+                <div class="stat-label">Est. Fuel Cost</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">${timeEstimate}min</div>
+                <div class="stat-label">Drive Time</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">${result.route.length}</div>
+                <div class="stat-label">Stops</div>
+            </div>
+        `;
+        statsDiv.style.display = 'grid';
+        
+        // Clear existing route
+        map.eachLayer(layer => {
+            if (layer instanceof L.Polyline || layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
+        
+        // Plot optimized route
+        result.route.forEach((job, idx) => {
+            L.marker([job.latitude, job.longitude])
+                .bindPopup(`<strong>${idx + 1}. ${job.client}</strong><br>${job.title}`)
+                .addTo(map);
+        });
+        
+        // Draw route line
+        const coords = result.route.map(j => [j.latitude, j.longitude]);
+        L.polyline(coords, { color: '#2E7D32', weight: 3 }).addTo(map);
+        
+        // Fit bounds to show all markers
+        const bounds = L.latLngBounds(coords);
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+    function navigateTo(address) {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+        window.open(url, '_blank');
+    }
+
+    // Camera System
+    function openCameraModal(jobId) {
+        currentJobIdForPhoto = jobId;
+        document.getElementById('cameraModal').style.display = 'block';
+        startCamera();
+    }
+
+    function closeCameraModal() {
+        document.getElementById('cameraModal').style.display = 'none';
+        stopCamera();
+        currentJobIdForPhoto = null;
+    }
+
+    async function startCamera() {
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            });
+            document.getElementById('cameraPreview').srcObject = currentStream;
+        } catch (err) {
+            alert('Camera access denied. Please enable camera permissions.');
+            console.error('Camera error:', err);
+        }
+    }
+
+    function stopCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+    }
+
+    async function capturePhoto() {
+        const video = document.getElementById('cameraPreview');
+        const canvas = document.getElementById('photoCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        
+        // Convert to blob
+        canvas.toBlob(async (blob) => {
+            const fileName = `photo_${currentJobIdForPhoto}_${Date.now()}.jpg`;
+            
+            // Upload to Supabase Storage
+            const { data, error } = await supabaseClient.storage
+                .from('job-photos')
+                .upload(`${currentUser.id}/${fileName}`, blob, {
+                    contentType: 'image/jpeg'
+                });
+            
+            if (error) {
+                alert('Error uploading photo');
+                console.error(error);
+                return;
+            }
+            
+            // Save photo reference to database
+            await supabaseClient.from('photos').insert([{
+                job_id: currentJobIdForPhoto,
+                user_id: currentUser.id,
+                storage_path: data.path,
+                captured_at: new Date().toISOString()
+            }]);
+            
+            // Show thumbnail
+            const url = canvas.toDataURL('image/jpeg');
+            const photosDiv = document.getElementById('capturedPhotos');
+            photosDiv.innerHTML += `
+                <img src="${url}" style="width: 150px; height: auto; margin: 5px; border-radius: 8px;" alt="Captured photo">
+            `;
+            
+            alert('✅ Photo saved!');
+        }, 'image/jpeg', 0.8);
+    }
+
+    // Invoice System
+    async function completeJob(jobId) {
+        const job = dailyJobs.find(j => j.id === jobId);
+        if (!job) return;
+        
+        if (!confirm(`Mark "${job.title}" as completed?\n\nThis will:\n• Update job status\n• Generate invoice\n• Send to client`)) {
+            return;
+        }
+        
+        // Update job status
+        const { error } = await supabaseClient
+            .from('jobs')
+            .update({ status: 'completed', completed_at: new Date().toISOString() })
+            .eq('id', jobId);
+        
+        if (error) {
+            alert('Error completing job');
+            console.error(error);
+            return;
+        }
+        
+        // Generate and show invoice
+        showInvoicePreview(job);
+    }
+
+    function showInvoicePreview(job) {
+        const invoiceNumber = `INV-${Date.now()}`;
+        const invoiceDate = new Date().toLocaleDateString('en-GB');
+        
+        const invoiceHTML = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 2rem;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 style="color: var(--garden-primary); margin: 0;">INVOICE</h1>
+                    <p style="color: #666;">${invoiceNumber}</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div>
+                        <strong>From:</strong><br>
+                        ${currentUser.user_metadata?.business_name || 'Your Business'}<br>
+                        ${currentUser.email}<br>
+                    </div>
+                    <div>
+                        <strong>To:</strong><br>
+                        ${job.client}<br>
+                        ${job.address}<br>
+                        ${job.phone}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <strong>Invoice Date:</strong> ${invoiceDate}<br>
+                    <strong>Job Date:</strong> ${new Date(job.date).toLocaleDateString('en-GB')}
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+                    <thead>
+                        <tr style="background: var(--morning-light);">
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Description</th>
+                            <th style="padding: 0.75rem; text-align: right; border: 1px solid #ddd;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">${job.title}</td>
+                            <td style="padding: 0.75rem; text-align: right; border: 1px solid #ddd;">£${job.price.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; background: var(--morning-light);">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">TOTAL</td>
+                            <td style="padding: 0.75rem; text-align: right; border: 1px solid #ddd;">£${job.price.toFixed(2)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <div style="font-size: 0.85rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <p><strong>Payment Terms:</strong> Due within 14 days</p>
+                    <p><strong>Payment Methods:</strong> Bank Transfer, Cash, Card</p>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('invoicePreview').innerHTML = invoiceHTML;
+        document.getElementById('invoiceModal').style.display = 'block';
+        
+        // Store invoice in database
+        window.currentInvoice = {
+            job_id: job.id,
+            invoice_number: invoiceNumber,
+            client_email: job.email,
+            amount: job.price,
+            html: invoiceHTML
+        };
+    }
+
+    function closeInvoiceModal() {
+        document.getElementById('invoiceModal').style.display = 'none';
+    }
+
+    async function sendInvoice() {
+        if (!window.currentInvoice) return;
+        
+        // Save to database
+        await supabaseClient.from('invoices').insert([{
+            user_id: currentUser.id,
+            job_id: window.currentInvoice.job_id,
+            invoice_number: window.currentInvoice.invoice_number,
+            amount: window.currentInvoice.amount,
+            status: 'sent',
+            sent_at: new Date().toISOString()
+        }]);
+        
+        // In production, integrate with Resend.com or similar email API
+        alert(`📧 Invoice sent to ${window.currentInvoice.client_email}\n\n(In production, this would send via email API)`);
+        
+        /*
+        // Production implementation with Resend:
+        await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer YOUR_RESEND_API_KEY',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'invoices@yourdomain.com',
+                to: window.currentInvoice.client_email,
+                subject: `Invoice ${window.currentInvoice.invoice_number}`,
+                html: window.currentInvoice.html
+            })
+        });
+        */
+        
+        closeInvoiceModal();
+        loadData(); // Refresh to show completed job
+    }
+
+    function downloadInvoicePDF() {
+        // In production, use jsPDF or similar library
+        alert('PDF download would be generated here using jsPDF library');
+        
+        /*
+        // Production implementation:
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.html(document.getElementById('invoicePreview'), {
+            callback: function (doc) {
+                doc.save(`invoice-${window.currentInvoice.invoice_number}.pdf`);
+            }
+        });
+        */
+    }
+
+    // Plant Library
+    function openPlantLibrary(serviceName) {
+        const month = new Date().toLocaleDateString('en-GB', { month: 'long' }).toLowerCase();
+        const tips = plantCareDatabase[month];
+        
+        let content = `<h2>🌿 Plant Care Guide</h2>`;
+        content += `<p><strong>Service:</strong> ${serviceName}</p>`;
+        content += `<h3>Seasonal Guide for ${month.charAt(0).toUpperCase() + month.slice(1)}</h3>`;
+        
+        if (tips) {
+            content += `<div style="background: #f1f8e9; padding: 1rem; border-radius: 8px; margin: 1rem 0;">`;
+            content += `<h4>What to Prune:</h4><ul>`;
+            tips.prune.forEach(p => content += `<li>${p}</li>`);
+            content += `</ul><h4>What to Plant:</h4><ul>`;
+            tips.plant.forEach(p => content += `<li>${p}</li>`);
+            content += `</ul><h4>What to Avoid:</h4><ul>`;
+            tips.avoid.forEach(p => content += `<li>${p}</li>`);
+            content += `</ul></div>`;
+            
+            if (tips.tips.length > 0) {
+                content += `<h4>Expert Tips:</h4>`;
+                tips.tips.forEach(tip => {
+                    content += `<div style="background: white; border-left: 4px solid var(--garden-accent); padding: 1rem; margin: 0.5rem 0;">`;
+                    content += `<strong>${tip.plant}:</strong> ${tip.tip}`;
+                    content += `</div>`;
+                });
+            }
+        }
+        
+        alert(content.replace(/<[^>]*>/g, '\n')); // Simple text version for demo
+        // In production, this would be a proper modal
+    }
+
+    function searchItems(query) {
+        const filtered = allItems.filter(i => 
+            i.title.toLowerCase().includes(query.toLowerCase()) ||
+            (i.client && i.client.toLowerCase().includes(query.toLowerCase()))
+        );
+        renderFeed(filtered);
+    }
+
+    async function addEvent() {
+        const title = document.getElementById('calEventInput').value;
+        const date = document.getElementById('calDateInput').value;
+        const priority = document.getElementById('calPriorityInput').value;
+
+        if (!title || !date) {
+            alert('Please fill in title and date');
+            return;
+        }
+
+        const { error } = await supabaseClient.from('events').insert([{
+            title,
+            event_date: date,
+            priority,
+            user_id: currentUser.id,
+            status: 'pending'
+        }]);
+        
+        if (error) {
+            alert('Error adding task');
+            console.error(error);
+            return;
+        }
+        
+        loadData();
+        document.getElementById('calEventInput').value = '';
+        document.getElementById('calDateInput').value = '';
+    }
+
+    function updateDateDisplay() {
+        const now = new Date();
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-GB', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function showQuickAdd() {
+        window.location.href = 'new-job.html';
+    }
+
+    function closeRouteModal() {
+        document.getElementById('routeModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            if (event.target.id === 'cameraModal') {
+                stopCamera();
+            }
+        }
+    }
+</script>
+</body>
+</html>

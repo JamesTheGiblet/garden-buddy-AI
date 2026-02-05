@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finances - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <style>
+        :root {
+            --garden-primary: #2E7D32;
+            --garden-secondary: #1B5E20;
+            --garden-accent: #43A047;
+            --morning-light: #F8FAF8;
+            --text-main: #1A241A;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --bg: #F0F4F0;
+            --card: #FFFFFF;
+            --success: #4CAF50;
+            --warning: #FF9800;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--morning-light); margin: 0; color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Nav & Header */
+        .nav-rail { width: 70px; background: var(--garden-primary); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 25px; color: white; }
+        .nav-icon { cursor: pointer; font-size: 1.5rem; opacity: 0.7; transition: 0.3s; text-decoration: none; color: white; }
+        .nav-icon:hover, .nav-icon.active { opacity: 1; transform: scale(1.1); }
+        
+        .command-bar { background: white; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e6e0; }
+        .command-left { display: flex; align-items: center; gap: 1rem; }
+        .back-link { text-decoration: none; font-size: 1.2rem; color: var(--garden-primary); }
+        .command-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--garden-secondary); }
+
+        /* Layout */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .content-area { flex: 1; padding: 2rem; overflow-y: auto; background: var(--bg); }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); border-left: 5px solid var(--garden-primary); }
+        .stat-card.pending { border-left-color: var(--warning); }
+        .stat-label { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); margin-top: 0.5rem; }
+        
+        /* Transaction List */
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--garden-secondary); }
+        .transaction-list { background: white; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+        .transaction-item { display: grid; grid-template-columns: 1fr auto auto; padding: 1rem 1.5rem; border-bottom: 1px solid #eee; align-items: center; gap: 1rem; }
+        .transaction-item:last-child { border-bottom: none; }
+        .t-info h4 { margin: 0 0 0.25rem 0; font-size: 1rem; }
+        .t-meta { font-size: 0.85rem; color: #888; }
+        .t-amount { font-weight: 700; font-size: 1.1rem; }
+        .t-status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .status-completed { background: #e8f5e9; color: var(--success); }
+        .status-pending { background: #fff3e0; color: var(--warning); }
+        .loading-message {
+            padding: 1.5rem;
+            text-align: center;
+            color: #888;
+        }
+
+        /* Simple Chart Placeholder */
+        .chart-container { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 0; }
+        .bar-group { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .bar { width: 40px; background: var(--garden-accent); border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 4px; }
+        .bar-label { margin-top: 0.5rem; font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <header class="command-bar">
+        <div class="command-left">
+            <a href="index.html" class="back-link">🏡</a>
+            <h1>Financial Overview</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="nav-rail">
+            <a href="workload-hub.html" class="nav-icon" title="Schedule">📅</a>
+            <a href="routes.html" class="nav-icon" title="Routes">🗺️</a>
+            <a href="plants.html" class="nav-icon" title="Plant ID">🌿</a>
+            <a href="finances.html" class="nav-icon active" title="Finances">💰</a>
+            <a href="index.html" class="nav-icon" title="Settings">⚙️</a>
+        </nav>
+
+        <section class="content-area">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Revenue (YTD)</div>
+                    <div class="stat-value" id="totalRevenue">£0.00</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-label">Pending / Scheduled</div>
+                    <div class="stat-value" id="pendingRevenue">£0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Jobs Completed</div>
+                    <div class="stat-value" id="jobsCount">0</div>
+                </div>
+            </div>
+
+            <h3 class="section-title">Monthly Revenue</h3>
+            <div class="chart-container" id="revenueChart">
+                <!-- Bars injected by JS -->
+            </div>
+
+            <h3 class="section-title">Recent Job History</h3>
+            <div class="transaction-list" id="transactionList">
+                <div class="loading-message">Loading financial data...</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            currentUser = session.user;
+            loadFinances();
+        } else {
+            window.location.href = '../global/login/login_contractor.html';
+        }
+    });
+
+    async function loadFinances() {
+        try {
+            // Fetch all jobs to calculate finances
+            const { data: jobs, error } = await supabaseClient
+                .from('jobs')
+                .select('*, pairings(client_name)')
+                .eq('contractor_id', currentUser.id)
+                .order('scheduled_date', { ascending: false });
+
+            if (error) throw error;
+
+            calculateStats(jobs);
+            renderTransactions(jobs);
+            renderChart(jobs);
+        } catch (err) {
+            console.error('Error loading finances:', err);
+        }
+    }
+
+    function calculateStats(jobs) {
+        const completed = jobs.filter(j => j.status === 'completed');
+        const pending = jobs.filter(j => j.status !== 'completed');
+
+        const totalRev = completed.reduce((sum, j) => sum + (j.price || 0), 0);
+        const pendingRev = pending.reduce((sum, j) => sum + (j.price || 0), 0);
+
+        document.getElementById('totalRevenue').textContent = `£${totalRev.toFixed(2)}`;
+        document.getElementById('pendingRevenue').textContent = `£${pendingRev.toFixed(2)}`;
+        document.getElementById('jobsCount').textContent = completed.length;
+    }
+
+    function renderTransactions(jobs) {
+        const list = document.getElementById('transactionList');
+        list.innerHTML = jobs.length ? jobs.map(j => `
+            <div class="transaction-item">
+                <div class="t-info">
+                    <h4>${j.service}</h4>
+                    <div class="t-meta">${new Date(j.scheduled_date).toLocaleDateString()} • ${j.pairings?.client_name || 'Client'}</div>
+                </div>
+                <div class="t-status status-${j.status === 'completed' ? 'completed' : 'pending'}">${j.status}</div>
+                <div class="t-amount">£${(j.price || 0).toFixed(2)}</div>
+            </div>
+        `).join('') : '<div class="loading-message">No jobs recorded yet.</div>';
+    }
+
+    function renderChart(jobs) {
+        // Simple mock chart logic - normally would aggregate by month
+        // For now, just showing visual placeholders
+        const chart = document.getElementById('revenueChart');
+        chart.innerHTML = '<div style="width:100%; text-align:center; color:#aaa; align-self:center;">Chart visualization coming soon</div>';
+    }
+</script>
+</body>
+</html>

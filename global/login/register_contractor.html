@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Garden Buddy 4U</title>
+    <link rel="icon" type="image/svg+xml" href="../../image/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/auth.css">
+    <style>
+        .client-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        .client-link:hover { color: #2e7d32; text-decoration: underline; }
+        
+        /* Contractor specific styling */
+        .logo { filter: hue-rotate(180deg); }
+        .auth-btn { background-color: #2e7d32; }
+        .auth-btn:hover { background-color: #1b5e20; }
+    </style>
+</head>
+<body>
+    <a href="../../index.html" class="nav-home">← Home</a>
+    <div class="auth-card">
+        <img src="../../image/logo.svg" alt="Garden Buddy 4U" class="logo">
+        <h2>Join Garden Buddy 4U</h2>
+        <p class="auth-subtitle">Create your professional contractor account</p>
+        
+        <input type="text" id="authName" class="auth-input" placeholder="Business / Contact Name">
+        <input type="email" id="authEmail" class="auth-input" placeholder="Business Email">
+        <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+        
+        <div id="authError" class="auth-error"></div>
+        
+        <button id="authRegisterBtn" class="auth-btn" type="button">Create Business Account</button>
+        <button onclick="window.location.href='login_contractor.html'" class="auth-btn auth-toggle-btn" type="button">Already have an account?</button>
+        
+        <div class="resend-container">
+            <a onclick="handleResend(this)" class="resend-link">Resend Verification Email</a>
+        </div>
+
+        <a href="register.html" class="client-link">Register as Home Gardener</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
+    <script src="../../supabase-client.js"></script>
+    <script>
+        // Auth is now available globally via window.auth
+
+        async function handleRegister() {
+            const name = document.getElementById('authName').value;
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const role = 'contractor';
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('authRegisterBtn');
+
+            if (!name || !email || !password) {
+                showError("All fields are required");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 3C21 3 19 13 10 16C5 17.5 2 16 2 16C2 16 5.5 13.5 8 10C10.5 6.5 10 2 10 2C10 2 17 2 21 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16L4 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Creating Account...`;
+            errorEl.style.display = 'none';
+
+            try {
+                // Pass role as userType to auth.signUp
+                const data = await auth.signUp(email, password, name, role);
+
+                if (data.session) {
+                    localStorage.setItem('gb_token', data.session.access_token);
+                    window.location.href = '../../GardenManager AI/index.html';
+                } else {
+                    // Email confirmation required case
+                    window.location.href = `check_email.html?email=${encodeURIComponent(email)}`;
+                }
+            } catch (error) {
+                showError(error.message || "Registration failed");
+                btn.disabled = false;
+                btn.textContent = "Create Business Account";
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('authRegisterBtn').onclick = handleRegister;
+
+        async function handleResend(linkElement) {
+            const email = document.getElementById('authEmail').value;
+            
+            if (!email) {
+                showError("Please enter your email address above to resend verification.");
+                return;
+            }
+
+            const originalText = linkElement.textContent;
+            linkElement.textContent = "Sending...";
+            linkElement.style.pointerEvents = "none";
+
+            try {
+                await auth.resendConfirmation(email);
+                alert(`Verification email sent to ${email}! Please check your inbox.`);
+            } catch (error) {
+                showError(error.message || "Failed to resend email.");
+            } finally {
+                linkElement.textContent = originalText;
+                linkElement.style.pointerEvents = "auto";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+:root {
+    /* Brand Colors */
+    --earth-dark: #1a2910;
+    --garden-primary: #2E7D32;
+    --garden-green: #2D5016;
+    --garden-secondary: #1B5E20;
+    --garden-accent: #43A047;
+    --fresh-growth: #4a7c2c;
+    --lawn-green: #6B9146;
+    --morning-light: #F1F8E9;
+    --tool-steel: #5a6268;
+    --warning-amber: #d4a017;
+    --money-green: #2e7d32;
+    --soil-brown: #3E2723;
+    --morning-dew: #E8F5E9;
+    --seedling-sprout: #7CB342;
+    --sunset-tomato: #D84315;
+    --sky-blue: #81C784;
+    
+    /* UI Colors */
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --white: #ffffff;
+    --border: #e0e0e0;
+    --danger: #d32f2f;
+    --warning: #FF9800;
+    --info: #0288D1;
+    --success: #4CAF50;
+    --bg: #F0F4F0;
+    --card: #FFFFFF;
+    --bg-primary: #FAFDF7;
+    --bg-chat: #FFFFFF;
+    --border-color: #D4E7D0;
+
+    /* Typography */
+    --font-display: 'Bitter', serif;
+    --font-body: 'Work Sans', sans-serif;
+    
+    /* Spacing */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 6rem;
+    
+    /* Shadows */
+    --shadow-soft: 0 2px 12px rgba(45, 80, 22, 0.08);
+    --shadow-strong: 0 4px 24px rgba(45, 80, 22, 0.15);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+    /* Aliases for Compatibility */
+    --primary: var(--garden-primary);
+    --secondary: var(--garden-secondary);
+    --accent: var(--garden-accent);
+    --text-main: var(--text-primary);
+    --text-light: var(--text-secondary);
+    --buddy-primary: var(--garden-primary);
+    --buddy-light: var(--morning-light);
+}

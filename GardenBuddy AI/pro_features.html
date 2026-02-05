@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro - Garden Buddy 4U</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <link rel="stylesheet" href="../global/styles/buddy-app.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">Garden Buddy 4U</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- Modals -->
+        <div id="profileModal" class="modal"></div>
+        <div id="settingsModal" class="modal"></div>
+        <div id="upgradeModal" class="modal"></div>
+        <div id="shareModal" class="modal"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button" type="button" onclick="window.location.href='chat.html'">Chat</button>
+            <button class="tab-button" type="button" onclick="window.location.href='qr-code.html'">Contractor</button>
+            <button class="tab-button" type="button" onclick="window.location.href='plants.html'">Plants</button>
+            <button class="tab-button" type="button" onclick="window.location.href='calendar.html'">Calendar</button>
+            <button class="tab-button active" type="button" onclick="location.reload()">Pro ⭐</button>
+        </div>
+
+        <!-- Pro Features Content -->
+        <div id="pro" class="tab-content active">
+            <div class="features-container">
+                <h1>🌟 Garden Buddy 4U Pro</h1>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <div class="feature-content">
+                        <h3>AI Photo Diagnosis</h3>
+                        <p>Upload photos of sick plants and let our advanced AI identify pests, diseases, and nutrient deficiencies instantly.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎤</div>
+                    <div class="feature-content">
+                        <h3>Voice Commands</h3>
+                        <p>Talk to your garden assistant naturally. Just say "Hey Garden Buddy 4U, when should I water my tomatoes?"</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-content">
+                        <h3>Advanced Analytics</h3>
+                        <p>Track plant health trends, harvest yields, and get data-driven insights to optimize your garden's productivity.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌱</div>
+                    <div class="feature-content">
+                        <h3>Unlimited Plants</h3>
+                        <p>Remove the 5-plant limit. Track every single vegetable, herb, flower, and tree in your garden without restrictions.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">☁️</div>
+                    <div class="feature-content">
+                        <h3>Cloud Sync & Backup</h3>
+                        <p>Never lose your garden data. Automatically sync across all your devices and keep your garden history safe in the cloud.</p>
+                    </div>
+                </div>
+
+                <button class="submit-button back-btn mt-2" onclick="window.location.href='chat.html'">Back to Garden</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+    <script src="../global/js/buddy-app.js"></script>
+</body>
+</html>

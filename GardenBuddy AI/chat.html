@@ -1,0 +1,312 @@
+<!-- GardenBuddy AI/chat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Garden Buddy 4U</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/logo.svg">
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <link rel="stylesheet" href="../global/styles/buddy-app.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="avatar" id="avatarContainer">
+                    <svg viewBox="0 0 100 100" class="tech-sprout-svg">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop id="gradStop1" offset="0%" class="svg-stop1" />
+                                <stop id="gradStop2" offset="100%" class="svg-stop2" />
+                            </linearGradient>
+                        </defs>
+                        <circle id="outerRing" cx="50" cy="50" r="44" stroke="#81C784" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle id="innerRing" cx="50" cy="50" r="38" stroke="#4CAF50" stroke-width="1" fill="none" opacity="0.3">
+                             <animate attributeName="r" values="38;40;38" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" fill="url(#leafGrad)">
+                            <animate attributeName="d" values="M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z; M50 80 Q50 45 15 30 Q50 30 50 50 Q50 30 85 30 Q50 45 50 80 Z; M50 80 Q50 50 20 35 Q50 35 50 50 Q50 35 80 35 Q50 50 50 80 Z" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="50" cy="20" r="2" fill="#fff" opacity="0.8">
+                            <animate attributeName="cy" values="20;35;20" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title">Garden Buddy 4U</div>
+                    <div class="header-subtitle">Your garden intelligence</div>
+                </div>
+                <button class="profile-button" type="button" onclick="toggleSettingsModal()">⚙️</button>
+                <button class="profile-button" type="button" onclick="toggleProfileModal()">👤</button>
+            </div>
+        </header>
+
+        <!-- User Details Modal -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Details</h2>
+                <p><strong>Display Name:</strong> <span id="userName">The Gardener</span></p>
+                <p><strong>Subscription Level:</strong> <span id="userSubscription">Free Plan</span></p>
+                <p><strong>Location:</strong> <span id="userLocation">London, England, GB</span></p>
+                <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="teachingsCount">0</div>
+                        <div class="stat-label">Teachings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="plantsCount">0</div>
+                        <div class="stat-label">Plants</div>
+                    </div>
+                </div>
+                <button class="submit-button share-btn" type="button" onclick="toggleShareModal()">Share with a Friend</button>
+                <button class="submit-button logout-btn" type="button" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="toggleSettingsModal()">&times;</span>
+                <h2>Settings</h2>
+                <div class="request-form">
+                    <label class="settings-label">Location (City)</label>
+                    <input class="request-input" id="settingLocation" placeholder="e.g. London" />
+                    <label class="settings-label settings-label-margin">
+                        OpenWeatherMap API Key
+                        <span class="info-icon" tabindex="0">?
+                            <span class="info-tooltip">
+                                This data is saved locally. <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-white">Get a free API key here</a>.
+                            </span>
+                        </span>
+                    </label>
+                    <div class="api-key-info">
+                        Don't have a key? <a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="noopener noreferrer" class="external-link-primary">Sign up for free</a> to get weather updates.
+                    </div>
+                    <input class="request-input" id="settingApiKey" placeholder="Paste API Key here" />
+                    <label class="settings-label settings-label-margin">Anthropic API Key (for AI Chat)</label>
+                    <input class="request-input" id="settingAnthropicKey" placeholder="sk-ant-..." type="password" />
+                    <button class="submit-button settings-save-btn" type="button" onclick="saveSettings()">Save Settings</button>
+                    <button class="submit-button replay-tutorial-btn" type="button" onclick="replayTutorial()">Replay Tutorial</button>
+                    <button class="submit-button refresh-knowledge-btn" type="button" onclick="manualRefreshKnowledge()" id="refreshKnowledgeBtn">Refresh Knowledge Base</button>
+                    <button class="submit-button clear-chat-btn" type="button" onclick="clearChatHistory()">Clear Chat History</button>
+                    <button class="submit-button export-chat-btn" type="button" onclick="exportChatHistory()">Export Chat History</button>
+                    <button class="submit-button clear-data-btn" type="button" onclick="clearAllData()">Clear All Data</button>
+                    <button class="submit-button report-bug-btn" type="button" onclick="reportBug()">Report Bug</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <div id="tutorialStep1" class="tutorial-step">
+                    <div class="tutorial-step-icon">🌱</div>
+                    <h2>Welcome to Garden Buddy 4U</h2>
+                    <p class="tutorial-step-desc">Your personal AI-powered gardening assistant that learns and grows with your garden.</p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(2)">Start Tour</button>
+                </div>
+                <div id="tutorialStep2" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🤖</div>
+                    <h2>I Learn From You</h2>
+                    <p class="tutorial-step-desc">Use <strong>/teach</strong> to tell me about your garden.</p>
+                    <div class="message-bubble tutorial-message-bubble">
+                        /teach I have 2 raised beds<br>
+                        /teach My soil is clay-heavy
+                    </div>
+                    <br>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(3)">Next</button>
+                </div>
+                <div id="tutorialStep3" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🛠️</div>
+                    <h2>Smart Tools</h2>
+                    <p class="tutorial-step-desc">
+                        <strong>Plants:</strong> Browse and add plants.<br>
+                        <strong>Calendar:</strong> Track watering and harvest.<br>
+                        <strong>Weather:</strong> Get local forecasts.
+                    </p>
+                    <button class="submit-button" type="button" onclick="nextTutorialStep(4)">Next</button>
+                </div>
+                <div id="tutorialStep4" class="tutorial-step tutorial-step-hidden">
+                    <div class="tutorial-step-icon">🌍</div>
+                    <h2>Quick Setup</h2>
+                    <p class="tutorial-step-desc">Where is your garden located?</p>
+                    <input class="request-input tutorial-location-input" id="tutorialLocation" placeholder="e.g. London">
+                    <button class="submit-button" type="button" onclick="finishTutorial()">All Set!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" type="button" onclick="location.reload()">Chat</button>
+            <button class="tab-button" type="button" onclick="window.location.href='qr-code.html'">Contractor</button>
+            <button class="tab-button" type="button" onclick="window.location.href='plants.html'">Plants</button>
+            <button class="tab-button" type="button" onclick="window.location.href='calendar.html'">Calendar</button>
+            <button class="tab-button" type="button" onclick="handleProTab()">Pro ⭐</button>
+        </div>
+
+        <!-- Chat Content -->
+        <div id="chat" class="tab-content active">
+            <div class="chat-wrapper">
+                <!-- Sidebar -->
+                <aside class="chat-sidebar" id="chatSidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-title">History</div>
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()">×</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items populated by JS -->
+                    </div>
+                </aside>
+                <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+                <!-- Main Chat Area -->
+                <div class="chat-main-area">
+                    <div class="chat-container" id="chatContainer">
+                        <div class="sidebar-toggle-container">
+                            <button class="sidebar-toggle-btn sidebar-toggle-history-btn" type="button" onclick="toggleSidebar()">☰ History</button>
+                        </div>
+                        <div class="welcome-message">
+                            <div class="welcome-icon">🌱</div>
+                            <h2 class="welcome-title">Welcome to Garden Buddy 4U</h2>
+                            <p class="welcome-text">
+                                I'll learn about your specific garden and help you tend it successfully. 
+                                Start by teaching me about your garden layout!
+                            </p>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <div class="quick-action" onclick="insertCommand('/teach I have a raised bed')">
+                                <div class="action-icon">🛏️</div>
+                                <div class="action-text">Teach Layout</div>
+                            </div>
+                            <div class="quick-action" onclick="showPlantSelector()">
+                                <div class="action-icon">🌿</div>
+                                <div class="action-text">Add Plants</div>
+                            </div>
+                            <div class="quick-action" onclick="sendMessage('What should I plant this season?')">
+                                <div class="action-icon">📅</div>
+                                <div class="action-text">Seasonal Tips</div>
+                            </div>
+                            <div class="quick-action" onclick="sendMessage('/stats')">
+                                <div class="action-icon">📊</div>
+                                <div class="action-text">View Stats</div>
+                            </div>
+                            <div class="quick-action" onclick="startDiagnosticWizard()">
+                                <div class="action-icon">🩺</div>
+                                <div class="action-text">Diagnose</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <div class="command-hints">
+                            <div class="command-hint" onclick="insertCommand('/teach ')">💡 /teach</div>
+                            <div class="command-hint" onclick="insertCommand('My plant is ')">🌿 Plant Issue</div>
+                            <div class="command-hint" onclick="insertCommand('When should I ')">📅 Timing</div>
+                            <div class="command-hint" onclick="insertCommand('/gist add ')">📝 /gist</div>
+                            <div class="command-hint" onclick="insertCommand('/wrong ')">✏️ /wrong</div>
+                            <div class="command-hint" onclick="sendMessage('/why')">/why</div>
+                            <div class="command-hint" onclick="sendMessage('/help')">/help</div>
+                            <div class="command-hint" onclick="sendMessage('/export')">💾 /export</div>
+                            <div class="command-hint" onclick="clearChatHistory()">🗑️ Clear</div>
+                        </div>
+                        <div class="input-wrapper">
+                            <textarea 
+                                class="input-field" 
+                                id="userInput" 
+                                placeholder="Tell me about your garden..."
+                                rows="1"
+                                onkeydown="handleKeyPress(event)"
+                            ></textarea>
+                            <label for="photoInput" class="visually-hidden">Upload Photo</label>
+                            <input type="file" id="photoInput" accept="image/*" class="hidden-file-input" onchange="handlePhotoUpload(this)" title="Upload Photo">
+                            <button class="mic-button" type="button" onclick="triggerPhotoUpload()" title="Upload Photo">📷</button>
+                            <button class="mic-button" type="button" id="micButton" onclick="toggleVoiceInput()" title="Voice Input">
+                                🎤
+                            </button>
+                            <button class="send-button" type="button" onclick="sendMessage()" id="sendButton">
+                                ➤
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrade Modal (Needed for Pro features in chat) -->
+        <div id="upgradeModal" class="modal upgrade-modal-hidden">
+          <div class="modal-content">
+            <button class="close-button" type="button" onclick="closeUpgradeModal()">×</button>
+            <h2>🌟 Upgrade to Pro</h2>
+            <p class="upgrade-modal-desc">Unlock unlimited plants and advanced features</p>
+            <div class="pro-features-grid">
+                <div class="pro-feature-item">🎤 <strong>Voice input</strong> - "Hey Garden Buddy 4U, when should I water?"</div>
+                <div class="pro-feature-item">📸 <strong>Photo diagnosis</strong> - Upload sick plant → AI identifies issue</div>
+                <div class="pro-feature-item">📊 <strong>Advanced analytics</strong> - Plant health trends, harvest predictions</div>
+                <div class="pro-feature-item">🔔 <strong>Smart notifications</strong> - "Water tomatoes today" push alerts</div>
+                <div class="pro-feature-item">📅 <strong>Unlimited calendar events</strong> - Free = 10, Pro = unlimited</div>
+                <div class="pro-feature-item">🌱 <strong>Unlimited plants</strong> - Free = 5, Pro = unlimited</div>
+                <div class="pro-feature-item">☁️ <strong>Cloud backup</strong> - Auto-sync across devices</div>
+                <div class="pro-feature-item">🎨 <strong>Custom themes</strong> - Personalize interface</div>
+                <div class="pro-feature-item">📈 <strong>Seasonal planning</strong> - AI suggests planting schedule</div>
+                <div class="pro-feature-item">💬 <strong>Priority support</strong> - Fast response times</div>
+            </div>
+            <div class="pricing-options">
+              <div class="pricing-card" onclick="selectPlan('monthly')">
+                <h3>Monthly</h3>
+                <div class="price">£2.99<span>/month</span></div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('monthly')">Choose Monthly</button>
+              </div>
+              <div class="pricing-card popular" onclick="selectPlan('yearly')">
+                <span class="popular-badge">Save 20%</span>
+                <h3>Yearly</h3>
+                <div class="price">£28.99<span>/year</span></div>
+                <div class="savings">Save £6.89/year</div>
+                <button class="upgrade-button" type="button" onclick="handleUpgrade('yearly')">Choose Yearly</button>
+              </div>
+            </div>
+            <p class="upgrade-modal-note">📧 Clicking choose will open your email client to request access.</p>
+          </div>
+        </div>
+
+        <!-- Share Modal -->
+        <div id="shareModal" class="modal">
+            <div class="modal-content share-modal-content">
+                <span class="close-button" onclick="toggleShareModal()">&times;</span>
+                <h2>Share Garden Buddy 4U</h2>
+                <p class="share-modal-desc">Scan to share with a friend</p>
+                <div class="qr-share-container">
+                    <img id="shareQrCode" src="" alt="Share QR Code" class="share-qr-img">
+                    <div class="qr-logo-overlay">
+                        <img src="../image/logo.svg" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="qr-logo-overlay-text visually-hidden">🌱</span>
+                    </div>
+                </div>
+                <div class="share-modal-actions">
+                    <button class="submit-button" type="button" onclick="copyShareLink()">Copy Link</button>
+                    <button class="submit-button native-share-btn" type="button" onclick="shareNative()" id="nativeShareBtn">Share</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../supabase-client.js"></script>
+    <script src="../global/js/garden_knowledge_loader.js"></script>
+    <script src="chat_main.js"></script>
+    <script src="chat_social.js"></script>
+    <script src="chat_gardener.js"></script>
+    <script>console.log('✅ Supabase initialized from client.');</script>
+</body>
+</html>

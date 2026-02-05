@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Plant - Garden Buddy 4U Pro</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <link rel="stylesheet" href="../global/styles/client-app.css">
+    <style>
+        /* Page specific overrides */
+        body { background-color: var(--morning-light); }
+        .container { max-width: 600px; margin: 0 auto; padding: 0; }
+        .header { position: sticky; top: 0; z-index: 100; }
+        .back-btn { color: white; text-decoration: none; font-weight: 600; margin-right: 1rem; }
+        .content { padding: 1.5rem; }
+        .emoji-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        .emoji-option {
+            font-size: 1.8rem;
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .emoji-option:hover { background: var(--morning-dew); }
+        .emoji-option.selected { background: var(--garden-primary); color: white; }
+        
+        /* Reuse form styles from client-app.css but ensure visibility */
+        .request-form { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .settings-label { display: block; margin-top: 1rem; font-weight: 600; color: var(--garden-primary); margin-bottom: 0.5rem; }
+        .settings-label:first-child { margin-top: 0; }
+        .request-input { width: 100%; margin-bottom: 0.5rem; }
+        .submit-button { margin-top: 1.5rem; width: 100%; background-color: var(--garden-primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <a href="plants.html" class="back-btn">← Back</a>
+                <div class="header-title">Add New Plant</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="request-form">
+                <label class="settings-label">Choose Icon</label>
+                <div class="emoji-picker" id="emojiPicker"></div>
+                <input type="hidden" id="newPlantEmoji" value="🌱">
+                
+                <label class="settings-label" for="newPlantName">Plant Name *</label>
+                <input class="request-input" id="newPlantName" placeholder="e.g. Purple Basil" required />
+                
+                <label class="settings-label" for="newPlantType">Plant Type</label>
+                <select class="request-input" id="newPlantType">
+                    <option value="vegetable">Vegetable</option>
+                    <option value="herb">Herb</option>
+                    <option value="fruit">Fruit</option>
+                    <option value="flower">Flower</option>
+                    <option value="tree">Tree</option>
+                    <option value="shrub">Shrub</option>
+                </select>
+                
+                <label class="settings-label" for="newPlantSun">Sun Requirements</label>
+                <select class="request-input" id="newPlantSun">
+                    <option value="Full sun">Full sun</option>
+                    <option value="Partial sun">Partial sun</option>
+                    <option value="Shade">Shade</option>
+                </select>
+
+                <label class="settings-label" for="newPlantWater">Water Requirements</label>
+                <input class="request-input" id="newPlantWater" placeholder="e.g. Keep moist" />
+
+                <label class="settings-label" for="plantClientSelect">Assign to Client (Optional)</label>
+                <select class="request-input" id="plantClientSelect">
+                    <option value="">My Personal Database</option>
+                </select>
+
+                <button class="submit-button" type="button" onclick="saveNewPlant()">Add to Garden</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentUser = null;
+        const COMMON_EMOJIS = ["🌱", "🌿", "🌾", "🌵", "🌷", "🌸", "🌹", "🌺", "🌻", "🌼", "🌽", "🍀", "🍁", "🍂", "🍃", "🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🥭", "🍎", "🍏", "🍐", "🍑", "🍒", "🍓", "🥝", "🍅", "🥥", "🥑", "🍆", "🥔", "🥕", "🌶️", "🥒", "🥬", "🥦", "🧄", "🧅", "🍄", "🥜", "🌰"];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                initEmojiPicker();
+                loadConnectedClients();
+            } else {
+                window.location.href = '../global/login/login_contractor.html';
+            }
+        });
+
+        function initEmojiPicker() {
+            const container = document.getElementById('emojiPicker');
+            COMMON_EMOJIS.forEach(emoji => {
+                const div = document.createElement('div');
+                div.className = 'emoji-option';
+                div.textContent = emoji;
+                div.onclick = () => {
+                    document.getElementById('newPlantEmoji').value = emoji;
+                    document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                };
+                if(emoji === '🌱') div.classList.add('selected');
+                container.appendChild(div);
+            });
+        }
+
+        async function loadConnectedClients() {
+            const select = document.getElementById('plantClientSelect');
+            try {
+                const { data: pairings } = await supabaseClient
+                    .from('pairings')
+                    .select('client_device_id, client_name')
+                    .eq('contractor_id', currentUser.id);
+
+                if (pairings) {
+                    pairings.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.client_device_id; 
+                        opt.textContent = p.client_name || 'Unnamed Client';
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Error loading clients', e); }
+        }
+
+        async function saveNewPlant() {
+            const name = document.getElementById('newPlantName').value.trim();
+            if (!name) return alert("Please enter a plant name.");
+            
+            const btn = document.querySelector('.submit-button');
+            btn.textContent = "Saving...";
+            btn.disabled = true;
+
+            const payload = {
+                name: name,
+                type: document.getElementById('newPlantType').value,
+                planted_at: new Date().toISOString(),
+                location: 'Unknown',
+                notes: `Sun: ${document.getElementById('newPlantSun').value}, Water: ${document.getElementById('newPlantWater').value}`,
+                user_id: document.getElementById('plantClientSelect').value || currentUser.id,
+                metadata: { emoji: document.getElementById('newPlantEmoji').value }
+            };
+
+            const { error } = await supabaseClient.from('plants').insert([payload]);
+            
+            if (error) {
+                alert("Error saving plant: " + error.message);
+                btn.textContent = "Add to Garden";
+                btn.disabled = false;
+            } else {
+                // Also update local storage for immediate feedback if using personal DB
+                if (!payload.user_id || payload.user_id === currentUser.id) {
+                    const mem = JSON.parse(localStorage.getItem('gardenmanager_memory') || '{"plants":[]}');
+                    mem.plants.push({ name: payload.name, emoji: payload.metadata.emoji });
+                    localStorage.setItem('gardenmanager_memory', JSON.stringify(mem));
+                }
+                window.location.href = 'plants.html';
+            }
+        }
+    </script>
+</body>
+</html>
